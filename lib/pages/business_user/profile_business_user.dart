@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/buttons/profile_save_changes.dart';
+import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
