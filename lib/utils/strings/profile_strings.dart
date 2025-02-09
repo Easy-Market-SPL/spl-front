@@ -27,4 +27,19 @@ class ProfileStrings {
   static const productsManagerProfile = " Gestor de productos";
   static const deliveryProfile = "Domiciliario";
   static const supportProfile = "Soporte";
+  static const paymentMethods = "Métodos de Pago";
+  static const paymentCard = "Tarjeta de Crédito o Débito";
+  static const paymentPlatform = "Plataforma";
+  static const managePaymentMethods = "Administra tus métodos de pago aquí";
+  static const add = "Agregar";
+  static const addPaymentCard = "Agregar Tarjeta de Pago";
+  static const cardLabel = "Número de Tarjeta";
+  static const cardHint = "XXXX XXXX XXXX XXXX";
+  static const lastNameLabel = "Apellido";
+  static const lastNameHint = "Apellido";
+  static const expirationDateLabel = "Fecha de Expiración";
+  static const expirationDateHint = "MM/AA";
+  static const ccvLabel = "CCV";
+  static const ccvHint = "XXX";
+  static const saveCard = "Guardar Tarjeta";
 }
