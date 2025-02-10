@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SPL Front',
-        initialRoute: 'login',
+        initialRoute: SPLVariables.hasThirdAuth ? 'login_variant' : 'login',
         routes: appRoutes,
       ),
     );

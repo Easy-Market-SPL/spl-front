@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
+import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/login/login_page.dart';
@@ -17,4 +18,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_user_profile': (_) => BusinessUserProfilePage(),
   'admin_profile': (_) => AdminPanelPage(),
   'customer_profile': (_) => CustomerProfilePage(),
+  'customer_dashboard': (_) => CustomerMainDashboard(),
 };
