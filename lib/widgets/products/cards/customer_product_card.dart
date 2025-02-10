@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomerProductCard extends StatelessWidget {
-  //TODO: Receive the POJO product object instead of individual fields for the future navigation
+  //TODO: Receive the POJO product object instead of individual fields for the future navigation or use the appropriate provider (Bloc)
   final String name;
   final String reference;
   final String description;

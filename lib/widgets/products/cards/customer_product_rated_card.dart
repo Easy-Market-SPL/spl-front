@@ -20,7 +20,7 @@ class CustomerProductRatedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: Receive the POJO product object instead of individual fields for the future navigation
+    //TODO: Receive the POJO product object instead of individual fields for the future navigation or use the appropriate provider (Bloc)
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
