@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/utils/strings/bottom_navigation_strings.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_card.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_rated_card.dart';
 
@@ -55,7 +55,7 @@ class CustomerMainDashboard extends StatelessWidget {
             ),
 
             // Bottom Navigation Bar
-            _buildBottomNavigationBar(),
+            CustomerBottomNavigationBar(),
           ],
         ),
       ),
@@ -80,28 +80,6 @@ class CustomerMainDashboard extends StatelessWidget {
           style: const TextStyle(fontSize: 12),
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      items: const [
-        BottomNavigationBarItem(
-            icon: Icon(Icons.home), label: BottomStrings.home),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart), label: BottomStrings.shopping),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: BottomStrings.notifications),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.menu), label: BottomStrings.menu),
-      ],
-      onTap: (index) {
-        // TODO: Handle bottom navigation
-      },
     );
   }
 }

@@ -1,4 +1,4 @@
-class BottomStrings {
+class BottomNavigationStrings {
   static const String home = 'Inicio';
   static const String shopping = 'Compras';
   static const String notifications = 'Notificaciones';
