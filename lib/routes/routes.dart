@@ -4,10 +4,11 @@ import 'package:spl_front/pages/business_user/profile_business_user.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
-import 'package:spl_front/pages/login/login_page.dart';
-import 'package:spl_front/pages/login/login_page_variant.dart';
-import 'package:spl_front/pages/register/register_page.dart';
-import 'package:spl_front/pages/register/register_page_variant.dart';
+import '../pages/chat/chat.dart';
+import '../pages/login/login_page.dart';
+import '../pages/login/login_page_variant.dart';
+import '../pages/register/register_page.dart';
+import '../pages/register/register_page_variant.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   'login': (_) => LoginPage(),
@@ -19,4 +20,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'admin_profile': (_) => AdminPanelPage(),
   'customer_profile': (_) => CustomerProfilePage(),
   'customer_dashboard': (_) => CustomerMainDashboard(),
+  'costumer_user_chat': (_) => ChatScreen(userType: ChatUserType.costumer, userName: "userName"),
+  'business_user_chat': (_) => ChatScreen(userType: ChatUserType.business, userName: "costumerName"),
 };
