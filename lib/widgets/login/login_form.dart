@@ -53,9 +53,8 @@ class _LoginFormState extends State<LoginForm> {
               // Login Button
               SignButton(
                 eventHandler: () => {
-                  // TODO: Implement the logic of auth according to the email and password
-                  // print("A Mora le gusta el Gil")
-                  Navigator.pushReplacementNamed(context, 'customer_dashboard')
+                  // TODO: Implement the logic of auth according to the role of the current user
+                  Navigator.pushReplacementNamed(context, 'business_dashboard')
                 },
                 buttonText: LoginStrings.loginButton,
               ),
