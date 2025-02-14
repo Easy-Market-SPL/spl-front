@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/chat/chat_bloc.dart';
+import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/routes/routes.dart';
 import 'package:spl_front/spl/spl_variables.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => ProfileTabBloc()),
         BlocProvider(create: (_) => ChatBloc()),
+        BlocProvider(create: (_) => ChatsBloc())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
