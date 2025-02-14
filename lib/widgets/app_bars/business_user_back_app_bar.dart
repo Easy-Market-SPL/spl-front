@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CustomerUserAppBar extends StatelessWidget
+class BusinessUserBackAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String hintText;
   final VoidCallback onFilterPressed;
 
-  const CustomerUserAppBar({
+  const BusinessUserBackAppBar({
     super.key,
     required this.hintText,
     required this.onFilterPressed,
@@ -17,7 +17,7 @@ class CustomerUserAppBar extends StatelessWidget
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -33,31 +33,23 @@ class CustomerUserAppBar extends StatelessWidget
               onPressed: onFilterPressed,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Colors.grey[100],
             border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.all(Radius.circular(15)), //
               borderSide: BorderSide(color: Colors.grey), // Gray border
             ),
             enabledBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.all(Radius.circular(15)),
               borderSide: BorderSide(color: Colors.grey), // Gray border
             ),
             focusedBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.all(Radius.circular(15)),
               borderSide:
                   BorderSide(color: Colors.blue, width: 2), // Blue border
             ),
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.shopping_cart, color: Colors.black),
-          onPressed: () {
-            // TODO: Implement shopping cart action
-          },
-        ),
-      ],
     );
   }
 

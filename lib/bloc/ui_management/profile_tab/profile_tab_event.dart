@@ -4,6 +4,6 @@ part of 'profile_tab_bloc.dart';
 sealed class ProfileTabEvent {}
 
 class ChangeTab extends ProfileTabEvent {
-  final bool isPaymentTab;
-  ChangeTab(this.isPaymentTab);
+  final int showedTab;
+  ChangeTab(this.showedTab);
 }
