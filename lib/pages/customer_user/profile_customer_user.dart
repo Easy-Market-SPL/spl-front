@@ -41,7 +41,7 @@ class CustomerProfilePage extends StatelessWidget {
               Expanded(
                 child: BlocBuilder<ProfileTabBloc, ProfileTabState>(
                   builder: (context, state) {
-                    if (state.informationTab) {
+                    if (state.showedTab == 0) {
                       return Column(
                         children: [
                           Expanded(
@@ -59,8 +59,10 @@ class CustomerProfilePage extends StatelessWidget {
                           ),
                         ],
                       );
-                    } else {
+                    } else if (state.showedTab == 1) {
                       return const PaymentMethodsSection();
+                    } else {
+                      return const SizedBox(child: Text("Address Section"));
                     }
                   },
                 ),
@@ -81,36 +83,69 @@ class CustomerProfilePage extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  context.read<ProfileTabBloc>().add(ChangeTab(true));
+                  context.read<ProfileTabBloc>().add(ChangeTab(0));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      state.informationTab ? Colors.blue : Colors.grey[200],
+                      state.showedTab == 0 ? Colors.blue : Colors.grey[200],
                   foregroundColor:
-                      state.informationTab ? Colors.white : Colors.blue,
+                      state.showedTab == 0 ? Colors.white : Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(ProfileStrings.information),
+                child: const Text(
+                  ProfileStrings.information,
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
-                  context.read<ProfileTabBloc>().add(ChangeTab(false));
+                  context.read<ProfileTabBloc>().add(ChangeTab(1));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      !state.informationTab ? Colors.blue : Colors.grey[200],
+                      state.showedTab == 1 ? Colors.blue : Colors.grey[200],
                   foregroundColor:
-                      !state.informationTab ? Colors.white : Colors.blue,
+                      state.showedTab == 1 ? Colors.white : Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(ProfileStrings.paymentMethods),
+                child: const Text(
+                  ProfileStrings.paymentMethods,
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<ProfileTabBloc>().add(ChangeTab(2));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      state.showedTab == 2 ? Colors.blue : Colors.grey[200],
+                  foregroundColor:
+                      state.showedTab == 2 ? Colors.white : Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  ProfileStrings.addresses,
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ),
           ],
