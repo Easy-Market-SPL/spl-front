@@ -1,4 +1,5 @@
 class SPLVariables {
-  static const isRated = false;
-  static const hasThirdAuth = true;
+  static const isRated = true;
+  static const hasThirdAuth = false;
+  static const isMobileUI = false;
 }
