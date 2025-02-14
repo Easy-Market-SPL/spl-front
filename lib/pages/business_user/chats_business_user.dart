@@ -6,7 +6,7 @@ import 'package:spl_front/bloc/ui_management/chats/chats_state.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
 import 'package:spl_front/widgets/chat/chat_item.dart';
 import 'package:spl_front/widgets/chat/chats_header.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 
 class ChatsScreen extends StatelessWidget {
@@ -107,7 +107,7 @@ class _ChatsPageState extends State<ChatsPage> {
                 },
               ),
             ),
-            const CustomerBottomNavigationBar(), //TODO: Change to BusinessBottomNavigationBar
+            const BusinessBottomNavigationBar(),
           ],
         ),
       ),

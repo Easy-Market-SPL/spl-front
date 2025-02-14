@@ -32,10 +32,9 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       ChatScreen(userType: ChatUserType.costumer, userName: "userName"),
   'business_user_chat': (_) =>
       ChatScreen(userType: ChatUserType.business, userName: "costumerName"),
+  'business_user_chats': (_) => ChatsScreen(),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),
-  'costumer_user_chat': (_) => ChatScreen(userType: ChatUserType.costumer, userName: "userName"),
-  'business_user_chat': (_) => ChatScreen(userType: ChatUserType.business, userName: "costumerName"),
-  'business_user_chats': (_) => ChatsScreen()
+  
 };
