@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
+import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
@@ -31,7 +32,9 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       ChatScreen(userType: ChatUserType.costumer, userName: "userName"),
   'business_user_chat': (_) =>
       ChatScreen(userType: ChatUserType.business, userName: "costumerName"),
+  'business_user_chats': (_) => ChatsScreen(),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),
+  
 };

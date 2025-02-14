@@ -2,6 +2,7 @@ class ChatStrings {
   static const String attentionToCustomers = 'Atención a clientes';
   static const String chatWithCustomer = 'Chat con Cliente';
   static const String writeMessageHint = 'Escribe un mensaje...';
+  static const String searchChatsHint = 'Buscar conversaciones...';
   static const String selectImage = 'Seleccionar Imagen';
   static const String selectVideo = 'Seleccionar Video';
   static const String imageNotAvailable = 'Imagen no disponible';
