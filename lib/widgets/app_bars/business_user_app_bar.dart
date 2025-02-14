@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CustomerUserAppBar extends StatelessWidget
+class BusinessUserAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String hintText;
   final VoidCallback onFilterPressed;
 
-  const CustomerUserAppBar({
+  const BusinessUserAppBar({
     super.key,
     required this.hintText,
     required this.onFilterPressed,
@@ -16,12 +16,6 @@ class CustomerUserAppBar extends StatelessWidget
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0), // Add spacing
         child: TextField(
@@ -50,14 +44,6 @@ class CustomerUserAppBar extends StatelessWidget
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.shopping_cart, color: Colors.black),
-          onPressed: () {
-            // TODO: Implement shopping cart action
-          },
-        ),
-      ],
     );
   }
 
