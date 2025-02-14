@@ -6,6 +6,7 @@ import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/login/login_page.dart';
 import 'package:spl_front/pages/login/login_page_variant.dart';
+import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/register/register_page.dart';
 import 'package:spl_front/pages/register/register_page_variant.dart';
 
@@ -19,4 +20,5 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'admin_profile': (_) => AdminPanelPage(),
   'customer_profile': (_) => CustomerProfilePage(),
   'customer_dashboard': (_) => CustomerMainDashboard(),
+  'business_user_order_tracking': (_) => OrderTrackingScreen(),
 };
