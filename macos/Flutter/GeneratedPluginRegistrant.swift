@@ -4,7 +4,6 @@
 
 import FlutterMacOS
 import Foundation
-
 import file_selector_macos
 import gal
 import path_provider_foundation
