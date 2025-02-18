@@ -8,6 +8,7 @@ import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/login_page_web.dart';
+import 'package:spl_front/pages/order/order_details.dart';
 
 import '../pages/chat/chat.dart';
 import '../pages/login/login_page.dart';
@@ -34,7 +35,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_user_chat': (_) =>
       ChatScreen(userType: ChatUserType.business, userName: "costumerName"),
   'business_user_chats': (_) => ChatsScreen(),
-  'business_user_order_tracking': (_) => OrderTrackingScreen(),
+  'business_user_order_tracking': (_) => OrderTrackingScreen(userType: OrderUserType.business,),
+  'customer_user_order_tracking': (_) => OrderTrackingScreen(userType: OrderUserType.costumer,),
+  'business_user_order_details': (_) => OrderDetailsPage(userType: OrderUserType.business),
+  'customer_user_order_details': (_) => OrderDetailsPage(userType: OrderUserType.costumer),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),

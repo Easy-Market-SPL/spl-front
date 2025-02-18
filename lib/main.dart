@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         title: 'SPL Front',
         home: _getInitialRoute(),
         //initialRoute: SPLVariables.hasThirdAuth ? 'login_variant' : 'login',
-        initialRoute: 'business_user_order_tracking',
+        initialRoute: 'customer_user_order_tracking',
         routes: appRoutes,
       ),
     );
