@@ -17,3 +17,12 @@ class ChangeOrderStatusEvent extends OrderStatusEvent {
   @override
   List<Object> get props => [newStatus];
 }
+
+class ChangeSelectedStatusEvent extends OrderStatusEvent {
+  final String selectedStatus;
+
+  const ChangeSelectedStatusEvent(this.selectedStatus);
+
+  @override
+  List<Object> get props => [selectedStatus];
+}

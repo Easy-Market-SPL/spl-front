@@ -3,195 +3,150 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
+import 'package:spl_front/spl/spl_variables.dart';
+import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/order/horizontal_order_status.dart';
 import 'package:spl_front/widgets/order/order_tracking_header.dart';
+import 'package:spl_front/widgets/order/modify_order_status_options.dart';
+import 'package:spl_front/widgets/order/order_action_buttons.dart';
+import 'package:spl_front/widgets/order/shipping_guide.dart';
+import 'package:spl_front/widgets/order/vertical_order_status.dart';
+
+enum OrderUserType { costumer, business }
 
 class OrderTrackingScreen extends StatelessWidget {
-  const OrderTrackingScreen({super.key});
+  final OrderUserType userType;
+  const OrderTrackingScreen({super.key, required this.userType});
 
   @override
   Widget build(BuildContext context) {
-    return OrderTrackingPage();
+    context.read<OrderStatusBloc>().add(LoadOrderStatusEvent());
+    return OrderTrackingPage(userType: userType);
   }
 }
 
 class OrderTrackingPage extends StatefulWidget {
-  const OrderTrackingPage({super.key});
+  final OrderUserType userType;
+  const OrderTrackingPage({super.key, required this.userType});
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingScreenState();
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
-  String _selectedStatus = 'En camino';
-
+  OrderUserType get userType => widget.userType;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          const OrderTrackingHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Status Tracker
-                    BlocBuilder<OrderStatusBloc, OrderStatusState>(
-                      builder: (context, state) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildStatusIcon(Icons.store, state.currentStatus == 'Orden confirmada' || state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                            _buildStatusLine(state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                            _buildStatusIcon(Icons.access_time, state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                            _buildStatusLine(state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                            _buildStatusIcon(Icons.local_shipping, state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                            _buildStatusLine(state.currentStatus == 'Entregada'),
-                            _buildStatusIcon(Icons.check, state.currentStatus == 'Entregada'),
-                          ],
-                        );
-                      },
-                    ),
-                    SizedBox(height: 32.0),
-                    // Current Status
-                    BlocBuilder<OrderStatusBloc, OrderStatusState>(
-                      builder: (context, state) {
-                        return Center(
+          Column(
+            children: [
+              const OrderTrackingHeader(),
+              Expanded(
+                child: BlocBuilder<OrderStatusBloc, OrderStatusState>(
+                  builder: (context, state) {
+                    if (state is OrderStatusLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (state is OrderStatusLoaded) {
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Estado: ${state.currentStatus}',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                state.description,
-                                style: TextStyle(fontSize: 16, color: const Color.fromARGB(127, 0, 0, 0)),
-                              ),
+                              // Business Screen
+                              if (userType == OrderUserType.business) ...[
+                                HorizontalOrderStatus(),
+                                if (SPLVariables.hasRealTimeTracking) ...[
+                                  Container(
+                                    height: 400,
+                                    color: Colors.grey[300],
+                                    child: Center(child: Text('Mapa aquí')),
+                                  ),
+                                ] 
+                                else ...[
+                                  const SizedBox(height: 24.0),
+                                  ModifyOrderStatusOptions(
+                                    selectedStatus: state.selectedStatus,
+                                    onStatusChanged: (status) {
+                                      context.read<OrderStatusBloc>().add(ChangeSelectedStatusEvent(status));
+                                    },
+                                  ),
+                                  const SizedBox(height: 24.0),
+                                  OrderActionButtons(selectedStatus: state.selectedStatus, userType: userType,),
+                                ],
+                              ] 
+                              
+                              // Costumer Screen
+                              else if (userType == OrderUserType.costumer)...[
+                                if (SPLVariables.hasRealTimeTracking) ...[
+                                  Container(
+                                    height: 500,
+                                    color: Colors.grey[300],
+                                    child: Center(child: Text('Mapa aquí')),
+                                  ),
+                                ] 
+                                else ...[
+                                  const VerticalOrderStatus(),
+                                  const SizedBox(height: 24.0),
+                                  ShippingGuide(orderNumber: "123456", estimatedDeliveryDate: "2025-02-20"),
+                                  const SizedBox(height: 10.0),
+                                  OrderActionButtons(selectedStatus: state.selectedStatus, showConfirmButton: false, userType: userType,),
+                                ],
+                              ]
+
+                              // TODO: Delivery screen
+                              else ...[
+                                const Text('Error al cargar el estado de la orden')
+                              ]
                             ],
                           ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 24.0),
-                    // Modify order status options
-                    Text(
-                      'Modificar estado de la orden',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8.0),
-                    Column(
-                        children: [
-                          _buildStatusOption('Orden confirmada'),
-                          _buildStatusOption('Preparando la orden'),
-                          _buildStatusOption('En camino'),
-                          _buildStatusOption('Entregada'),
-                        ],
-                      ),
-                    SizedBox(height: 24.0),
-                    // Buttons
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 37, 139, 217), //rgb(37, 139, 217)
-                        minimumSize: Size(double.infinity, 48),
-                      ),
-                      child: Text('Ver detalles de la orden', style: TextStyle(color: Colors.white),),
-                    ),
-                    SizedBox(height: 8.0),
-                    BlocBuilder<OrderStatusBloc, OrderStatusState>(
-                      builder: (context, state) {
-                        return ElevatedButton(
-                          onPressed: _selectedStatus != state.currentStatus ? () {
-                            _confirmStatusChange(context);
-                          } : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedStatus != state.currentStatus ? Colors.green : Colors.grey[350],
-                            minimumSize: Size(double.infinity, 48),
-                          ),
-                          child: Text('Confirmar', style: TextStyle(color: Colors.black),),
-                        );
-                      },
-                    ),
-                  ],
+                        ),
+                      );
+                    } else {
+                      return Center(child: Text('Error al cargar el estado de la orden'));
+                    }
+                  },
                 ),
               ),
-            ),
+              if (userType == OrderUserType.costumer) const CustomerBottomNavigationBar() 
+              else const BusinessBottomNavigationBar(),
+            ],
           ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildStatusIcon(IconData icon, bool isActive) {
-    return Icon(icon, color: isActive ? const Color.fromARGB(255, 0, 73, 143) : Colors.grey, size: 40,);
-  }
-
-  Widget _buildStatusLine(bool isActive) {
-    return Expanded(
-      child: Container(
-        height: 2.0,
-        color: isActive ? Color.fromARGB(255, 0, 73, 143): Colors.grey,
-      ),
-    );
-  }
-
-  Widget _buildStatusOption(String status) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4.0),
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          unselectedWidgetColor: Colors.blue,
-        ),
-        child: RadioListTile<String>(
-          title: Text(status),
-          value: status,
-          groupValue: _selectedStatus,
-          onChanged: (value) {
-            setState(() {
-              _selectedStatus = value!;  // Solo actualiza la variable local, no emite evento aquí
-            });
-          },
-          activeColor: Colors.blue,
-          controlAffinity: ListTileControlAffinity.trailing, // Mueve el botón de radio a la derecha
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-      ),
-    );
-  }
-
-  void _confirmStatusChange(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmar cambio de estado'),
-          content: Text('¿Estás seguro de que deseas cambiar el estado de la orden a "$_selectedStatus"?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();  // Cierra el diálogo sin hacer nada
-              },
-              child: Text('Cancelar', style: TextStyle(color: Colors.blue),),
-            ),
-            TextButton(
-              onPressed: () {
-                // Emite el evento para cambiar el estado sin necesidad de un Builder
-                context.read<OrderStatusBloc>().add(ChangeOrderStatusEvent(_selectedStatus));
-                Navigator.of(context).pop();  // Cierra el diálogo después de confirmar
-              },
-              child: Text('Aceptar', style: TextStyle(color: Colors.blue),),
+          // Buttons that have to be at the bottom of the screen
+          if (userType == OrderUserType.business && SPLVariables.hasRealTimeTracking) ...[
+            Positioned(
+              bottom: 80.0,
+              left: 16.0,
+              right: 16.0,
+              child: OrderActionButtons(
+                selectedStatus: "",
+                showConfirmButton: false,
+                userType: userType,
+              ),
             ),
           ],
-        );
-      },
+          
+          // Shipping guide for costumers
+          if (userType == OrderUserType.costumer && SPLVariables.hasRealTimeTracking) ...[
+            Positioned(
+              bottom: 80.0,
+              left: 16.0,
+              right: 16.0,
+              child: Column(
+              children: [
+                ShippingGuide(orderNumber: "123456", estimatedDeliveryDate: "2025-02-20"),
+                const SizedBox(height: 10.0),
+                OrderActionButtons(selectedStatus: "", showConfirmButton: false, userType: userType),
+              ],
+              ),
+            ),
+          ]
+        ],
+      ),
     );
   }
 }
