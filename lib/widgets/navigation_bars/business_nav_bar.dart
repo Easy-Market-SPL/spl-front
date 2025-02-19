@@ -27,6 +27,20 @@ class BusinessBottomNavigationBar extends StatelessWidget {
       ],
       onTap: (index) {
         // TODO: Handle bottom navigation
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, 'business_dashboard');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '');
+            break;
+          case 2:
+            Navigator.pushNamed(context, '');
+            break;
+          case 3:
+            Navigator.pushNamed(context, 'business_user_menu');
+            break;
+        }
       },
     );
   }
