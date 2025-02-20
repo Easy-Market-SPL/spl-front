@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class ShippingCompanyPopup extends StatefulWidget {
   final String selectedCompany;
@@ -44,7 +45,7 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Seleccionar Empresa de Envío',
+                      OrderStrings.selectShippingCompany,
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ),
@@ -67,7 +68,7 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    child: const Text('Cancelar', style: TextStyle(color: Colors.blue)),
+                    child: const Text(OrderStrings.cancel, style: TextStyle(color: Colors.blue)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -79,7 +80,7 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                             Navigator.of(context).pop();
                           }
                         : null,
-                    child: const Text('Confirmar', style: TextStyle(color: Colors.blue)),
+                    child: const Text(OrderStrings.confirm, style: TextStyle(color: Colors.blue)),
                   ),
                 ],
               ),

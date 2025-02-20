@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class VerticalOrderStatus extends StatelessWidget {
   const VerticalOrderStatus({super.key});
@@ -17,41 +18,41 @@ class VerticalOrderStatus extends StatelessWidget {
               _buildStatusItem(
                 context,
                 icon: Icons.store,
-                title: 'Orden confirmada',
-                description: 'Tu orden ha sido procesada correctamente',
-                notReachedTitle: 'Sin confirmar',
-                notReachedDescription: 'Tu orden aún no ha sido aceptada',
-                isActive: state.currentStatus == 'Orden confirmada' || state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada',
+                title: OrderStrings.orderConfirmed,
+                description: OrderStrings.orderConfirmedDescription,
+                notReachedTitle: OrderStrings.notConfirmed,
+                notReachedDescription: OrderStrings.notConfirmedDescription,
+                isActive: state.currentStatus == OrderStrings.orderConfirmed || state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
               ),
-              _buildStatusLine(state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
+              _buildStatusLine(state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
               _buildStatusItem(
                 context,
                 icon: Icons.access_time,
-                title: 'Preparando la orden',
-                description: 'Tu orden está siendo preparada para su entrega',
-                notReachedTitle: 'Sin preparar',
-                notReachedDescription: 'Tu orden aún no se ha procesado',
-                isActive: state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada',
+                title: OrderStrings.preparingOrder,
+                description: OrderStrings.preparingOrderDescription,
+                notReachedTitle: OrderStrings.notPrepared,
+                notReachedDescription: OrderStrings.notPreparedDescription,
+                isActive: state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
               ),
-              _buildStatusLine(state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
+              _buildStatusLine(state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
               _buildStatusItem(
                 context,
                 icon: Icons.local_shipping,
-                title: 'En camino',
-                description: 'La orden ha salido en camino',
-                notReachedTitle: 'Sin salir',
-                notReachedDescription: 'Tu orden no está lista para partir',
-                isActive: state.currentStatus == 'En camino' || state.currentStatus == 'Entregada',
+                title: OrderStrings.onTheWay,
+                description: OrderStrings.onTheWayDescription,
+                notReachedTitle: OrderStrings.notOnTheWay,
+                notReachedDescription: OrderStrings.notOnTheWayDescription,
+                isActive: state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
               ),
-              _buildStatusLine(state.currentStatus == 'Entregada'),
+              _buildStatusLine(state.currentStatus == OrderStrings.delivered),
               _buildStatusItem(
                 context,
                 icon: Icons.check,
-                title: 'Entregada',
-                description: 'La orden ha sido entregada',
-                notReachedTitle: 'Sin entregar',
-                notReachedDescription: 'Tu orden aún no ha sido entregada',
-                isActive: state.currentStatus == 'Entregada',
+                title: OrderStrings.delivered,
+                description: OrderStrings.deliveredDescription,
+                notReachedTitle: OrderStrings.notDelivered,
+                notReachedDescription: OrderStrings.notDeliveredDescription,
+                isActive: state.currentStatus == OrderStrings.delivered,
               ),
             ],
           );

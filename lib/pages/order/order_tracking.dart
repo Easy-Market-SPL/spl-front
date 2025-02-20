@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
+import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
@@ -16,7 +17,7 @@ import 'package:spl_front/widgets/order/vertical_order_status.dart';
 enum OrderUserType { costumer, business }
 
 class OrderTrackingScreen extends StatelessWidget {
-  final OrderUserType userType;
+  final ChatUserType userType;
   const OrderTrackingScreen({super.key, required this.userType});
 
   @override
@@ -27,7 +28,7 @@ class OrderTrackingScreen extends StatelessWidget {
 }
 
 class OrderTrackingPage extends StatefulWidget {
-  final OrderUserType userType;
+  final ChatUserType userType;
   const OrderTrackingPage({super.key, required this.userType});
 
   @override
@@ -35,7 +36,7 @@ class OrderTrackingPage extends StatefulWidget {
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
-  OrderUserType get userType => widget.userType;
+  ChatUserType get userType => widget.userType;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +58,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Business Screen
-                              if (userType == OrderUserType.business) ...[
+                              if (userType == ChatUserType.business) ...[
                                 HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
@@ -80,7 +81,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                               ] 
                               
                               // Costumer Screen
-                              else if (userType == OrderUserType.costumer)...[
+                              else if (userType == ChatUserType.customer)...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 500,
@@ -111,13 +112,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                   },
                 ),
               ),
-              if (userType == OrderUserType.costumer) const CustomerBottomNavigationBar() 
+              if (userType == ChatUserType.customer) const CustomerBottomNavigationBar() 
               else const BusinessBottomNavigationBar(),
             ],
           ),
 
           // Buttons that have to be at the bottom of the screen
-          if (userType == OrderUserType.business && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == ChatUserType.business && SPLVariables.hasRealTimeTracking) ...[
             Positioned(
               bottom: 80.0,
               left: 16.0,
@@ -131,7 +132,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           ],
           
           // Shipping guide for costumers
-          if (userType == OrderUserType.costumer && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == ChatUserType.customer && SPLVariables.hasRealTimeTracking) ...[
             Positioned(
               bottom: 80.0,
               left: 16.0,

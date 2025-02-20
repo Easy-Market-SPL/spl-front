@@ -10,7 +10,7 @@ import '../../widgets/chat/chat_input_area.dart';
 import '../../widgets/chat/chat_messages_list.dart';
 import '../../widgets/chat/chat_header.dart';
 
-enum ChatUserType { costumer, business }
+enum ChatUserType { customer, business }
 
 class ChatScreen extends StatelessWidget {
   final ChatUserType userType;
@@ -103,7 +103,7 @@ class ChatPage extends StatelessWidget {
               ],
             ),
           ),
-          if (userType == ChatUserType.costumer) const CustomerBottomNavigationBar() 
+          if (userType == ChatUserType.customer) const CustomerBottomNavigationBar() 
           else const BusinessBottomNavigationBar(),
         ],
       ),

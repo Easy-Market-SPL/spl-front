@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
+import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class OrderActionButtons extends StatelessWidget {
   final String selectedStatus;
   final bool showDetailsButton;
   final bool showConfirmButton;
-  final OrderUserType userType;
+  final ChatUserType userType;
 
   const OrderActionButtons({
     super.key,
@@ -32,7 +33,7 @@ class OrderActionButtons extends StatelessWidget {
               backgroundColor: const Color.fromARGB(255, 37, 139, 217),
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text('Ver detalles de la orden', style: TextStyle(color: Colors.white)),
+            child: const Text(OrderStrings.orderDetailsTitle, style: TextStyle(color: Colors.white)),
           ),
         if (showDetailsButton) const SizedBox(height: 8.0),
         if (showConfirmButton)
@@ -47,7 +48,7 @@ class OrderActionButtons extends StatelessWidget {
                     backgroundColor: selectedStatus != state.currentStatus ? const Color.fromARGB(255, 37, 139, 217) : Colors.grey[350],
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: Text('Confirmar', style: TextStyle(color: selectedStatus != state.currentStatus ?  Colors.white : Colors.black)),
+                  child: Text(OrderStrings.confirm, style: TextStyle(color: selectedStatus != state.currentStatus ?  Colors.white : Colors.black)),
                 );
               } else {
                 return Container();
@@ -60,9 +61,10 @@ class OrderActionButtons extends StatelessWidget {
 
   // Navigate to the appropriate details page based on userType
   void _navigateToDetails(BuildContext context) {
-    if (userType == OrderUserType.costumer) {
+    // TODO: Pass the order ID to the details page
+    if (userType == ChatUserType.customer) {
       Navigator.of(context).pushNamed('customer_user_order_details');
-    } else if (userType == OrderUserType.business) {
+    } else if (userType == ChatUserType.business) {
       Navigator.of(context).pushNamed('business_user_order_details');
     }
   }
@@ -73,14 +75,14 @@ class OrderActionButtons extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirmar cambio de estado'),
-          content: Text('¿Estás seguro de que deseas cambiar el estado de la orden a "$selectedStatus"?'),
+          title: const Text(OrderStrings.confirmStatusChangeTitle),
+          content: Text(OrderStrings.confirmStatusChangeContent(selectedStatus)),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();  // Close the dialog without doing anything
               },
-              child: const Text('Cancelar', style: TextStyle(color: Colors.blue)),
+              child: const Text(OrderStrings.cancel, style: TextStyle(color: Colors.blue)),
             ),
             TextButton(
               onPressed: () {
@@ -88,7 +90,7 @@ class OrderActionButtons extends StatelessWidget {
                 context.read<OrderStatusBloc>().add(ChangeOrderStatusEvent(selectedStatus));
                 Navigator.of(context).pop();  // Close the dialog after confirming
               },
-              child: const Text('Aceptar', style: TextStyle(color: Colors.blue)),
+              child: const Text(OrderStrings.accept, style: TextStyle(color: Colors.blue)),
             ),
           ],
         );

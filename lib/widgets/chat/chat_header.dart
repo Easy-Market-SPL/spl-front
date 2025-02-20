@@ -29,7 +29,7 @@ class ChatHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            userType == ChatUserType.costumer
+            userType == ChatUserType.customer
                 ? ChatStrings.attentionToCustomers
                 : ChatStrings.chatWithCustomer,
             style: const TextStyle(
