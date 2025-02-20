@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class ModifyOrderStatusOptions extends StatelessWidget {
   final String selectedStatus;
@@ -16,16 +17,16 @@ class ModifyOrderStatusOptions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Modificar estado de la orden',
+          OrderStrings.modifyOrderStatus,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8.0),
         Column(
           children: [
-            _buildStatusOption(context, 'Orden confirmada'),
-            _buildStatusOption(context, 'Preparando la orden'),
-            _buildStatusOption(context, 'En camino'),
-            _buildStatusOption(context, 'Entregada'),
+            _buildStatusOption(context, OrderStrings.orderConfirmed),
+            _buildStatusOption(context, OrderStrings.preparingOrder),
+            _buildStatusOption(context, OrderStrings.onTheWay),
+            _buildStatusOption(context, OrderStrings.delivered),
           ],
         ),
       ],

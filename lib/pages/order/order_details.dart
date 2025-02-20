@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
+import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
 import 'package:spl_front/widgets/order/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
@@ -13,7 +14,7 @@ import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
-  final OrderUserType userType;
+  final ChatUserType userType;
 
   const OrderDetailsScreen({super.key, required this.userType});
 
@@ -24,7 +25,7 @@ class OrderDetailsScreen extends StatelessWidget {
 }
 
 class OrderDetailsPage extends StatefulWidget {
-  final OrderUserType userType;
+  final ChatUserType userType;
 
   const OrderDetailsPage({super.key, required this.userType});
 
@@ -33,7 +34,7 @@ class OrderDetailsPage extends StatefulWidget {
 }
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
-  OrderUserType get userType => widget.userType;
+  ChatUserType get userType => widget.userType;
   String selectedShippingCompany = "Sin seleccionar";
 
   @override
@@ -59,7 +60,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Order modification options
-                        if (SPLVariables.hasRealTimeTracking && userType == OrderUserType.business) ...[
+                        if (SPLVariables.hasRealTimeTracking && userType == ChatUserType.business) ...[
                           const SizedBox(height: 20),
                           ModifyOrderStatusOptions(
                             selectedStatus: state.selectedStatus,
@@ -73,47 +74,47 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ],
 
                         // Order details content
-                        _buildSectionTitle("Detalles de la orden"),
-                        _buildInfoRow("Número de orden", orderData['numeroOrden']),
-                        _buildInfoRow("Fecha", orderData['fecha']),
-                        _buildInfoRow("Número de productos", "${orderData['numProductos']}", actionText: "Ver productos", onActionTap: () {
+                        _buildSectionTitle(OrderStrings.orderDetailsTitle),
+                        _buildInfoRow(OrderStrings.orderNumber, orderData['numeroOrden']),
+                        _buildInfoRow(OrderStrings.orderDate, orderData['fecha']),
+                        _buildInfoRow(OrderStrings.orderProductCount, "${orderData['numProductos']}", actionText: OrderStrings.viewProducts, onActionTap: () {
                           _showProductPopup(context); // Open the product popup
                         }),
-                        _buildInfoRow("Total", "\$${orderData['total'].toStringAsFixed(0)}"),
+                        _buildInfoRow(OrderStrings.orderTotal, "\$${orderData['total'].toStringAsFixed(0)}"),
                         const SizedBox(height: 20),
 
                         // Customer details content
-                        _buildSectionTitle("Detalles del cliente"),
-                        _buildInfoRow("Nombre de cliente", customerData['cliente']),
-                        _buildInfoRow("Dirección de entrega", customerData['direccion']),
+                        _buildSectionTitle(OrderStrings.customerDetailsTitle),
+                        _buildInfoRow(OrderStrings.customerName, customerData['cliente']),
+                        _buildInfoRow(OrderStrings.deliveryAddress, customerData['direccion']),
 
                         // Real-time tracking or company selection
                         if (SPLVariables.hasRealTimeTracking) ...[
                           const SizedBox(height: 20),
-                          _buildSectionTitle("Detalles del domiciliario"),
-                          _buildInfoRow("Nombre del repartidor", "Sin repartidor asignado"),
+                          _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
+                          _buildInfoRow(OrderStrings.deliveryPersonName, OrderStrings.noDeliveryPersonAssigned),
                         ] else ...[
                           const SizedBox(height: 20),
-                          _buildSectionTitle("Empresa de envío"),
-                          if (userType == OrderUserType.business) ...[
-                            _buildSelectableRow("Empresa seleccionada", selectedShippingCompany, onActionTap: () {
+                          _buildSectionTitle(OrderStrings.shippingCompanyTitle),
+                          if (userType == ChatUserType.business) ...[
+                            _buildSelectableRow(OrderStrings.selectedShippingCompany, selectedShippingCompany, onActionTap: () {
                               _showShippingCompanyPopup(context); // Open the shipping company selection popup
                             }),
                           ] else ...[
-                            _buildInfoRow("Empresa transportista", selectedShippingCompany,),
+                            _buildInfoRow(OrderStrings.shippingCompany, selectedShippingCompany,),
                           ],
                         ]
                       ],
                     );
                   } 
                   else {
-                    return const Center(child: Text('Error al cargar el estado de la orden'));
+                    return const Center(child: Text(OrderStrings.errorLoadingOrderStatus));
                   }
                 },
               ),
             ),
           ),
-          userType == OrderUserType.costumer
+          userType == ChatUserType.customer
               ? const CustomerBottomNavigationBar()
               : const BusinessBottomNavigationBar(),
         ],
@@ -147,7 +148,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
     return Container(
       padding: EdgeInsets.only(top: topPadding, left: 10.0, right: 10.0),
-      height: 70.0,
+      height: 80.0,
       child: Stack(
         children: [
           Positioned(

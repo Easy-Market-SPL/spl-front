@@ -112,7 +112,7 @@ class ChatInputField extends StatelessWidget {
                     // Send file event
                     if (context.mounted){
                       context.read<ChatBloc>().add(SendFileEvent(
-                          sender: userType == ChatUserType.costumer ? 'cliente' : 'soporte',
+                          sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
                           fileUrl: selectedFile.path,
                           fileType: fileType,
                           context: context)
@@ -129,7 +129,7 @@ class ChatInputField extends StatelessWidget {
                 onPressed: () {
                   if (controller.text.trim().isNotEmpty) {
                     context.read<ChatBloc>().add(SendMessageEvent(
-                        sender: userType == ChatUserType.costumer ? 'cliente' : 'soporte',
+                        sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
                         text: controller.text.trim(),
                         context: context)
                     );

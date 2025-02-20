@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class ProductPopup extends StatelessWidget {
 
@@ -8,19 +9,19 @@ class ProductPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Product> products = [
-    Product(
-      name: 'Nombre del Producto X',
-      description: 'Descripción general del Producto',
-      price: 50.0,
-      quantity: 1,
-    ),
-    Product(
-      name: 'Nombre del Producto X',
-      description: 'Descripción general del Producto',
-      price: 50.0,
-      quantity: 1,
-    ),
-  ];
+      Product(
+        name: 'Nombre del Producto X',
+        description: 'Descripción general del Producto',
+        price: 50.0,
+        quantity: 1,
+      ),
+      Product(
+        name: 'Nombre del Producto X',
+        description: 'Descripción general del Producto',
+        price: 50.0,
+        quantity: 1,
+      ),
+    ];
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
@@ -35,7 +36,7 @@ class ProductPopup extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Productos en esta orden',
+                  OrderStrings.productsInOrder,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 IconButton(

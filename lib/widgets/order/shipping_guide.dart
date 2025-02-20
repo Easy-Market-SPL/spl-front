@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class ShippingGuide extends StatelessWidget {
   final String orderNumber;
@@ -25,12 +26,12 @@ class ShippingGuide extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Número de orden: #$orderNumber',
+              '${OrderStrings.orderNumber}: #$orderNumber',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Fecha de entrega estimada: $estimatedDeliveryDate',
+              '${OrderStrings.estimatedDeliveryDate}: $estimatedDeliveryDate',
               style: const TextStyle(fontSize: 16),
             ),
           ],

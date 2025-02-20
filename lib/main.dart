@@ -6,6 +6,7 @@ import 'package:spl_front/bloc/ui_management/chat/chat_bloc.dart';
 import 'package:spl_front/bloc/ui_management/labels_store/labels_store_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
+import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/pages/login/login_page.dart';
 import 'package:spl_front/pages/login/login_page_variant.dart';
@@ -34,14 +35,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LabelsProvider()),
         BlocProvider(create: (_) => ChatBloc()),
         BlocProvider(create: (_) => OrderStatusBloc()),
-        BlocProvider(create: (_) => ChatsBloc())
+        BlocProvider(create: (_) => ChatsBloc()),
+        BlocProvider(create: (_) => OrderListBloc())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SPL Front',
         home: _getInitialRoute(),
-        //initialRoute: SPLVariables.hasThirdAuth ? 'login_variant' : 'login',
-        initialRoute: 'customer_user_order_tracking',
         routes: appRoutes,
       ),
     );

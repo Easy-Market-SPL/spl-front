@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class HorizontalOrderStatus extends StatelessWidget {
   const HorizontalOrderStatus({super.key});
@@ -18,13 +19,13 @@ class HorizontalOrderStatus extends StatelessWidget {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatusIcon(Icons.store, state.currentStatus == 'Orden confirmada' || state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                  _buildStatusLine(state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                  _buildStatusIcon(Icons.access_time, state.currentStatus == 'Preparando la orden' || state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                  _buildStatusLine(state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                  _buildStatusIcon(Icons.local_shipping, state.currentStatus == 'En camino' || state.currentStatus == 'Entregada'),
-                  _buildStatusLine(state.currentStatus == 'Entregada'),
-                  _buildStatusIcon(Icons.check, state.currentStatus == 'Entregada'),
+                  _buildStatusIcon(Icons.store, state.currentStatus == OrderStrings.orderConfirmed || state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
+                  _buildStatusLine(state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
+                  _buildStatusIcon(Icons.access_time, state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
+                  _buildStatusLine(state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
+                  _buildStatusIcon(Icons.local_shipping, state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
+                  _buildStatusLine(state.currentStatus == OrderStrings.delivered),
+                  _buildStatusIcon(Icons.check, state.currentStatus == OrderStrings.delivered),
                 ],
               );
             } else {
@@ -41,7 +42,7 @@ class HorizontalOrderStatus extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Estado: ${state.currentStatus}',
+                      '${OrderStrings.status}: ${state.currentStatus}',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(

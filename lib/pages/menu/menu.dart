@@ -36,14 +36,14 @@ class MenuPage extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     radius: 25,
-                    child: Text(userType == ChatUserType.costumer ? 'UC' : 'UE'),
+                    child: Text(userType == ChatUserType.customer ? 'UC' : 'UE'),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userType == ChatUserType.costumer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
+                        userType == ChatUserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
                         style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),
@@ -55,7 +55,7 @@ class MenuPage extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              children: userType == ChatUserType.costumer ? clienteMenuItems(context) : empresaMenuItems(context),
+              children: userType == ChatUserType.customer ? clienteMenuItems(context) : empresaMenuItems(context),
             ),
           ),
         ],
@@ -69,17 +69,17 @@ class MenuPage extends StatelessWidget {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
       menuItem(context, Icons.shopping_cart, MenuStrings.cart, ''),
-      menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, ''),
+      menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
       menuItem(context, Icons.notifications, MenuStrings.notifications, ''),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'costumer_user_chat'),
+      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'custumer_user_chat'),
     ];
   }
 
   List<Widget> empresaMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'business_dashboard'),
-      menuItem(context, Icons.history, MenuStrings.orderHistory, ''),
+      menuItem(context, Icons.history, MenuStrings.orderHistory, 'business_user_orders'),
       menuItem(context, Icons.admin_panel_settings, MenuStrings.adminPanel, 'admin_profile'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'business_user_profile'),
       menuItem(context, Icons.notifications, MenuStrings.notifications, ''),

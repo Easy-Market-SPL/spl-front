@@ -46,7 +46,7 @@ class ChatMessagesList extends StatelessWidget {
                   // Messages
                   ...messages.map((message) => ChatMessageBubble(
                     message: message,
-                    isCurrentUser: message.sender == (userType == ChatUserType.costumer ? 'cliente' : 'soporte'),
+                    isCurrentUser: message.sender == (userType == ChatUserType.customer ? 'cliente' : 'soporte'),
                     focusNode: focusNode,
                   )),
                 ],
