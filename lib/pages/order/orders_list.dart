@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
 import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
 import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
@@ -144,9 +144,8 @@ class OrdersPage extends StatelessWidget {
   }
 
   Widget dateRangeChip(BuildContext context, DateTimeRange dateRange) {
-    final DateFormat formatter = DateFormat('dd/MM/yyyy');
-    final String startDate = formatter.format(dateRange.start);
-    final String endDate = formatter.format(dateRange.end);
+    final String startDate = DateHelper.formatDate(dateRange.start);
+    final String endDate = DateHelper.formatDate(dateRange.end);
     return ChoiceChip(
       label: Text(OrderStrings.showDateRangeString(startDate, endDate)),
       selected: true,
