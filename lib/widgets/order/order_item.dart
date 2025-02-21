@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
+import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 class OrderItem extends StatelessWidget {
@@ -13,7 +13,6 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat formatter = DateFormat('dd/MM/yyyy');
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -43,7 +42,7 @@ class OrderItem extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
-                          text: formatter.format(order.date),
+                          text: DateHelper.formatDate(order.date),
                           style: TextStyle(fontWeight: FontWeight.normal),
                         ),
                       ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:spl_front/utils/dates/date_helper.dart';
 
 class CustomDateRangePicker extends StatefulWidget {
   final DateTimeRange? initialDateRange;
@@ -27,7 +27,6 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat formatter = DateFormat('dd/MM/yyyy');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -76,7 +75,7 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
           child: Text(
             selectedDateRange == null
                 ? "Seleccionar rango de fechas"
-                : "${formatter.format(selectedDateRange!.start)} - ${formatter.format(selectedDateRange!.end)}",
+                : "${DateHelper.formatDate(selectedDateRange!.start)} - ${DateHelper.formatDate(selectedDateRange!.end)}",
             style: TextStyle(color: Colors.blue),
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
+import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 class Order {
@@ -69,7 +70,8 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
       final query = event.query.toLowerCase();
 
       final filteredOrders = loadedState.orders.where((order) {
-        return order.clientName.toLowerCase().contains(query);
+        return order.clientName.toLowerCase().contains(query) ||
+          DateHelper.isDateMatchingQuery(order.date, query);
       }).toList();
 
       emit(OrderListLoaded(loadedState.orders, filteredOrders, loadedState.selectedFilters, loadedState.additionalFilters, selectedDateRange: selectedDateRange));
@@ -116,9 +118,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
 
     if (dateRange != null) {
       filteredOrders = filteredOrders.where((order) {
-        return 
-          (order.date.isAfter(dateRange.start) || DateUtils.isSameDay(order.date, dateRange.start)) && 
-          (order.date.isBefore(dateRange.end) || DateUtils.isSameDay(order.date, dateRange.end));
+        return DateHelper.dateIsBetweenAndSameDay(order.date, dateRange);
       }).toList();
     }
 
