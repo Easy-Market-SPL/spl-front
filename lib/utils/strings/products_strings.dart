@@ -11,4 +11,9 @@ class ProductStrings {
   static const creationDescription = "Descripción";
   static const save = "Guardar";
   static const delete = "Eliminar";
+
+  static const nameExample = "Camiseta de algodón";
+  static const referenceExample = "C-123";
+  static const descriptionExample =
+      "Camiseta de algodón 100% con cuello redondo.";
 }
