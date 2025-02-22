@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/pages/business_user/edit_product.dart';
 
 class BusinessProductCard extends StatelessWidget {
   //TODO: Receive the POJO product object instead of individual fields for the future navigation or use the appropriate provider (Bloc)
@@ -88,6 +89,11 @@ class BusinessProductCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 // TODO: Handle View Product action
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EditProductPage(productId: '123456')));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
