@@ -6,6 +6,7 @@ import 'package:spl_front/models/ui/general/route_destination.dart';
 import 'package:spl_front/models/ui/google/places_google_response.dart';
 import 'package:spl_front/models/ui/map_box/places_map_box_response.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../models/ui/map_box/traffic_map_box_response.dart';
 
@@ -14,6 +15,8 @@ part 'search_places_state.dart';
 
 class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
   MapService mapService;
+  // Unique session token to avoid conflicts with other requests and duplicates
+  final String sessionToken = Uuid().v4();
 
   SearchPlacesBloc({required this.mapService})
       : super(const SearchPlacesState()) {
@@ -66,7 +69,7 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
 
   Future getPlacesByGoogleQuery(String query) async {
     final List<Result> newPlaces =
-        await mapService.getResultsByGoogleQuery(query);
+        await mapService.getResultsByGoogleQuery(query, sessionToken);
     add(OnNewGooglePlacesFoundEvent(newPlaces));
   }
 }

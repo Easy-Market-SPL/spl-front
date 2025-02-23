@@ -7,6 +7,7 @@ part 'address_state.dart';
 
 class AddressBloc extends Bloc<AddressEvent, AddressState> {
   AddressBloc()
+      // TODO: LOAD FROM PERSISTENCE
       : super(AddressState(addresses: [
           Address(
             name: 'Casa Principal',
