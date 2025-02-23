@@ -2,14 +2,24 @@ import 'dart:async'; // Para el debounce
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/models/ui/google/places_google_response.dart';
 
-class AddAddressPage extends StatelessWidget {
+import '../../widgets/addresses/helpers/address_dialogs.dart';
+
+class AddAddressPage extends StatefulWidget {
   const AddAddressPage({super.key});
 
   @override
+  State<AddAddressPage> createState() => _AddAddressPageState();
+}
+
+class _AddAddressPageState extends State<AddAddressPage> {
+  @override
   Widget build(BuildContext context) {
+    final gpsBloc = BlocProvider.of<GpsBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Agregar una nueva dirección'),
@@ -21,19 +31,66 @@ class AddAddressPage extends StatelessWidget {
             // Search bar
             _SearchBar(),
             // Display the search results in a ListView
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Divider(height: 5),
+            ListTile(
+              leading:
+                  const Icon(Icons.location_on_outlined, color: Colors.black),
+              title: Text('Seleccionar en el Mapa'),
+              onTap: () {
+                _handleAddManualMarker(context, () {
+                  _handleGpsAnswer(context, gpsBloc);
+                });
+              },
+            ),
+            Divider(height: 5),
+            const SizedBox(height: 10),
             Expanded(child: _SearchResults()),
           ],
         ),
       ),
     );
   }
+
+  // Handle adding manual marker on map
+  Future<void> _handleAddManualMarker(
+      BuildContext context, VoidCallback gpsAction) async {
+    final gpsBloc = BlocProvider.of<GpsBloc>(context);
+    print('GPS Enabled: ${gpsBloc.state.isGpsEnabled}');
+    print('GPS Permission Granted: ${gpsBloc.state.isGpsPermissionGranted}');
+
+    // Ensure GPS status is checked before proceeding
+    if (gpsBloc.state.isLoading) {
+      // Wait until GPS is initialized
+      await Future.delayed(Duration(milliseconds: 300));
+    }
+    gpsAction.call();
+  }
+
+  void _handleGpsAnswer(BuildContext context, GpsBloc gpsBloc) {
+    // Step 1: Check if GPS is enabled
+    if (!gpsBloc.state.isGpsEnabled) {
+      showGpsLocationDialog(context);
+      return;
+    }
+
+    // Step 2: Check if GPS permission is granted
+    if (!gpsBloc.state.isGpsPermissionGranted) {
+      showLocationPermissionDialog(context, gpsBloc);
+      return;
+    }
+
+    // Step 3: Proceed to map screen
+    Navigator.pushNamed(context, 'map_address');
+  }
 }
 
+// The search bar with debounce
 class _SearchBar extends StatelessWidget {
   final TextEditingController searchController = TextEditingController();
   final _debounce = Debouncer(
-      duration: Duration(milliseconds: 500)); // Implementación del debounce
+    duration: Duration(milliseconds: 500),
+  ); // Debounce to optimize search
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +108,7 @@ class _SearchBar extends StatelessWidget {
       onChanged: (query) {
         _debounce.run(() {
           if (query.isNotEmpty) {
-            // Only trigger the search event when the user stops typing for a while
+            // Trigger search only after the user stops typing
             searchBloc.getPlacesByGoogleQuery(query);
           }
         });
@@ -60,6 +117,7 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
+// The list of search results
 class _SearchResults extends StatelessWidget {
   const _SearchResults();
 

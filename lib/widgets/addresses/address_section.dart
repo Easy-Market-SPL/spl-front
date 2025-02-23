@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/widgets/addresses/address_dialogs.dart';
+import 'package:spl_front/widgets/addresses/helpers/address_dialogs.dart';
 
 import '../../bloc/ui_management/address/address_bloc.dart';
 
@@ -49,8 +49,7 @@ class AddressSection extends StatelessWidget {
                             icon: Icon(Icons.edit),
                             onPressed: () {
                               // Trigger edit dialog
-                              AddressDialogs.showEditDialog(
-                                  context, address, index);
+                              showEditDialog(context, address, index);
                             },
                           ),
                           // Delete Button
@@ -58,7 +57,7 @@ class AddressSection extends StatelessWidget {
                             icon: Icon(Icons.delete),
                             onPressed: () {
                               // Show confirmation before deletion
-                              AddressDialogs.showDeleteConfirmationDialog(
+                              showDeleteConfirmationDialog(
                                   context, addressBloc, index);
                             },
                           ),

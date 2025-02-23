@@ -12,14 +12,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final LocationBloc locationBloc;
   GoogleMapController? _mapController;
   LatLng? mapCenter;
+
   StreamSubscription<LocationState>? locationStateSubscription;
 
-  // Dispatch events when the BLoC is created
   MapBloc({required this.locationBloc}) : super(const MapState()) {
     on<OnMapInitializedEvent>(_onInitMap);
     on<OnStartFollowingUser>(_onStartFollowingUser);
     on<OnStopFollowingUser>((event, emit) {
       emit(state.copyWith(isFollowingUser: false));
+    });
+    on<OnAddMarkerEvent>((event, emit) {
+      final currentMarkers = Map<String, Marker>.from(state.markers);
+      currentMarkers[event.markerId] = event.marker;
+      emit(state.copyWith(markers: currentMarkers));
     });
   }
 
