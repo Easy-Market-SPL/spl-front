@@ -57,11 +57,13 @@ class MapService {
   }
 
   // Google:
-  Future<List<Result>> getResultsByGoogleQuery(String query) async {
+  Future<List<Result>> getResultsByGoogleQuery(
+      String query, String sessionToken) async {
     if (query.isEmpty) return [];
 
     final resp = await _dioGoogle.get(_baseGoogleUrl, queryParameters: {
       'address': query,
+      'sessiontoken': sessionToken,
     });
 
     final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
