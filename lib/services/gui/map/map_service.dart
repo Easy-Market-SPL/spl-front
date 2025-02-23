@@ -72,6 +72,7 @@ class MapService {
   }
 
   // REVERSE GEOCODING
+  // MapBox
   Future<Feature> getInformationByCoors(LatLng coors) async {
     final resp = await _dioReverseMapBoxPlaces
         .get(_baseReversePlacesUrl, queryParameters: {
@@ -83,5 +84,14 @@ class MapService {
     // print('✅ Answer API: ${resp.data}'); // 🔹 Debugging
     final placesResponse = PlacesResponse.fromJson(resp.data);
     return placesResponse.features[0];
+  }
+
+  // Google
+  Future<Result> getInformationByCoorsGoogle(LatLng coors) async {
+    final resp = await _dioGoogle.get(_baseGoogleUrl, queryParameters: {
+      'latlng': '${coors.latitude},${coors.longitude}',
+    });
+    final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
+    return placesResponse.results[0];
   }
 }

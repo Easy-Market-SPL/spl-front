@@ -39,23 +39,24 @@ class MyApp extends StatelessWidget {
       // Providers using BLoC, managed on the folder lib/bloc/...
       providers: [
         // Providers for manage the Location, GPS and Map on the App
-        BlocProvider(create: (_) => GpsBloc()),
-        BlocProvider(create: (_) => LocationBloc()),
+        BlocProvider(create: (context) => GpsBloc()),
+        BlocProvider(create: (context) => LocationBloc()),
         BlocProvider(
-            create: (_) =>
+            create: (context) =>
                 MapBloc(locationBloc: BlocProvider.of<LocationBloc>(context))),
-        BlocProvider(create: (_) => SearchPlacesBloc(mapService: MapService())),
+        BlocProvider(
+            create: (context) => SearchPlacesBloc(mapService: MapService())),
 
         // Providers for UI Management
-        BlocProvider(create: (_) => ProfileTabBloc()),
-        BlocProvider(create: (_) => AddressBloc()),
-        BlocProvider(create: (_) => LabelsStoreBloc()),
-        ChangeNotifierProvider(create: (_) => ProductFormProvider()),
-        ChangeNotifierProvider(create: (_) => LabelsProvider()),
-        BlocProvider(create: (_) => ChatBloc()),
-        BlocProvider(create: (_) => OrderStatusBloc()),
-        BlocProvider(create: (_) => ChatsBloc()),
-        BlocProvider(create: (_) => OrderListBloc()),
+        BlocProvider(create: (context) => ProfileTabBloc()),
+        BlocProvider(create: (context) => AddressBloc()),
+        BlocProvider(create: (context) => LabelsStoreBloc()),
+        ChangeNotifierProvider(create: (context) => ProductFormProvider()),
+        ChangeNotifierProvider(create: (context) => LabelsProvider()),
+        BlocProvider(create: (context) => ChatBloc()),
+        BlocProvider(create: (context) => OrderStatusBloc()),
+        BlocProvider(create: (context) => ChatsBloc()),
+        BlocProvider(create: (context) => OrderListBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

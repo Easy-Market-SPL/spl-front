@@ -6,6 +6,7 @@ import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
 import 'package:spl_front/pages/customer_user/add_address.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
+import 'package:spl_front/pages/customer_user/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/login_page_web.dart';
@@ -53,6 +54,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_user_orders': (_) => OrdersScreen(userType: ChatUserType.business),
   'customer_user_orders': (_) => OrdersScreen(userType: ChatUserType.customer),
   'add_address': (_) => AddAddressPage(),
+  'map_address': (_) => MapAddressPage(),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),
