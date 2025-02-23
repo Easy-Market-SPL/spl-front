@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/chat/chat_bloc.dart';
 import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
 import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
 
         // Providers for UI Management
         BlocProvider(create: (_) => ProfileTabBloc()),
+        BlocProvider(create: (_) => AddressBloc()),
         BlocProvider(create: (_) => LabelsStoreBloc()),
         ChangeNotifierProvider(create: (_) => ProductFormProvider()),
         ChangeNotifierProvider(create: (_) => LabelsProvider()),

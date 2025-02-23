@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
+import 'package:spl_front/widgets/addresses/address_section.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/payment/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
@@ -62,7 +63,7 @@ class CustomerProfilePage extends StatelessWidget {
                     } else if (state.showedTab == 1) {
                       return const PaymentMethodsSection();
                     } else {
-                      return const SizedBox(child: Text("Address Section"));
+                      return AddressSection();
                     }
                   },
                 ),
