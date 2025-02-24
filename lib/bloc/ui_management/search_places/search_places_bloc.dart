@@ -31,6 +31,10 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
     on<OnToggleManualMarkerEvent>((event, emit) {
       emit(state.copyWith(displayManualMarker: !state.displayManualMarker));
     });
+
+    on<OnNewGoogleSelectedPlaceEvent>((event, emit) {
+      emit(state.copyWith(selectedPlace: event.place));
+    });
   }
 
   // Extra methods
@@ -73,12 +77,17 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
     add(OnNewGooglePlacesFoundEvent(newPlaces));
   }
 
+  Future getSelectedPlace(Result? place) async {
+    add(OnNewGoogleSelectedPlaceEvent(place));
+  }
+
   Future getPlacesByGoogleLatLng(LatLng latLng) async {
     final newPlaces = await mapService.getInformationByCoorsGoogle(
       latLng,
     );
     print('newPlace : ${newPlaces[0].formattedAddress}');
     add(OnNewGooglePlacesFoundEvent(newPlaces));
+    add(OnNewGoogleSelectedPlaceEvent(newPlaces[0]));
   }
 
   Future emptyGooglePlaces() async {

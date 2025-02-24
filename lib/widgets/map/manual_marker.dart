@@ -63,8 +63,7 @@ class ManualMarker extends StatelessWidget {
 
   Future _handleSearchPlaces(BuildContext context, VoidCallback navigatorAction,
       SearchPlacesBloc searchBloc, MapBloc mapBloc) async {
-    await searchBloc
-        .getPlacesByGoogleLatLng(mapBloc.locationBloc.state.lastKnowLocation!);
+    await searchBloc.getPlacesByGoogleLatLng(mapBloc.mapCenter!);
     navigatorAction.call();
   }
 
