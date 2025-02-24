@@ -68,6 +68,6 @@ class ManualMarker extends StatelessWidget {
   }
 
   void _navigateToConfirmAddress(BuildContext context) {
-    Navigator.pushNamed(context, 'confirm_address');
+    Navigator.pushReplacementNamed(context, 'confirm_address');
   }
 }

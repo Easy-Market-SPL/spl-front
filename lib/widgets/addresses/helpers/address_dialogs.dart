@@ -207,7 +207,6 @@ void showGpsLocationDialog(BuildContext context) {
                   fontSize: 14,
                   fontWeight: FontWeight.w500),
             ),
-            SizedBox(height: 10),
           ],
         ),
         actions: [
@@ -215,7 +214,8 @@ void showGpsLocationDialog(BuildContext context) {
           TextButton(
             style: ElevatedButton.styleFrom(
               minimumSize: Size(mediaQueryWidth, 50),
-              side: BorderSide(color: Colors.blue), // Blue border
+              backgroundColor: Colors.blue,
+              side: BorderSide(color: Colors.grey), // Blue border
             ),
             onPressed: () {
               Navigator.pop(context);
@@ -223,7 +223,7 @@ void showGpsLocationDialog(BuildContext context) {
             child: Text(
               'Cancelar',
               style: TextStyle(
-                color: Colors.blue,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -235,7 +235,7 @@ void showGpsLocationDialog(BuildContext context) {
 }
 
 void showLocationPermissionDialog(BuildContext context, GpsBloc gpsBloc) {
-  double mediaQueryWidth = (MediaQuery.of(context).size.width / 1.5);
+  double mediaQueryWidth = (MediaQuery.of(context).size.width / 4);
 
   showDialog(
     context: context,

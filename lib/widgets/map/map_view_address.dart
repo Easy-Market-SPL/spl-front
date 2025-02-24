@@ -22,12 +22,22 @@ class MapViewAddress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mapBloc = BlocProvider.of<MapBloc>(context);
+    final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
 
-    final CameraPosition initialCameraPosition = CameraPosition(
-      bearing: 192.8334901395799,
-      target: initialLocation,
-      zoom: 15,
-    );
+    final CameraPosition initialCameraPosition =
+        searchBloc.state.selectedPlace == null
+            ? CameraPosition(
+                bearing: 0,
+                target: initialLocation,
+                zoom: 15,
+              )
+            : CameraPosition(
+                bearing: 0,
+                target: LatLng(
+                    searchBloc.state.selectedPlace!.geometry.location.lat,
+                    searchBloc.state.selectedPlace!.geometry.location.lng),
+                zoom: 15,
+              );
 
     final size = MediaQuery.of(context).size;
 

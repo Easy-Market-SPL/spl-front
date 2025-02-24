@@ -35,6 +35,10 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
     on<OnNewGoogleSelectedPlaceEvent>((event, emit) {
       emit(state.copyWith(selectedPlace: event.place));
     });
+
+    on<OnClearSelectedPlaceEvent>((event, emit) {
+      emit(state.copyWith(selectedPlace: null));
+    });
   }
 
   // Extra methods
@@ -92,5 +96,9 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
 
   Future emptyGooglePlaces() async {
     add(OnNewGooglePlacesFoundEvent(const []));
+  }
+
+  Future clearSelectedPlace() async {
+    add(OnClearSelectedPlaceEvent());
   }
 }
