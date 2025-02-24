@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../utils/strings/address_strings.dart';
 
 void showDeleteConfirmationDialog(
     BuildContext context, AddressBloc addressBloc, int index) {
@@ -179,124 +179,60 @@ void showEditDialog(BuildContext context, Address address, int index) {
   );
 }
 
-void showGpsLocationDialog(BuildContext context) {
+void showErrorDialog(BuildContext context) {
   double mediaQueryWidth = (MediaQuery.of(context).size.width / 1.5);
 
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Center(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Align(
+          alignment: Alignment.centerLeft,
           child: Text(
-            'Activar GPS',
+            AddressStrings.mandatoryFields,
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: 18,
+              fontSize: 20,
             ),
           ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Por favor, active el GPS para seleccionar la dirección en el mapa.',
-              style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Text(
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            AddressStrings.mandatoryFieldsDescription,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
             ),
-          ],
+            textAlign: TextAlign.left,
+          ),
         ),
         actions: [
-          // Cancel Button with blue border
           TextButton(
-            style: ElevatedButton.styleFrom(
+            style: TextButton.styleFrom(
               minimumSize: Size(mediaQueryWidth, 50),
               backgroundColor: Colors.blue,
-              side: BorderSide(color: Colors.grey), // Blue border
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
               Navigator.pop(context);
             },
             child: Text(
-              'Cancelar',
+              AddressStrings.accept,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-            ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void showLocationPermissionDialog(BuildContext context, GpsBloc gpsBloc) {
-  double mediaQueryWidth = (MediaQuery.of(context).size.width / 4);
-
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Center(
-          child: Text(
-            'Permisos de Ubicación',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Por favor, otorgue los permisos para acceder a la funcionalidad del Mapa.',
-              style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 10),
-          ],
-        ),
-        actions: [
-          // Cancel Button with blue border
-          TextButton(
-            style: ElevatedButton.styleFrom(
-              minimumSize: Size(mediaQueryWidth, 50),
-              side: BorderSide(color: Colors.blue), // Blue border
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Cancelar',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          ElevatedButton(
-            onPressed: () {
-              // Dispatch Delete Address event
-              gpsBloc.askGpsAccess();
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              minimumSize: Size(mediaQueryWidth, 50),
-              backgroundColor: Colors.blue,
-            ),
-            child: Text(
-              'Solicitar Permiso',
-              style: TextStyle(color: Colors.white),
             ),
           ),
         ],

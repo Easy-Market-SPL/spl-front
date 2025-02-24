@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/widgets/addresses/helpers/address_dialogs.dart';
 
 import '../../bloc/ui_management/address/address_bloc.dart';
@@ -19,7 +20,7 @@ class AddressSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text(
-                'Direcciones de Entrega',
+                AddressStrings.deliveryAddresses,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -39,7 +40,9 @@ class AddressSection extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16.0),
                       title: Text(address.name),
-                      subtitle: Text('${address.address}\n${address.details}'),
+                      subtitle: Text(
+                        '${address.address.split(',').sublist(0).join(',')}\n${address.details}',
+                      ),
                       isThreeLine: true,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -68,7 +71,6 @@ class AddressSection extends StatelessWidget {
                 },
               ),
             ),
-            //TODO: Implement Add Address functionality when needed
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
@@ -86,7 +88,7 @@ class AddressSection extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Agregar Dirección',
+                    AddressStrings.addAddress,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

@@ -22,13 +22,17 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
       ));
     });
 
+    on<InitialLoadEvent>((event, emit) {
+      emit(GpsState(
+          isGpsEnabled: false, isGpsPermissionGranted: false, isLoading: true));
+    });
+
     _init();
   }
 
   Future<void> _init() async {
     // Emit a loading state to show while checking GPS and permissions
-    emit(GpsState(
-        isGpsEnabled: false, isGpsPermissionGranted: false, isLoading: true));
+    add(InitialLoadEvent());
 
     final gpsInitStatus = await Future.wait([
       _checkGpsStatus(),

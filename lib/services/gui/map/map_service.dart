@@ -93,7 +93,7 @@ class MapService {
       'results': 3,
     });
     final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
-    print('RESPUESTAAAAA ${placesResponse.results.length}');
+    // print('Answer Length ${placesResponse.results.length}');
     return placesResponse.results;
   }
 }

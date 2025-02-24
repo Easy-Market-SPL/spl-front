@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/address_strings.dart';
 
 import '../../bloc/ui_management/address/address_bloc.dart';
 
@@ -20,11 +21,12 @@ class EditAddressForm extends StatelessWidget {
       children: [
         TextField(
           controller: nameController,
-          decoration: InputDecoration(labelText: 'Nombre'),
+          decoration: InputDecoration(labelText: AddressStrings.inputLabelName),
         ),
         TextField(
           controller: detailsController,
-          decoration: InputDecoration(labelText: 'Detalles'),
+          decoration:
+              InputDecoration(labelText: AddressStrings.inputLabelDetails),
         ),
       ],
     );
