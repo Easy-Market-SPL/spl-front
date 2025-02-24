@@ -19,15 +19,12 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
 
   @override
   Widget build(BuildContext context) {
-    final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
     final apiKey = dotenv.env['MAPS_API_KEY'];
 
     return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Detalles de la dirección'),
-            backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),

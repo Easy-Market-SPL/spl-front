@@ -17,6 +17,7 @@ class AddAddressPage extends StatefulWidget {
 
 class _AddAddressPageState extends State<AddAddressPage> {
   late SearchPlacesBloc searchPlacesBloc;
+  bool isSearching = false;
 
   @override
   void initState() {
@@ -24,7 +25,6 @@ class _AddAddressPageState extends State<AddAddressPage> {
     searchPlacesBloc = BlocProvider.of<SearchPlacesBloc>(context);
     searchPlacesBloc.emptyGooglePlaces();
     searchPlacesBloc.clearSelectedPlace();
-    // print('Is Empty: ${searchPlacesBloc.state.googlePlaces.isEmpty}');
   }
 
   @override
@@ -35,7 +35,6 @@ class _AddAddressPageState extends State<AddAddressPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Agregar una nueva dirección'),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
@@ -46,15 +45,32 @@ class _AddAddressPageState extends State<AddAddressPage> {
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Agrega una Nueva Dirección',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 17),
                 // Barra de búsqueda
-                _SearchBar(),
-                // Resultados de búsqueda
-                const SizedBox(height: 10),
+                _SearchBar(
+                  onSearch: (query) {
+                    setState(() {
+                      isSearching = query.isNotEmpty;
+                    });
+                    if (query.isNotEmpty) {
+                      searchPlacesBloc.getPlacesByGoogleQuery(query);
+                    }
+                  },
+                ),
+                const SizedBox(height: 17),
                 Divider(height: 5),
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined,
-                      color: Colors.black),
+                      color: Colors.blue),
                   title: Text('Seleccionar en el Mapa'),
                   onTap: () {
                     _handleAddManualMarker(context, () {
@@ -64,7 +80,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
                 ),
                 Divider(height: 5),
                 const SizedBox(height: 10),
-                Expanded(child: _SearchResults()),
+                // Resultados de la búsqueda
+                _SearchResults(isSearching: isSearching),
               ],
             ),
           ),
@@ -76,12 +93,9 @@ class _AddAddressPageState extends State<AddAddressPage> {
   Future<void> _handleAddManualMarker(
       BuildContext context, VoidCallback gpsAction) async {
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
-    // print('GPS Enabled: ${gpsBloc.state.isGpsEnabled}');
-    // print('GPS Permission Granted: ${gpsBloc.state.isGpsPermissionGranted}');
 
     if (gpsBloc.state.isLoading) {
-      // Esperar a que el GPS se inicialice
-      await Future.delayed(Duration(milliseconds: 300));
+      await Future.delayed(Duration(milliseconds: 100));
     }
     gpsAction.call();
   }
@@ -103,25 +117,37 @@ class _AddAddressPageState extends State<AddAddressPage> {
 
 // Barra de búsqueda con debounce
 class _SearchBar extends StatelessWidget {
-  final TextEditingController searchController = TextEditingController();
-  final _debounce = Debouncer(duration: Duration(milliseconds: 500));
+  final _debounce = Debouncer(duration: Duration(seconds: 2));
+  final Function(String) onSearch;
+
+  _SearchBar({required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
-    final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
+    final searchController = TextEditingController();
 
     return TextField(
       controller: searchController,
       decoration: InputDecoration(
         labelText: 'Busca tu dirección',
-        prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          Icons.search,
+          color: Colors.blue,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade200, // Color de fondo gris
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          // Color de borde cuando se enfoca
+          borderSide: BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
       onChanged: (query) {
         _debounce.run(() {
-          if (query.isNotEmpty) {
-            searchBloc.getPlacesByGoogleQuery(query);
-          }
+          onSearch(query);
         });
       },
     );
@@ -129,37 +155,84 @@ class _SearchBar extends StatelessWidget {
 }
 
 // Resultados de búsqueda
-class _SearchResults extends StatefulWidget {
-  const _SearchResults();
+class _SearchResults extends StatelessWidget {
+  final bool isSearching;
 
-  @override
-  State<_SearchResults> createState() => _SearchResultsState();
-}
+  const _SearchResults({required this.isSearching});
 
-class _SearchResultsState extends State<_SearchResults> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
       builder: (context, state) {
-        if (state.googlePlaces.isEmpty) {
-          return Center(child: Text('No se encontraron resultados.'));
+        // Mostrar el CircularProgressIndicator solo cuando estamos buscando y no hay resultados
+        if (isSearching && state.googlePlaces.isEmpty) {
+          return Center(child: CircularProgressIndicator());
         } else {
-          return ListView.builder(
-            itemCount: state.googlePlaces.length,
-            itemBuilder: (context, index) {
-              final place = state.googlePlaces[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  title: Text(place.formattedAddress),
-                  subtitle: Text(place.formattedAddress),
-                  onTap: () {
-                    _selectPlace(context, place);
+          if (state.googlePlaces.isEmpty && !isSearching) {
+            return SizedBox(); // No mostrar nada si no se está buscando
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (state.googlePlaces.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Resultados de la Búsqueda',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: state.googlePlaces.length,
+                  itemBuilder: (context, index) {
+                    final place = state.googlePlaces[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.all(10),
+                        title: Text(
+                          place.formattedAddress
+                              .split(',')
+                              .sublist(0)
+                              .join(','),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          place.formattedAddress
+                              .split(',')
+                              .sublist(1)
+                              .join(','),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        onTap: () {
+                          _selectPlace(context, place);
+                        },
+                      ),
+                    );
                   },
                 ),
-              );
-            },
-          );
+              ],
+            );
+          }
         }
       },
     );
@@ -172,7 +245,7 @@ class _SearchResultsState extends State<_SearchResults> {
   }
 }
 
-// Clase para manejar el debounce
+// Manage debounce request
 class Debouncer {
   final Duration duration;
   VoidCallback? action;
