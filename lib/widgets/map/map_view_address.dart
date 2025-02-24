@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
+import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 
 import '../../utils/map_themes/retro_map_style.dart';
 
@@ -30,30 +31,34 @@ class MapViewAddress extends StatelessWidget {
 
     final size = MediaQuery.of(context).size;
 
-    return SizedBox(
-      width: size.width,
-      height: size.height,
-      child: Listener(
-        onPointerMove: (event) {
-          mapBloc.add(OnStopFollowingUser());
-        },
-        child: GoogleMap(
-          initialCameraPosition: initialCameraPosition,
-          compassEnabled: true,
-          zoomControlsEnabled: false,
-          zoomGesturesEnabled: true,
-          myLocationButtonEnabled: false,
-          style: jsonEncode(retroMapStyle),
-          polylines: polyLines,
-          markers: markers,
-          onMapCreated: (controller) {
-            mapBloc.add(OnMapInitializedEvent(controller));
-          },
-          onCameraMove: (position) {
-            mapBloc.mapCenter = position.target;
-          },
-        ),
-      ),
+    return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
+      builder: (context, state) {
+        return SizedBox(
+          width: size.width,
+          height: size.height,
+          child: Listener(
+            onPointerMove: (event) {
+              mapBloc.add(OnStopFollowingUser());
+            },
+            child: GoogleMap(
+              initialCameraPosition: initialCameraPosition,
+              compassEnabled: true,
+              zoomControlsEnabled: false,
+              zoomGesturesEnabled: true,
+              myLocationButtonEnabled: false,
+              style: jsonEncode(retroMapStyle),
+              polylines: polyLines,
+              markers: markers,
+              onMapCreated: (controller) {
+                mapBloc.add(OnMapInitializedEvent(controller));
+              },
+              onCameraMove: (position) {
+                mapBloc.mapCenter = position.target;
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

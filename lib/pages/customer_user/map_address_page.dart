@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
+import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/widgets/map/helpers/back_widget.dart';
 import 'package:spl_front/widgets/map/helpers/current_location_widget.dart';
 import 'package:spl_front/widgets/map/helpers/follow_user_widget.dart';
@@ -45,19 +46,23 @@ class _MapAddressPageState extends State<MapAddressPage> {
                 polylines.removeWhere((key, value) => key == 'my_route');
               }
 
-              return SingleChildScrollView(
-                child: Stack(
-                  children: [
-                    // Google Map View
-                    MapViewAddress(
-                      initialLocation: locationState.lastKnowLocation!,
-                      polyLines: polylines.values.toSet(),
-                      markers: markers.values.toSet(),
+              return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
+                builder: (context, searchPlacesState) {
+                  return SingleChildScrollView(
+                    child: Stack(
+                      children: [
+                        // Google Map View
+                        MapViewAddress(
+                          initialLocation: locationState.lastKnowLocation!,
+                          polyLines: polylines.values.toSet(),
+                          markers: markers.values.toSet(),
+                        ),
+                        // Marker to indicate the selected location
+                        ManualMarker(),
+                      ],
                     ),
-                    // Marker to indicate the selected location
-                    ManualMarker(),
-                  ],
-                ),
+                  );
+                },
               );
             },
           );
@@ -68,7 +73,7 @@ class _MapAddressPageState extends State<MapAddressPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           BtnFollowUser(),
-          BtnCurrentLocation(),
+          BtnCurrentLocationWithResult(),
           BtnBackLocation(),
         ],
       ),
