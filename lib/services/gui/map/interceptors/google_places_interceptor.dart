@@ -10,6 +10,7 @@ class GooglePlacesInterceptor extends Interceptor {
       'key': apiKey,
       'language': 'es',
       'country': 'co',
+      'componentes': 'country:co',
     });
     super.onRequest(options, handler);
   }
