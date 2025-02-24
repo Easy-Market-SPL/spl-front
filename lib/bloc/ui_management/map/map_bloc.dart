@@ -36,7 +36,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   // Other Dispatches:
-
   // Aux Methods for handle events at BLoC:
   void _onInitMap(OnMapInitializedEvent event, Emitter<MapState> emit) {
     _mapController = event.controller;

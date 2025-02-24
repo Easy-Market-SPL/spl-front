@@ -16,7 +16,7 @@ class BtnBackLocation extends StatelessWidget {
             color: Colors.black,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.popAndPushNamed(context, 'add_address');
           },
         ),
       ),

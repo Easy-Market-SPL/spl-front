@@ -16,81 +16,88 @@ class AddAddressPage extends StatefulWidget {
 }
 
 class _AddAddressPageState extends State<AddAddressPage> {
+  late SearchPlacesBloc searchPlacesBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    searchPlacesBloc = BlocProvider.of<SearchPlacesBloc>(context);
+    searchPlacesBloc.emptyGooglePlaces(); // Vaciar los resultados
+    print('Is Empty: ${searchPlacesBloc.state.googlePlaces.isEmpty}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Agregar una nueva dirección'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Search bar
-            _SearchBar(),
-            // Display the search results in a ListView
-            const SizedBox(height: 10),
-            Divider(height: 5),
-            ListTile(
-              leading:
-                  const Icon(Icons.location_on_outlined, color: Colors.black),
-              title: Text('Seleccionar en el Mapa'),
-              onTap: () {
-                _handleAddManualMarker(context, () {
-                  _handleGpsAnswer(context, gpsBloc);
-                });
-              },
+    return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Agregar una nueva dirección'),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // Barra de búsqueda
+                _SearchBar(),
+                // Resultados de búsqueda
+                const SizedBox(height: 10),
+                Divider(height: 5),
+                ListTile(
+                  leading: const Icon(Icons.location_on_outlined,
+                      color: Colors.black),
+                  title: Text('Seleccionar en el Mapa'),
+                  onTap: () {
+                    _handleAddManualMarker(context, () {
+                      _handleGpsAnswer(context, gpsBloc);
+                    });
+                  },
+                ),
+                Divider(height: 5),
+                const SizedBox(height: 10),
+                Expanded(child: _SearchResults()),
+              ],
             ),
-            Divider(height: 5),
-            const SizedBox(height: 10),
-            Expanded(child: _SearchResults()),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  // Handle adding manual marker on map
   Future<void> _handleAddManualMarker(
       BuildContext context, VoidCallback gpsAction) async {
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
     print('GPS Enabled: ${gpsBloc.state.isGpsEnabled}');
     print('GPS Permission Granted: ${gpsBloc.state.isGpsPermissionGranted}');
 
-    // Ensure GPS status is checked before proceeding
     if (gpsBloc.state.isLoading) {
-      // Wait until GPS is initialized
+      // Esperar a que el GPS se inicialice
       await Future.delayed(Duration(milliseconds: 300));
     }
     gpsAction.call();
   }
 
   void _handleGpsAnswer(BuildContext context, GpsBloc gpsBloc) {
-    // Step 1: Check if GPS is enabled
     if (!gpsBloc.state.isGpsEnabled) {
       showGpsLocationDialog(context);
       return;
     }
 
-    // Step 2: Check if GPS permission is granted
     if (!gpsBloc.state.isGpsPermissionGranted) {
       showLocationPermissionDialog(context, gpsBloc);
       return;
     }
 
-    // Step 3: Proceed to map screen
     Navigator.pushNamed(context, 'map_address');
   }
 }
 
-// The search bar with debounce
+// Barra de búsqueda con debounce
 class _SearchBar extends StatelessWidget {
   final TextEditingController searchController = TextEditingController();
-  final _debounce = Debouncer(
-    duration: Duration(milliseconds: 500),
-  ); // Debounce to optimize search
+  final _debounce = Debouncer(duration: Duration(milliseconds: 500));
 
   @override
   Widget build(BuildContext context) {
@@ -101,14 +108,11 @@ class _SearchBar extends StatelessWidget {
       decoration: InputDecoration(
         labelText: 'Busca tu dirección',
         prefixIcon: Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onChanged: (query) {
         _debounce.run(() {
           if (query.isNotEmpty) {
-            // Trigger search only after the user stops typing
             searchBloc.getPlacesByGoogleQuery(query);
           }
         });
@@ -117,16 +121,21 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-// The list of search results
-class _SearchResults extends StatelessWidget {
+// Resultados de búsqueda
+class _SearchResults extends StatefulWidget {
   const _SearchResults();
 
+  @override
+  State<_SearchResults> createState() => _SearchResultsState();
+}
+
+class _SearchResultsState extends State<_SearchResults> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
       builder: (context, state) {
         if (state.googlePlaces.isEmpty) {
-          return Center(child: Text('No results found.'));
+          return Center(child: Text('No se encontraron resultados.'));
         } else {
           return ListView.builder(
             itemCount: state.googlePlaces.length,
@@ -150,12 +159,11 @@ class _SearchResults extends StatelessWidget {
   }
 
   void _selectPlace(BuildContext context, Result place) {
-    // Handle the selection of a place
     print('Selected: ${place.formattedAddress}');
   }
 }
 
-// Debouncer class to control the frequency of the requests
+// Clase para manejar el debounce
 class Debouncer {
   final Duration duration;
   VoidCallback? action;

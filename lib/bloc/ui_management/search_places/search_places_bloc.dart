@@ -72,4 +72,16 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
         await mapService.getResultsByGoogleQuery(query, sessionToken);
     add(OnNewGooglePlacesFoundEvent(newPlaces));
   }
+
+  Future getPlacesByGoogleLatLng(LatLng latLng) async {
+    final newPlaces = await mapService.getInformationByCoorsGoogle(
+      latLng,
+    );
+    print('newPlace : ${newPlaces[0].formattedAddress}');
+    add(OnNewGooglePlacesFoundEvent(newPlaces));
+  }
+
+  Future emptyGooglePlaces() async {
+    add(OnNewGooglePlacesFoundEvent(const []));
+  }
 }

@@ -87,11 +87,13 @@ class MapService {
   }
 
   // Google
-  Future<Result> getInformationByCoorsGoogle(LatLng coors) async {
+  Future<List<Result>> getInformationByCoorsGoogle(LatLng coors) async {
     final resp = await _dioGoogle.get(_baseGoogleUrl, queryParameters: {
       'latlng': '${coors.latitude},${coors.longitude}',
+      'results': 3,
     });
     final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
-    return placesResponse.results[0];
+    print('RESPUESTAAAAA ${placesResponse.results.length}');
+    return placesResponse.results;
   }
 }
