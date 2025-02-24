@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../bloc/ui_management/map/map_bloc.dart';
+import '../../../../bloc/ui_management/map/map_bloc.dart';
 
 class BtnFollowUser extends StatelessWidget {
   const BtnFollowUser({super.key});

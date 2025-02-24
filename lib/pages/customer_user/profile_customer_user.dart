@@ -8,8 +8,18 @@ import 'package:spl_front/widgets/payment/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
-class CustomerProfilePage extends StatelessWidget {
+class CustomerProfilePage extends StatefulWidget {
   const CustomerProfilePage({super.key});
+
+  @override
+  State<CustomerProfilePage> createState() => _CustomerProfilePageState();
+}
+
+class _CustomerProfilePageState extends State<CustomerProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +64,7 @@ class CustomerProfilePage extends StatelessWidget {
                           SaveChangesButton(
                             onPressed: () {
                               // TODO: Implement Save changes logic
-                              // print("Username: ${userNameController.text}");
-                              // print("Name: ${nameController.text}");
+                              Navigator.pop(context);
                             },
                           ),
                         ],
