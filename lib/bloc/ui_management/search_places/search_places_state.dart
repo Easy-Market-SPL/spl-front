@@ -4,8 +4,7 @@ class SearchPlacesState extends Equatable {
   final bool displayManualMarker;
   final List<Feature> mapBoxPlaces;
   final List<Result> googlePlaces;
-  final Result?
-      selectedPlace; // Nueva propiedad para almacenar el lugar seleccionado
+  final Result? selectedPlace;
 
   const SearchPlacesState({
     this.displayManualMarker = false,
@@ -18,13 +17,13 @@ class SearchPlacesState extends Equatable {
     bool? displayManualMarker,
     List<Feature>? mapBoxPlaces,
     List<Result>? googlePlaces,
-    Result? selectedPlace, // Parámetro para modificar el mensaje
+    Result? selectedPlace,
   }) {
     return SearchPlacesState(
       displayManualMarker: displayManualMarker ?? this.displayManualMarker,
       mapBoxPlaces: mapBoxPlaces ?? this.mapBoxPlaces,
       googlePlaces: googlePlaces ?? this.googlePlaces,
-      selectedPlace: selectedPlace ?? this.selectedPlace, // Copiar la propiedad
+      selectedPlace: selectedPlace ?? this.selectedPlace,
     );
   }
 

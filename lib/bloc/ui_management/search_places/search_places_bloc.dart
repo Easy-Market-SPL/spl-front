@@ -89,7 +89,7 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
     final newPlaces = await mapService.getInformationByCoorsGoogle(
       latLng,
     );
-    print('newPlace : ${newPlaces[0].formattedAddress}');
+    // print('newPlace : ${newPlaces[0].formattedAddress}');
     add(OnNewGooglePlacesFoundEvent(newPlaces));
     add(OnNewGoogleSelectedPlaceEvent(newPlaces[0]));
   }

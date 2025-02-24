@@ -14,3 +14,5 @@ class GpsAndPermissionEvent extends GpsEvent {
   const GpsAndPermissionEvent(
       {required this.isGpsEnabled, required this.isGpsPermissionGranted});
 }
+
+class InitialLoadEvent extends GpsEvent {}
