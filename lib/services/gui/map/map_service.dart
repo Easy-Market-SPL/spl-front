@@ -57,11 +57,13 @@ class MapService {
   }
 
   // Google:
-  Future<List<Result>> getResultsByGoogleQuery(String query) async {
+  Future<List<Result>> getResultsByGoogleQuery(
+      String query, String sessionToken) async {
     if (query.isEmpty) return [];
 
     final resp = await _dioGoogle.get(_baseGoogleUrl, queryParameters: {
       'address': query,
+      'sessiontoken': sessionToken,
     });
 
     final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
@@ -70,6 +72,7 @@ class MapService {
   }
 
   // REVERSE GEOCODING
+  // MapBox
   Future<Feature> getInformationByCoors(LatLng coors) async {
     final resp = await _dioReverseMapBoxPlaces
         .get(_baseReversePlacesUrl, queryParameters: {
@@ -81,5 +84,16 @@ class MapService {
     // print('✅ Answer API: ${resp.data}'); // 🔹 Debugging
     final placesResponse = PlacesResponse.fromJson(resp.data);
     return placesResponse.features[0];
+  }
+
+  // Google
+  Future<List<Result>> getInformationByCoorsGoogle(LatLng coors) async {
+    final resp = await _dioGoogle.get(_baseGoogleUrl, queryParameters: {
+      'latlng': '${coors.latitude},${coors.longitude}',
+      'results': 3,
+    });
+    final placesResponse = PlacesGoogleResponse.fromJson(resp.data);
+    // print('Answer Length ${placesResponse.results.length}');
+    return placesResponse.results;
   }
 }
