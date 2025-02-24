@@ -18,3 +18,8 @@ class OnNewGooglePlacesFoundEvent extends SearchPlacesEvent {
   final List<Result> places;
   const OnNewGooglePlacesFoundEvent(this.places);
 }
+
+class OnNewGoogleSelectedPlaceEvent extends SearchPlacesEvent {
+  final Result? place;
+  const OnNewGoogleSelectedPlaceEvent(this.place);
+}

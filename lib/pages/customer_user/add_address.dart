@@ -159,7 +159,9 @@ class _SearchResultsState extends State<_SearchResults> {
   }
 
   void _selectPlace(BuildContext context, Result place) {
-    print('Selected: ${place.formattedAddress}');
+    final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
+    searchBloc.getSelectedPlace(place);
+    Navigator.pushNamed(context, 'confirm_address');
   }
 }
 
