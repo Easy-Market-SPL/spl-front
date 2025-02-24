@@ -1,9 +1,5 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
-import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 
 class ManualMarker extends StatelessWidget {
   const ManualMarker({super.key});
@@ -11,38 +7,34 @@ class ManualMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
-    final locationBloc = BlocProvider.of<LocationBloc>(context);
-    final mapBloc = BlocProvider.of<MapBloc>(context);
 
     return SizedBox(
       width: size.width,
       height: size.height,
       child: Stack(
         children: [
+          // Center Marker Icon
           Center(
             child: Transform.translate(
               offset: Offset(0, -20),
               child: BounceInDown(
                 from: 100,
                 child: Icon(
-                  Icons.directions_run_rounded,
+                  Icons.location_pin,
                   size: 60,
                   color: Colors.black,
                 ),
               ),
             ),
           ),
-
-          // Button for confirm
+          // Confirm button at the bottom
           Positioned(
             bottom: 70,
             left: 40,
             child: FadeInUp(
               child: MaterialButton(
                 onPressed: () async {
-                  // TODO: OBTAIN THE DESTINATION AND SHOW A DIALOG WITH THE INFORMATION OF THIS POINT
-
+                  // Here you would get the destination info and show a dialog if needed
                   Navigator.pop(context);
                 },
                 elevation: 0,
@@ -56,7 +48,7 @@ class ManualMarker extends StatelessWidget {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

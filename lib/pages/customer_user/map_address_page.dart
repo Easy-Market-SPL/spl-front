@@ -33,9 +33,7 @@ class _MapAddressPageState extends State<MapAddressPage> {
       body: BlocBuilder<LocationBloc, LocationState>(
         builder: (context, locationState) {
           if (locationState.lastKnowLocation == null) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           }
 
           return BlocBuilder<MapBloc, MapState>(
@@ -50,12 +48,13 @@ class _MapAddressPageState extends State<MapAddressPage> {
               return SingleChildScrollView(
                 child: Stack(
                   children: [
-                    // Google Maps View
+                    // Google Map View
                     MapViewAddress(
                       initialLocation: locationState.lastKnowLocation!,
                       polyLines: polylines.values.toSet(),
                       markers: markers.values.toSet(),
                     ),
+                    // Marker to indicate the selected location
                     ManualMarker(),
                   ],
                 ),

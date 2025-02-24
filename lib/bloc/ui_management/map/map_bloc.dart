@@ -26,6 +26,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       currentMarkers[event.markerId] = event.marker;
       emit(state.copyWith(markers: currentMarkers));
     });
+
+    // FOLLOWING THE USER LOCATION
+    locationStateSubscription = locationBloc.stream.listen((locationState) {
+      if (!state.isFollowingUser) return;
+      if (locationState.lastKnowLocation == null) return;
+      moveCamera(locationState.lastKnowLocation!);
+    });
   }
 
   // Other Dispatches:
