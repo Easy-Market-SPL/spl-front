@@ -85,8 +85,10 @@ class AddressSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('Agregar Dirección',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text(
+                    'Agregar Dirección',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),

@@ -25,6 +25,13 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            title: Text(
+              'Detalles de La Dirección',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -33,17 +40,21 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
             ),
           ),
           body: SingleChildScrollView(
-            // Wrapping the body to avoid overflow
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dirección (Estática)
                 Text(
-                  state.selectedPlace!.formattedAddress,
+                  'Dirección',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 10),
+                Text(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  state.selectedPlace!.formattedAddress,
+                  style: TextStyle(color: Colors.black38, fontSize: 16),
+                ),
+                SizedBox(height: 15),
 
                 // Mapa (Estático con el icono del marcador)
                 Container(
@@ -69,7 +80,8 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                       ),
                       Positioned(
                         bottom: 10,
-                        left: 10,
+                        left: 100,
+                        right: 100,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacementNamed(
@@ -78,9 +90,13 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: Text('Ajustar'),
+                          child: Text(
+                            'Ajustar',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],
@@ -88,12 +104,20 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                 ),
 
                 // Etiqueta editable
-                SizedBox(height: 20),
+                SizedBox(height: 25),
+                Text(
+                  'Etiqueta tu dirección',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
                 TextFormField(
                   controller: labelController,
                   decoration: InputDecoration(
                     labelText: 'Etiqueta tu dirección',
                     hintText: 'Etiqueta (p.e. Casa, Oficina)',
+                    labelStyle: TextStyle(color: Colors.black38),
+                    filled: true,
+                    fillColor: Colors.grey.shade200,
                     border: OutlineInputBorder(),
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -110,11 +134,19 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
 
                 // Detalles de la dirección
                 SizedBox(height: 20),
+                Text(
+                  'Detalles de tu dirección',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
                 TextFormField(
                   controller: detailsController,
                   decoration: InputDecoration(
                     labelText: 'Detalles de tu dirección',
+                    labelStyle: TextStyle(color: Colors.black38),
                     hintText: 'Número de Apartamento u oficina',
+                    filled: true,
+                    fillColor: Colors.grey.shade200,
                     border: OutlineInputBorder(),
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -129,40 +161,116 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                   ),
                 ),
 
-                // Botón Guardar (al final para evitar overflow)
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    final addressBloc = BlocProvider.of<AddressBloc>(context);
-                    final searchBloc =
-                        BlocProvider.of<SearchPlacesBloc>(context);
-                    addressBloc.add(
-                      AddAddress(
-                        name: labelController.text,
-                        address: state.selectedPlace!.formattedAddress,
-                        details: detailsController.text,
-                        location: LatLng(
-                          state.selectedPlace!.geometry.location.lat,
-                          state.selectedPlace!.geometry.location.lng,
-                        ),
-                      ),
-                    );
+                // Empty space before button
+                SizedBox(height: 40), // Adds space before button
 
-                    searchBloc.add(OnClearSelectedPlaceEvent());
-                    Navigator.popAndPushNamed(context, 'customer_profile');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50),
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                // Centering the "Guardar Dirección" button at the bottom
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (labelController.text.isEmpty ||
+                          detailsController.text.isEmpty) {
+                        // Mostrar un dialogo si alguno de los campos está vacío
+                        _showErrorDialog(context);
+                      } else {
+                        final addressBloc =
+                            BlocProvider.of<AddressBloc>(context);
+                        final searchBloc =
+                            BlocProvider.of<SearchPlacesBloc>(context);
+                        addressBloc.add(
+                          AddAddress(
+                            name: labelController.text,
+                            address: state.selectedPlace!.formattedAddress,
+                            details: detailsController.text,
+                            location: LatLng(
+                              state.selectedPlace!.geometry.location.lat,
+                              state.selectedPlace!.geometry.location.lng,
+                            ),
+                          ),
+                        );
+
+                        searchBloc.add(OnClearSelectedPlaceEvent());
+                        Navigator.popAndPushNamed(context, 'customer_profile');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(300, 50), // Button width reduced
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    child: Text('Guardar Dirección',
+                        style: TextStyle(color: Colors.white)),
                   ),
-                  child: Text('Guardar Dirección'),
                 ),
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context) {
+    double mediaQueryWidth = (MediaQuery.of(context).size.width / 1.5);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Round the corners
+          ),
+          title: Align(
+            alignment: Alignment.centerLeft, // Align title to the left
+            child: Text(
+              'Campos Obligatorios',
+              style: TextStyle(
+                color: Colors.black, // Black color for the title
+                fontWeight: FontWeight.bold, // Bold font for the title
+                fontSize: 20, // Larger font size for the title
+              ),
+            ),
+          ),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Text(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              'El nombre y los detalles de la ubicación son obligatorios.',
+              style: TextStyle(
+                color:
+                    Colors.black87, // Slightly lighter black color for content
+                fontSize: 16, // Larger font size for content
+                fontWeight: FontWeight.w400, // Regular weight for the content
+              ),
+              textAlign: TextAlign.left, // Align content to the left
+            ),
+          ),
+          actions: [
+            // Button styled similar to the GPS dialog
+            TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: Size(mediaQueryWidth, 50),
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Aceptar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16, // Slightly larger font for the button text
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
