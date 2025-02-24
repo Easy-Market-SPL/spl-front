@@ -23,3 +23,5 @@ class OnNewGoogleSelectedPlaceEvent extends SearchPlacesEvent {
   final Result? place;
   const OnNewGoogleSelectedPlaceEvent(this.place);
 }
+
+class OnClearSelectedPlaceEvent extends SearchPlacesEvent {}

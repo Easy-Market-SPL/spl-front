@@ -22,8 +22,9 @@ class _AddAddressPageState extends State<AddAddressPage> {
   void initState() {
     super.initState();
     searchPlacesBloc = BlocProvider.of<SearchPlacesBloc>(context);
-    searchPlacesBloc.emptyGooglePlaces(); // Vaciar los resultados
-    print('Is Empty: ${searchPlacesBloc.state.googlePlaces.isEmpty}');
+    searchPlacesBloc.emptyGooglePlaces();
+    searchPlacesBloc.clearSelectedPlace();
+    // print('Is Empty: ${searchPlacesBloc.state.googlePlaces.isEmpty}');
   }
 
   @override
@@ -35,6 +36,12 @@ class _AddAddressPageState extends State<AddAddressPage> {
         return Scaffold(
           appBar: AppBar(
             title: Text('Agregar una nueva dirección'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.popAndPushNamed(context, 'customer_profile');
+              },
+            ),
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -69,8 +76,8 @@ class _AddAddressPageState extends State<AddAddressPage> {
   Future<void> _handleAddManualMarker(
       BuildContext context, VoidCallback gpsAction) async {
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
-    print('GPS Enabled: ${gpsBloc.state.isGpsEnabled}');
-    print('GPS Permission Granted: ${gpsBloc.state.isGpsPermissionGranted}');
+    // print('GPS Enabled: ${gpsBloc.state.isGpsEnabled}');
+    // print('GPS Permission Granted: ${gpsBloc.state.isGpsPermissionGranted}');
 
     if (gpsBloc.state.isLoading) {
       // Esperar a que el GPS se inicialice
@@ -90,7 +97,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
       return;
     }
 
-    Navigator.pushNamed(context, 'map_address');
+    Navigator.popAndPushNamed(context, 'map_address');
   }
 }
 
@@ -161,7 +168,7 @@ class _SearchResultsState extends State<_SearchResults> {
   void _selectPlace(BuildContext context, Result place) {
     final searchBloc = BlocProvider.of<SearchPlacesBloc>(context);
     searchBloc.getSelectedPlace(place);
-    Navigator.pushNamed(context, 'confirm_address');
+    Navigator.popAndPushNamed(context, 'confirm_address');
   }
 }
 

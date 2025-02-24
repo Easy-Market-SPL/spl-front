@@ -74,7 +74,7 @@ class AddressSection extends StatelessWidget {
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, 'add_address');
+                    Navigator.popAndPushNamed(context, 'add_address');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
