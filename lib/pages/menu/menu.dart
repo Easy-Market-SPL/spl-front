@@ -55,7 +55,7 @@ class MenuPage extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              children: userType == ChatUserType.customer ? costumerMenuItems(context) : businessMenuItems(context),
+              children: userType == ChatUserType.customer ? customerMenuItems(context) : businessMenuItems(context),
             ),
           ),
         ],
@@ -65,7 +65,7 @@ class MenuPage extends StatelessWidget {
 
   //TODO: Implement the routes for each menu item
 
-  List<Widget> costumerMenuItems(BuildContext context) {
+  List<Widget> customerMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
       menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
