@@ -4,6 +4,7 @@ import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
+import 'package:spl_front/pages/customer_user/cart.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
@@ -57,6 +58,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'add_address': (_) => AddAddressPage(),
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),
+  'customer_user_cart': (_) => CartScreen(),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),
