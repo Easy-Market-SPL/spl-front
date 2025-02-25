@@ -5,7 +5,7 @@ class LocationState extends Equatable {
   final LatLng? lastKnowLocation;
 
   const LocationState({
-    this.followingUser = false,
+    this.followingUser = true,
     this.lastKnowLocation,
   });
 

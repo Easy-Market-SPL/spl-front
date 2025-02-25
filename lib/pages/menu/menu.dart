@@ -68,11 +68,11 @@ class MenuPage extends StatelessWidget {
   List<Widget> costumerMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
-      menuItem(context, Icons.shopping_cart, MenuStrings.cart, ''),
+      menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
       menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
       menuItem(context, Icons.notifications, MenuStrings.notifications, ''),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'custumer_user_chat'),
+      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'customer_user_chat'),
     ];
   }
 

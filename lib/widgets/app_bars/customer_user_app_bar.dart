@@ -54,7 +54,7 @@ class CustomerUserAppBar extends StatelessWidget
         IconButton(
           icon: const Icon(Icons.shopping_cart, color: Colors.black),
           onPressed: () {
-            // TODO: Implement shopping cart action
+            Navigator.pushNamed(context, 'customer_user_cart');
           },
         ),
       ],
