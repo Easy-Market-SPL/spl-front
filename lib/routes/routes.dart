@@ -4,6 +4,7 @@ import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
+import 'package:spl_front/pages/customer_user/cart.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
@@ -45,6 +46,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'customer_user_order_details': (_) => OrderDetailsPage(userType: ChatUserType.customer),
   'business_user_orders': (_) => OrdersScreen(userType: ChatUserType.business),
   'customer_user_orders': (_) => OrdersScreen(userType: ChatUserType.customer),
+  'customer_user_cart': (_) => CartScreen(),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),
