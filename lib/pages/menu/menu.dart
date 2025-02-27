@@ -71,7 +71,7 @@ class MenuPage extends StatelessWidget {
       menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
       menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, ''),
+      menuItem(context, Icons.notifications, MenuStrings.notifications, 'customer_notifications'),
       menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'customer_user_chat'),
     ];
   }
@@ -82,7 +82,7 @@ class MenuPage extends StatelessWidget {
       menuItem(context, Icons.history, MenuStrings.orderHistory, 'business_user_orders'),
       menuItem(context, Icons.admin_panel_settings, MenuStrings.adminPanel, 'admin_profile'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'business_user_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, ''),
+      menuItem(context, Icons.notifications, MenuStrings.notifications, 'business_notifications'),
       menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'business_user_chats'),
     ];
   }
