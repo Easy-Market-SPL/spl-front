@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
-import 'package:spl_front/widgets/app_bars/menu_app_bar.dart';
 
 class MenuScreen extends StatelessWidget {
   final ChatUserType userType;
@@ -21,13 +20,42 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double topPadding = screenHeight * 0.05;
+
     return Scaffold(
       body: Column(
         children: [
-          MenuHeader(userType: userType),
+          Padding(
+            padding: EdgeInsets.only(top: topPadding),
+            child: Container(
+              color: Colors.blue,
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                    radius: 25,
+                    child: Text(userType == ChatUserType.customer ? 'UC' : 'UE'),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userType == ChatUserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           Expanded(
             child: ListView(
-              children: userType == ChatUserType.customer ? costumerMenuItems(context) : businessMenuItems(context),
+              children: userType == ChatUserType.customer ? customerMenuItems(context) : businessMenuItems(context),
             ),
           ),
         ],
@@ -35,14 +63,16 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  List<Widget> costumerMenuItems(BuildContext context) {
+  //TODO: Implement the routes for each menu item
+
+  List<Widget> customerMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
-      menuItem(context, Icons.shopping_cart, MenuStrings.cart, ''),
+      menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
       menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
       menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
       menuItem(context, Icons.notifications, MenuStrings.notifications, 'customer_notifications'),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'custumer_user_chat'),
+      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'customer_user_chat'),
     ];
   }
 

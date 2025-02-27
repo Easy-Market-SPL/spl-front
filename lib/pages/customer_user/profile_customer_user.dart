@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
+import 'package:spl_front/widgets/addresses/address_section.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/payment/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
-class CustomerProfilePage extends StatelessWidget {
+class CustomerProfilePage extends StatefulWidget {
   const CustomerProfilePage({super.key});
+
+  @override
+  State<CustomerProfilePage> createState() => _CustomerProfilePageState();
+}
+
+class _CustomerProfilePageState extends State<CustomerProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +64,7 @@ class CustomerProfilePage extends StatelessWidget {
                           SaveChangesButton(
                             onPressed: () {
                               // TODO: Implement Save changes logic
-                              // print("Username: ${userNameController.text}");
-                              // print("Name: ${nameController.text}");
+                              Navigator.pop(context);
                             },
                           ),
                         ],
@@ -62,7 +72,7 @@ class CustomerProfilePage extends StatelessWidget {
                     } else if (state.showedTab == 1) {
                       return const PaymentMethodsSection();
                     } else {
-                      return const SizedBox(child: Text("Address Section"));
+                      return AddressSection();
                     }
                   },
                 ),

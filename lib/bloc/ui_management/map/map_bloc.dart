@@ -12,25 +12,29 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final LocationBloc locationBloc;
   GoogleMapController? _mapController;
   LatLng? mapCenter;
+
   StreamSubscription<LocationState>? locationStateSubscription;
 
-  // Dispatch events when the BLoC is created
   MapBloc({required this.locationBloc}) : super(const MapState()) {
     on<OnMapInitializedEvent>(_onInitMap);
     on<OnStartFollowingUser>(_onStartFollowingUser);
     on<OnStopFollowingUser>((event, emit) {
       emit(state.copyWith(isFollowingUser: false));
     });
+    // FOLLOWING THE USER LOCATION
+    locationStateSubscription = locationBloc.stream.listen((locationState) {
+      if (!state.isFollowingUser) return;
+      if (locationState.lastKnowLocation == null) return;
+      moveCamera(locationState.lastKnowLocation!);
+    });
   }
 
   // Other Dispatches:
-
   // Aux Methods for handle events at BLoC:
   void _onInitMap(OnMapInitializedEvent event, Emitter<MapState> emit) {
     _mapController = event.controller;
     emit(state.copyWith(isMapInitialized: true));
   }
-
   void _onStartFollowingUser(
       OnStartFollowingUser event, Emitter<MapState> emit) {
     emit(state.copyWith(isFollowingUser: true));
