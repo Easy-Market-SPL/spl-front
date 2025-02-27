@@ -35,7 +35,7 @@ class BusinessBottomNavigationBar extends StatelessWidget {
             Navigator.pushNamed(context, 'business_user_orders');
             break;
           case 2:
-            Navigator.pushNamed(context, '');
+            Navigator.pushNamed(context, 'business_notifications');
             break;
           case 3:
             Navigator.pushNamed(context, 'business_user_menu');
