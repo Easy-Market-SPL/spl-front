@@ -21,11 +21,13 @@ import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
+import 'package:spl_front/services/supabase/supabase_config.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 Future main() async {
   // Load the environment variables from the .env file for begin the app
   await dotenv.load(fileName: '.env');
+  await SupabaseConfig.initializeSupabase();
   runApp(MyApp());
 }
 
