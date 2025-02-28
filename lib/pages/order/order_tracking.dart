@@ -83,6 +83,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                               // Costumer Screen
                               else if (userType == ChatUserType.customer)...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
+                                  HorizontalOrderStatus(),
                                   Container(
                                     height: 500,
                                     color: Colors.grey[300],
