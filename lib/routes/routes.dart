@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
@@ -44,21 +45,21 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_user_chat': (_) =>
       ChatScreen(userType: ChatUserType.business, userName: "customerName"),
   'business_user_chats': (_) => ChatsScreen(),
-  'business_user_menu': (_) => MenuScreen(userType: ChatUserType.business),
-  'customer_user_menu': (_) => MenuScreen(userType: ChatUserType.customer),
-  'delivery_user_menu': (_) => MenuScreen(userType: ChatUserType.delivery),
+  'delivery_user_menu': (_) => MenuScreen(userType: UserType.delivery),
+  'business_user_menu': (_) => MenuScreen(userType: UserType.business),
+  'customer_user_menu': (_) => MenuScreen(userType: UserType.customer),
   'business_user_order_tracking': (_) => OrderTrackingScreen(
-        userType: ChatUserType.business,
+        userType: UserType.business,
       ),
   'customer_user_order_tracking': (_) => OrderTrackingScreen(
-        userType: ChatUserType.customer,
+        userType: UserType.customer,
       ),
   'business_user_order_details': (_) =>
-      OrderDetailsPage(userType: ChatUserType.business),
+      OrderDetailsPage(userType: UserType.business),
   'customer_user_order_details': (_) =>
-      OrderDetailsPage(userType: ChatUserType.customer),
-  'business_user_orders': (_) => OrdersScreen(userType: ChatUserType.business),
-  'customer_user_orders': (_) => OrdersScreen(userType: ChatUserType.customer),
+      OrderDetailsPage(userType: UserType.customer),
+  'business_user_orders': (_) => OrdersScreen(userType: UserType.business),
+  'customer_user_orders': (_) => OrdersScreen(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
   'delivery_user_tracking': (_) => DeliveryUserTracking(),
   'add_address': (_) => AddAddressPage(),
@@ -66,10 +67,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'confirm_address': (_) => ConfirmAddressPage(),
   'customer_user_cart': (_) => CartScreen(),
   'customer_notifications': (_) => NotificationsScreen(
-        userType: ChatUserType.customer,
+        userType: UserType.customer,
       ),
   'business_notifications': (_) => NotificationsScreen(
-        userType: ChatUserType.business,
+        userType: UserType.business,
       ),
 
   // WEB PAGES

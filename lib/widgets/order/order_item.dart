@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
-import '../../bloc/ui_management/orders_list/orders_list_bloc.dart';
-
 class OrderItem extends StatelessWidget {
   final Order order;
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderItem({super.key, required this.order, required this.userType});
 
   @override
   Widget build(BuildContext context) {
-    final orderBloc = BlocProvider.of<OrderListBloc>(context);
-
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -55,7 +51,7 @@ class OrderItem extends StatelessWidget {
                   SizedBox(height: 4),
 
                   // Client
-                  if (userType == ChatUserType.business)
+                  if (userType == UserType.business)
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.client}: ',
@@ -70,7 +66,7 @@ class OrderItem extends StatelessWidget {
                       ),
                     ),
 
-                  if (userType == ChatUserType.delivery)
+                  if (userType == UserType.delivery)
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.deliveryIn}: ',
@@ -138,7 +134,7 @@ class OrderItem extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0)),
               ),
-              child: userType == ChatUserType.delivery
+              child: userType == UserType.delivery
                   ? Text(
                       OrderStrings.takeOrder,
                       style: TextStyle(color: Colors.white),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/times/time_helper.dart';
 import 'package:spl_front/widgets/app_bars/menu_app_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 class NotificationsScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const NotificationsScreen({super.key, required this.userType});
 
@@ -24,9 +23,7 @@ class NotificationsScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: userType == ChatUserType.customer 
-          ? const CustomerBottomNavigationBar() 
-          : const BusinessBottomNavigationBar(),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
   }
 

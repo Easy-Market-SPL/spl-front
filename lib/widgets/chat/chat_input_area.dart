@@ -1,11 +1,13 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:spl_front/pages/chat/chat.dart';
+
 import '../../bloc/ui_management/chat/chat_bloc.dart';
 import '../../bloc/ui_management/chat/chat_event.dart';
 import '../../bloc/ui_management/chat/chat_state.dart';
-import '../../pages/chat/chat.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatInputField extends StatelessWidget {
@@ -13,7 +15,11 @@ class ChatInputField extends StatelessWidget {
   final ChatUserType userType;
   final FocusNode focusNode;
 
-  const ChatInputField({super.key, required this.scrollController, required this.userType, required this.focusNode});
+  const ChatInputField(
+      {super.key,
+      required this.scrollController,
+      required this.userType,
+      required this.focusNode});
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +60,11 @@ class ChatInputField extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
-                      borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 1.5),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
                   ),
                   onTap: () {
                     // Scroll to the bottom when the input field is tapped
@@ -64,12 +72,13 @@ class ChatInputField extends StatelessWidget {
                   },
                 ),
               ),
-              
+
               // Attach file button
               IconButton(
                 icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
                 onPressed: () async {
-                  focusNode.unfocus(); // Desenfocar el TextField antes de abrir el selector de archivos
+                  focusNode
+                      .unfocus(); // Desenfocar el TextField antes de abrir el selector de archivos
                   final ImagePicker picker = ImagePicker();
                   final XFile? file = await showModalBottomSheet<XFile>(
                     context: context,
@@ -82,16 +91,22 @@ class ChatInputField extends StatelessWidget {
                               leading: const Icon(Icons.photo_library),
                               title: const Text(ChatStrings.selectImage),
                               onTap: () async {
-                                final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-                                if (context.mounted) Navigator.pop(context, image);
+                                final XFile? image = await picker.pickImage(
+                                    source: ImageSource.gallery);
+                                if (context.mounted) {
+                                  Navigator.pop(context, image);
+                                }
                               },
                             ),
                             ListTile(
                               leading: const Icon(Icons.videocam),
                               title: const Text(ChatStrings.selectVideo),
                               onTap: () async {
-                                final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
-                                if (context.mounted) Navigator.pop(context, video);
+                                final XFile? video = await picker.pickVideo(
+                                    source: ImageSource.gallery);
+                                if (context.mounted) {
+                                  Navigator.pop(context, video);
+                                }
                               },
                             ),
                           ],
@@ -104,19 +119,21 @@ class ChatInputField extends StatelessWidget {
                     File selectedFile = File(file.path);
                     MessageType fileType;
 
-                    if (file.path.endsWith('.mp4') || file.path.endsWith('.mov')) {
+                    if (file.path.endsWith('.mp4') ||
+                        file.path.endsWith('.mov')) {
                       fileType = MessageType.video;
                     } else {
                       fileType = MessageType.image;
                     }
                     // Send file event
-                    if (context.mounted){
+                    if (context.mounted) {
                       context.read<ChatBloc>().add(SendFileEvent(
-                          sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
+                          sender: userType == ChatUserType.customer
+                              ? 'cliente'
+                              : 'soporte',
                           fileUrl: selectedFile.path,
                           fileType: fileType,
-                          context: context)
-                      );
+                          context: context));
                     }
                     scrollToBottomWithDelay(scrollController);
                   }
@@ -129,10 +146,11 @@ class ChatInputField extends StatelessWidget {
                 onPressed: () {
                   if (controller.text.trim().isNotEmpty) {
                     context.read<ChatBloc>().add(SendMessageEvent(
-                        sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
+                        sender: userType == ChatUserType.customer
+                            ? 'cliente'
+                            : 'soporte',
                         text: controller.text.trim(),
-                        context: context)
-                    );
+                        context: context));
                     controller.clear();
                     scrollToBottomPostFrame(scrollController);
                   }
@@ -148,9 +166,9 @@ class ChatInputField extends StatelessWidget {
 
 void scrollToBottom(ScrollController scrollController) {
   scrollController.animateTo(
-      scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOut,
+    scrollController.position.maxScrollExtent,
+    duration: const Duration(milliseconds: 150),
+    curve: Curves.easeOut,
   );
 }
 

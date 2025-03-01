@@ -3,19 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
 import 'package:spl_front/widgets/order/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
 import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderDetailsScreen({super.key, required this.userType});
 
@@ -26,7 +27,7 @@ class OrderDetailsScreen extends StatelessWidget {
 }
 
 class OrderDetailsPage extends StatefulWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderDetailsPage({super.key, required this.userType});
 
@@ -35,7 +36,7 @@ class OrderDetailsPage extends StatefulWidget {
 }
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
-  ChatUserType get userType => widget.userType;
+  UserType get userType => widget.userType;
   String selectedShippingCompany = "Sin seleccionar";
 
   @override
@@ -60,73 +61,80 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Order modification options
+
                         if (SPLVariables.hasRealTimeTracking &&
-                                userType == ChatUserType.business ||
-                            userType == ChatUserType.delivery) ...[
-                          const SizedBox(height: 20),
-                          ModifyOrderStatusOptions(
-                            selectedStatus: state.selectedStatus,
-                            onStatusChanged: (status) {
-                              context
-                                  .read<OrderStatusBloc>()
-                                  .add(ChangeSelectedStatusEvent(status));
-                            },
-                          ),
-                          const SizedBox(height: 24.0),
-                          OrderActionButtons(
-                            selectedStatus: state.selectedStatus,
-                            showDetailsButton: false,
-                            userType: userType,
-                          ),
-                          const SizedBox(height: 24.0),
-                        ],
-
-                        // Order details content
-                        _buildSectionTitle(OrderStrings.orderDetailsTitle),
-                        _buildInfoRow(
-                            OrderStrings.orderNumber, orderData['numeroOrden']),
-                        _buildInfoRow(
-                            OrderStrings.orderDate, orderData['fecha']),
-                        _buildInfoRow(OrderStrings.orderProductCount,
-                            "${orderData['numProductos']}",
-                            actionText: OrderStrings.viewProducts,
-                            onActionTap: () {
-                          _showProductPopup(context); // Open the product popup
-                        }),
-                        _buildInfoRow(OrderStrings.orderTotal,
-                            "\$${orderData['total'].toStringAsFixed(0)}"),
-                        const SizedBox(height: 20),
-
-                        // Customer details content
-                        _buildSectionTitle(OrderStrings.customerDetailsTitle),
-                        _buildInfoRow(
-                            OrderStrings.customerName, customerData['cliente']),
-                        _buildInfoRow(OrderStrings.deliveryAddress,
-                            customerData['direccion']),
-
-                        // Real-time tracking or company selection
-                        if (SPLVariables.hasRealTimeTracking) ...[
-                          const SizedBox(height: 20),
-                          _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
-                          _buildInfoRow(OrderStrings.deliveryPersonName,
-                              OrderStrings.noDeliveryPersonAssigned),
-                        ] else ...[
-                          const SizedBox(height: 20),
-                          _buildSectionTitle(OrderStrings.shippingCompanyTitle),
-                          if (userType == ChatUserType.business) ...[
-                            _buildSelectableRow(
-                                OrderStrings.selectedShippingCompany,
-                                selectedShippingCompany, onActionTap: () {
-                              _showShippingCompanyPopup(
-                                  context); // Open the shipping company selection popup
-                            }),
-                          ] else ...[
-                            _buildInfoRow(
-                              OrderStrings.shippingCompany,
-                              selectedShippingCompany,
+                                userType == UserType.business ||
+                            userType == UserType.delivery) ...[
+                          if (SPLVariables.hasRealTimeTracking &&
+                              userType == UserType.business) ...[
+                            const SizedBox(height: 20),
+                            ModifyOrderStatusOptions(
+                              selectedStatus: state.selectedStatus,
+                              onStatusChanged: (status) {
+                                context
+                                    .read<OrderStatusBloc>()
+                                    .add(ChangeSelectedStatusEvent(status));
+                              },
                             ),
+                            const SizedBox(height: 24.0),
+                            OrderActionButtons(
+                              selectedStatus: state.selectedStatus,
+                              showDetailsButton: false,
+                              userType: userType,
+                            ),
+                            const SizedBox(height: 24.0),
                           ],
-                        ]
+
+                          // Order details content
+                          _buildSectionTitle(OrderStrings.orderDetailsTitle),
+                          _buildInfoRow(OrderStrings.orderNumber,
+                              orderData['numeroOrden']),
+                          _buildInfoRow(
+                              OrderStrings.orderDate, orderData['fecha']),
+                          _buildInfoRow(OrderStrings.orderProductCount,
+                              "${orderData['numProductos']}",
+                              actionText: OrderStrings.viewProducts,
+                              onActionTap: () {
+                            _showProductPopup(
+                                context); // Open the product popup
+                          }),
+                          _buildInfoRow(OrderStrings.orderTotal,
+                              "\$${orderData['total'].toStringAsFixed(0)}"),
+                          const SizedBox(height: 20),
+
+                          // Customer details content
+                          _buildSectionTitle(OrderStrings.customerDetailsTitle),
+                          _buildInfoRow(OrderStrings.customerName,
+                              customerData['cliente']),
+                          _buildInfoRow(OrderStrings.deliveryAddress,
+                              customerData['direccion']),
+
+                          // Real-time tracking or company selection
+                          if (SPLVariables.hasRealTimeTracking) ...[
+                            const SizedBox(height: 20),
+                            _buildSectionTitle(
+                                OrderStrings.deliveryDetailsTitle),
+                            _buildInfoRow(OrderStrings.deliveryPersonName,
+                                OrderStrings.noDeliveryPersonAssigned),
+                          ] else ...[
+                            const SizedBox(height: 20),
+                            _buildSectionTitle(
+                                OrderStrings.shippingCompanyTitle),
+                            if (userType == UserType.business) ...[
+                              _buildSelectableRow(
+                                  OrderStrings.selectedShippingCompany,
+                                  selectedShippingCompany, onActionTap: () {
+                                _showShippingCompanyPopup(
+                                    context); // Open the shipping company selection popup
+                              }),
+                            ] else ...[
+                              _buildInfoRow(
+                                OrderStrings.shippingCompany,
+                                selectedShippingCompany,
+                              ),
+                            ],
+                          ]
+                        ],
                       ],
                     );
                   } else {
@@ -140,15 +148,16 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           _getBottomNavigationBar(),
         ],
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
   }
 
   Widget _getBottomNavigationBar() {
-    if (userType == ChatUserType.customer) {
+    if (userType == UserType.customer) {
       return const CustomerBottomNavigationBar();
-    } else if (userType == ChatUserType.business) {
+    } else if (userType == UserType.business) {
       return const BusinessBottomNavigationBar();
-    } else if (userType == ChatUserType.delivery) {
+    } else if (userType == UserType.delivery) {
       return const DeliveryUserBottomNavigationBar();
     } else {
       return const SizedBox();

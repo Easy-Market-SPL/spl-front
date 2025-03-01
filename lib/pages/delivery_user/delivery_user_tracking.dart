@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
-
-import '../chat/chat.dart';
 
 class DeliveryUserTracking extends StatefulWidget {
   final Order? order;
@@ -88,7 +87,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => OrderTrackingScreen(
-                              userType: ChatUserType.delivery,
+                              userType: UserType.delivery,
                             ),
                           ),
                         );

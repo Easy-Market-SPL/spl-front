@@ -10,7 +10,7 @@ import '../../widgets/chat/chat_header.dart';
 import '../../widgets/chat/chat_input_area.dart';
 import '../../widgets/chat/chat_messages_list.dart';
 
-enum ChatUserType { customer, business, delivery }
+enum ChatUserType { customer, business }
 
 class ChatScreen extends StatelessWidget {
   final ChatUserType userType;

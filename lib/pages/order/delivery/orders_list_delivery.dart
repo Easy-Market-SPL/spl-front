@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
@@ -68,7 +68,7 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
                               final order = state.filteredOrders[index];
                               return OrderItem(
                                 order: order,
-                                userType: ChatUserType.delivery,
+                                userType: UserType.delivery,
                               );
                             },
                           );
