@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_event.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/cart/cart_subtotal.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -41,7 +42,7 @@ class CartPage extends StatelessWidget {
           },
         ),
       ),
-      bottomNavigationBar: const CustomerBottomNavigationBar(),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer),
     );
   }
 

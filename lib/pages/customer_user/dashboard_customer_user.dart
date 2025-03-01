@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_card.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_rated_card.dart';
 
@@ -53,12 +54,10 @@ class CustomerMainDashboard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom Navigation Bar
-            CustomerBottomNavigationBar(),
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer),
     );
   }
 

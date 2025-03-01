@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
 
 class MenuHeader extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const MenuHeader({super.key, required this.userType});
 
@@ -22,14 +22,14 @@ class MenuHeader extends StatelessWidget {
             CircleAvatar(
               backgroundColor: Colors.grey[300],
               radius: 25,
-              child: Text(userType == ChatUserType.customer ? 'UC' : 'UE'),
+              child: Text(userType == UserType.customer ? 'UC' : 'UE'),
             ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userType == ChatUserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
+                  userType == UserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),

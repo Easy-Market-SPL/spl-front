@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatHeader extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
   final String userName;
 
   const ChatHeader({
@@ -29,7 +29,7 @@ class ChatHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            userType == ChatUserType.customer
+            userType == UserType.customer
                 ? ChatStrings.attentionToCustomers
                 : ChatStrings.chatWithCustomer,
             style: const TextStyle(

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 class OrderItem extends StatelessWidget {
   final Order order;
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderItem({super.key, required this.order, required this.userType});
 
@@ -51,7 +51,7 @@ class OrderItem extends StatelessWidget {
                   SizedBox(height: 4),
 
                   // Client
-                  if (userType == ChatUserType.business)
+                  if (userType == UserType.business)
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.client}: ',

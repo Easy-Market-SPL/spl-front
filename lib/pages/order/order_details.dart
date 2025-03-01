@@ -3,18 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
 import 'package:spl_front/widgets/order/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
-import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderDetailsScreen({super.key, required this.userType});
 
@@ -25,7 +24,7 @@ class OrderDetailsScreen extends StatelessWidget {
 }
 
 class OrderDetailsPage extends StatefulWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderDetailsPage({super.key, required this.userType});
 
@@ -34,7 +33,7 @@ class OrderDetailsPage extends StatefulWidget {
 }
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
-  ChatUserType get userType => widget.userType;
+  UserType get userType => widget.userType;
   String selectedShippingCompany = "Sin seleccionar";
 
   @override
@@ -60,7 +59,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Order modification options
-                        if (SPLVariables.hasRealTimeTracking && userType == ChatUserType.business) ...[
+                        if (SPLVariables.hasRealTimeTracking && userType == UserType.business) ...[
                           const SizedBox(height: 20),
                           ModifyOrderStatusOptions(
                             selectedStatus: state.selectedStatus,
@@ -96,7 +95,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ] else ...[
                           const SizedBox(height: 20),
                           _buildSectionTitle(OrderStrings.shippingCompanyTitle),
-                          if (userType == ChatUserType.business) ...[
+                          if (userType == UserType.business) ...[
                             _buildSelectableRow(OrderStrings.selectedShippingCompany, selectedShippingCompany, onActionTap: () {
                               _showShippingCompanyPopup(context); // Open the shipping company selection popup
                             }),
@@ -114,11 +113,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
             ),
           ),
-          userType == ChatUserType.customer
-              ? const CustomerBottomNavigationBar()
-              : const BusinessBottomNavigationBar(),
         ],
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
   }
 

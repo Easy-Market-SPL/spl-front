@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/horizontal_order_status.dart';
 import 'package:spl_front/widgets/order/order_tracking_header.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
@@ -17,7 +16,7 @@ import 'package:spl_front/widgets/order/vertical_order_status.dart';
 enum OrderUserType { costumer, business }
 
 class OrderTrackingScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
   const OrderTrackingScreen({super.key, required this.userType});
 
   @override
@@ -28,7 +27,7 @@ class OrderTrackingScreen extends StatelessWidget {
 }
 
 class OrderTrackingPage extends StatefulWidget {
-  final ChatUserType userType;
+  final UserType userType;
   const OrderTrackingPage({super.key, required this.userType});
 
   @override
@@ -36,7 +35,7 @@ class OrderTrackingPage extends StatefulWidget {
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
-  ChatUserType get userType => widget.userType;
+  UserType get userType => widget.userType;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +57,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Business Screen
-                              if (userType == ChatUserType.business) ...[
+                              if (userType == UserType.business) ...[
                                 HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
@@ -81,7 +80,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                               ] 
                               
                               // Costumer Screen
-                              else if (userType == ChatUserType.customer)...[
+                              else if (userType == UserType.customer)...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   HorizontalOrderStatus(),
                                   Container(
@@ -113,15 +112,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                   },
                 ),
               ),
-              if (userType == ChatUserType.customer) const CustomerBottomNavigationBar() 
-              else const BusinessBottomNavigationBar(),
             ],
           ),
 
           // Buttons that have to be at the bottom of the screen
-          if (userType == ChatUserType.business && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == UserType.business && SPLVariables.hasRealTimeTracking) ...[
             Positioned(
-              bottom: 80.0,
+              bottom: 0.0,
               left: 16.0,
               right: 16.0,
               child: OrderActionButtons(
@@ -133,9 +130,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           ],
           
           // Shipping guide for costumers
-          if (userType == ChatUserType.customer && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == UserType.customer && SPLVariables.hasRealTimeTracking) ...[
             Positioned(
-              bottom: 80.0,
+              bottom: 0.0,
               left: 16.0,
               right: 16.0,
               child: Column(
@@ -149,6 +146,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           ]
         ],
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
   }
 }

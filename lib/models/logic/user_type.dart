@@ -1,0 +1,2 @@
+
+enum UserType { customer, business }

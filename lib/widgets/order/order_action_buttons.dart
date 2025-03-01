@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 class OrderActionButtons extends StatelessWidget {
   final String selectedStatus;
   final bool showDetailsButton;
   final bool showConfirmButton;
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrderActionButtons({
     super.key,
@@ -62,9 +62,9 @@ class OrderActionButtons extends StatelessWidget {
   // Navigate to the appropriate details page based on userType
   void _navigateToDetails(BuildContext context) {
     // TODO: Pass the order ID to the details page
-    if (userType == ChatUserType.customer) {
+    if (userType == UserType.customer) {
       Navigator.of(context).pushNamed('customer_user_order_details');
-    } else if (userType == ChatUserType.business) {
+    } else if (userType == UserType.business) {
       Navigator.of(context).pushNamed('business_user_order_details');
     }
   }

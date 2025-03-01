@@ -3,17 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
-import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/order_item.dart';
 import 'package:spl_front/widgets/order/orders_filters_popup.dart';
 
 class OrdersScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
   
   const OrdersScreen({super.key, required this.userType});
 
@@ -25,7 +24,7 @@ class OrdersScreen extends StatelessWidget {
 }
 
 class OrdersPage extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const OrdersPage({super.key, required this.userType});
 
@@ -77,12 +76,9 @@ class OrdersPage extends StatelessWidget {
               ),
             ),
           ),
-          if (userType == ChatUserType.customer)
-            const CustomerBottomNavigationBar()
-          else
-            const BusinessBottomNavigationBar(),
         ],
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
   }
 

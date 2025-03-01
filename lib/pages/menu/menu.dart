@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
 
 class MenuScreen extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const MenuScreen({super.key, required this.userType});
 
@@ -14,7 +14,7 @@ class MenuScreen extends StatelessWidget {
 }
 
 class MenuPage extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
 
   const MenuPage({super.key, required this.userType});
 
@@ -36,14 +36,14 @@ class MenuPage extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     radius: 25,
-                    child: Text(userType == ChatUserType.customer ? 'UC' : 'UE'),
+                    child: Text(_getAvatarText(userType)),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userType == ChatUserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
+                        _getUserTypeText(userType),
                         style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),
@@ -55,7 +55,7 @@ class MenuPage extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              children: userType == ChatUserType.customer ? customerMenuItems(context) : businessMenuItems(context),
+              children: _getMenuItems(context, userType),
             ),
           ),
         ],
@@ -63,37 +63,53 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  //TODO: Implement the routes for each menu item
+  String _getAvatarText(UserType userType) {
+    final Map<UserType, String> avatarTexts = {
+      UserType.customer: 'UC',
+      UserType.business: 'UE',
+    };
 
-  List<Widget> customerMenuItems(BuildContext context) {
-    return [
-      menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
-      menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
-      menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
-      menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, 'customer_notifications'),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'customer_user_chat'),
-    ];
+    return avatarTexts[userType] ?? 'U';
   }
 
-  List<Widget> businessMenuItems(BuildContext context) {
-    return [
-      menuItem(context, Icons.home, MenuStrings.home, 'business_dashboard'),
-      menuItem(context, Icons.history, MenuStrings.orderHistory, 'business_user_orders'),
-      menuItem(context, Icons.admin_panel_settings, MenuStrings.adminPanel, 'admin_profile'),
-      menuItem(context, Icons.person, MenuStrings.myAccount, 'business_user_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, 'business_notifications'),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'business_user_chats'),
-    ];
+  String _getUserTypeText(UserType userType) {
+    final Map<UserType, String> userTypeTexts = {
+      UserType.customer: MenuStrings.userCustomer,
+      UserType.business: MenuStrings.userBusiness,
+    };
+
+    return userTypeTexts[userType] ?? 'User';
   }
 
-  Widget menuItem(BuildContext context, IconData icon, String text, String routeName) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(text),
-      onTap: () {
-        Navigator.pushNamed(context, routeName);
-      },
-    );
+  List<Widget> _getMenuItems(BuildContext context, UserType userType) {
+    final Map<UserType, List<Map<String, dynamic>>> menuItems = {
+      UserType.customer: [
+        {'icon': Icons.home, 'text': MenuStrings.home, 'route': 'customer_dashboard'},
+        {'icon': Icons.shopping_cart, 'text': MenuStrings.cart, 'route': 'customer_user_cart'},
+        {'icon': Icons.shopping_bag, 'text': MenuStrings.myPurchases, 'route': 'customer_user_orders'},
+        {'icon': Icons.person, 'text': MenuStrings.myAccount, 'route': 'customer_profile'},
+        {'icon': Icons.notifications, 'text': MenuStrings.notifications, 'route': 'customer_notifications'},
+        {'icon': Icons.headset_mic, 'text': MenuStrings.customerSupport, 'route': 'customer_user_chat'},
+      ],
+      UserType.business: [
+        {'icon': Icons.home, 'text': MenuStrings.home, 'route': 'business_dashboard'},
+        {'icon': Icons.history, 'text': MenuStrings.orderHistory, 'route': 'business_user_orders'},
+        {'icon': Icons.admin_panel_settings, 'text': MenuStrings.adminPanel, 'route': 'admin_profile'},
+        {'icon': Icons.person, 'text': MenuStrings.myAccount, 'route': 'business_user_profile'},
+        {'icon': Icons.notifications, 'text': MenuStrings.notifications, 'route': 'business_notifications'},
+        {'icon': Icons.headset_mic, 'text': MenuStrings.customerSupport, 'route': 'business_user_chats'},
+      ],
+      //TODO: Add delivery user menu items
+    };
+
+    return menuItems[userType]?.map((item) {
+      return ListTile(
+        leading: Icon(item['icon']),
+        title: Text(item['text']),
+        onTap: () {
+          Navigator.pushNamed(context, item['route']);
+        },
+      );
+    }).toList() ?? [];
   }
 }

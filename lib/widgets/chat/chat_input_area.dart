@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import '../../bloc/ui_management/chat/chat_bloc.dart';
 import '../../bloc/ui_management/chat/chat_event.dart';
 import '../../bloc/ui_management/chat/chat_state.dart';
-import '../../pages/chat/chat.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatInputField extends StatelessWidget {
   final ScrollController scrollController;
-  final ChatUserType userType;
+  final UserType userType;
   final FocusNode focusNode;
 
   const ChatInputField({super.key, required this.scrollController, required this.userType, required this.focusNode});
@@ -112,7 +112,7 @@ class ChatInputField extends StatelessWidget {
                     // Send file event
                     if (context.mounted){
                       context.read<ChatBloc>().add(SendFileEvent(
-                          sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
+                          sender: userType == UserType.customer ? 'cliente' : 'soporte',
                           fileUrl: selectedFile.path,
                           fileType: fileType,
                           context: context)
@@ -129,7 +129,7 @@ class ChatInputField extends StatelessWidget {
                 onPressed: () {
                   if (controller.text.trim().isNotEmpty) {
                     context.read<ChatBloc>().add(SendMessageEvent(
-                        sender: userType == ChatUserType.customer ? 'cliente' : 'soporte',
+                        sender: userType == UserType.customer ? 'cliente' : 'soporte',
                         text: controller.text.trim(),
                         context: context)
                     );
