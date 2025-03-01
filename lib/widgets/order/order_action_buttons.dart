@@ -33,7 +33,8 @@ class OrderActionButtons extends StatelessWidget {
               backgroundColor: const Color.fromARGB(255, 37, 139, 217),
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text(OrderStrings.orderDetailsTitle, style: TextStyle(color: Colors.white)),
+            child: const Text(OrderStrings.orderDetailsTitle,
+                style: TextStyle(color: Colors.white)),
           ),
         if (showDetailsButton) const SizedBox(height: 8.0),
         if (showConfirmButton)
@@ -41,14 +42,22 @@ class OrderActionButtons extends StatelessWidget {
             builder: (context, state) {
               if (state is OrderStatusLoaded) {
                 return ElevatedButton(
-                  onPressed: selectedStatus != state.currentStatus ? () {
-                    _confirmStatusChange(context);
-                  } : null,
+                  onPressed: selectedStatus != state.currentStatus
+                      ? () {
+                          _confirmStatusChange(context);
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedStatus != state.currentStatus ? const Color.fromARGB(255, 37, 139, 217) : Colors.grey[350],
+                    backgroundColor: selectedStatus != state.currentStatus
+                        ? const Color.fromARGB(255, 37, 139, 217)
+                        : Colors.grey[350],
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: Text(OrderStrings.confirm, style: TextStyle(color: selectedStatus != state.currentStatus ?  Colors.white : Colors.black)),
+                  child: Text(OrderStrings.confirm,
+                      style: TextStyle(
+                          color: selectedStatus != state.currentStatus
+                              ? Colors.white
+                              : Colors.black)),
                 );
               } else {
                 return Container();
@@ -64,7 +73,8 @@ class OrderActionButtons extends StatelessWidget {
     // TODO: Pass the order ID to the details page
     if (userType == ChatUserType.customer) {
       Navigator.of(context).pushNamed('customer_user_order_details');
-    } else if (userType == ChatUserType.business) {
+    } else if (userType == ChatUserType.business ||
+        userType == ChatUserType.delivery) {
       Navigator.of(context).pushNamed('business_user_order_details');
     }
   }
@@ -76,21 +86,28 @@ class OrderActionButtons extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(OrderStrings.confirmStatusChangeTitle),
-          content: Text(OrderStrings.confirmStatusChangeContent(selectedStatus)),
+          content:
+              Text(OrderStrings.confirmStatusChangeContent(selectedStatus)),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();  // Close the dialog without doing anything
+                Navigator.of(context)
+                    .pop(); // Close the dialog without doing anything
               },
-              child: const Text(OrderStrings.cancel, style: TextStyle(color: Colors.blue)),
+              child: const Text(OrderStrings.cancel,
+                  style: TextStyle(color: Colors.blue)),
             ),
             TextButton(
               onPressed: () {
                 // Emit the event only after the user confirms
-                context.read<OrderStatusBloc>().add(ChangeOrderStatusEvent(selectedStatus));
-                Navigator.of(context).pop();  // Close the dialog after confirming
+                context
+                    .read<OrderStatusBloc>()
+                    .add(ChangeOrderStatusEvent(selectedStatus));
+                Navigator.of(context)
+                    .pop(); // Close the dialog after confirming
               },
-              child: const Text(OrderStrings.accept, style: TextStyle(color: Colors.blue)),
+              child: const Text(OrderStrings.accept,
+                  style: TextStyle(color: Colors.blue)),
             ),
           ],
         );

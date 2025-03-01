@@ -10,6 +10,8 @@ class OrderStrings {
   static const String dateRange = 'Fechas';
   static const String orderDetailsTitle = 'Detalles de la orden';
   static const String orderNumber = 'Número de orden';
+  static const String deliveryIn = 'Hacía';
+  static const String noLocation = 'Dirección Mapa';
   static const String orderDate = 'Fecha';
   static const String orderProductCount = 'Número de productos';
   static const String viewProducts = 'Ver productos';
@@ -36,6 +38,7 @@ class OrderStrings {
   static const String client = 'Cliente';
   static const String status = 'Estado';
   static const String items = 'Items';
+  static const String takeOrder = 'Tomar Orden';
   static const String viewOrder = 'Ver orden';
   static const String confirmStatusChangeTitle = 'Confirmar cambio de estado';
   static const String cancel = 'Cancelar';

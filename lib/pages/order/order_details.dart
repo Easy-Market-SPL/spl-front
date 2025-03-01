@@ -61,7 +61,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       children: [
                         // Order modification options
                         if (SPLVariables.hasRealTimeTracking &&
-                            userType == ChatUserType.business) ...[
+                                userType == ChatUserType.business ||
+                            userType == ChatUserType.delivery) ...[
                           const SizedBox(height: 20),
                           ModifyOrderStatusOptions(
                             selectedStatus: state.selectedStatus,

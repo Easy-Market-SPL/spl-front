@@ -20,6 +20,7 @@ import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 
 import '../pages/chat/chat.dart';
+import '../pages/delivery_user/delivery_user_tracking.dart';
 import '../pages/login/login_page.dart';
 import '../pages/login/login_page_variant.dart';
 import '../pages/register/register_page.dart';
@@ -59,6 +60,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_user_orders': (_) => OrdersScreen(userType: ChatUserType.business),
   'customer_user_orders': (_) => OrdersScreen(userType: ChatUserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
+  'delivery_user_tracking': (_) => DeliveryUserTracking(),
   'add_address': (_) => AddAddressPage(),
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),

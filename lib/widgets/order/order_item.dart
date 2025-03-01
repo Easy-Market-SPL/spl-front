@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/chat/chat.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
+import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+
+import '../../bloc/ui_management/orders_list/orders_list_bloc.dart';
 
 class OrderItem extends StatelessWidget {
   final Order order;
@@ -13,6 +15,8 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final orderBloc = BlocProvider.of<OrderListBloc>(context);
+
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -51,8 +55,7 @@ class OrderItem extends StatelessWidget {
                   SizedBox(height: 4),
 
                   // Client
-                  if (userType == ChatUserType.business ||
-                      userType == ChatUserType.delivery)
+                  if (userType == ChatUserType.business)
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.client}: ',
@@ -66,6 +69,22 @@ class OrderItem extends StatelessWidget {
                         ],
                       ),
                     ),
+
+                  if (userType == ChatUserType.delivery)
+                    RichText(
+                      text: TextSpan(
+                        text: '${OrderStrings.deliveryIn}: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: order.address,
+                            style: TextStyle(fontWeight: FontWeight.normal),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 4),
 
                   // Status
                   RichText(
@@ -102,23 +121,30 @@ class OrderItem extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(width: 10),
 
             //Order tracking button
             ElevatedButton(
               onPressed: () {
+                print('Order Address: ${order.address}');
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            OrderTrackingScreen(userType: userType)));
+                            DeliveryUserTracking(order: order)));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0)),
               ),
-              child: Text(OrderStrings.viewOrder,
-                  style: TextStyle(color: Colors.white)),
+              child: userType == ChatUserType.delivery
+                  ? Text(
+                      OrderStrings.takeOrder,
+                      style: TextStyle(color: Colors.white),
+                    )
+                  : Text(OrderStrings.viewOrder,
+                      style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
