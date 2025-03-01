@@ -54,6 +54,7 @@ class _LoginFormState extends State<LoginForm> {
               SignButton(
                 eventHandler: () => {
                   // TODO: Implement the logic of auth according to the role of the current user
+                  //Navigator.pushReplacementNamed(context, 'delivery_user_orders')
                   Navigator.pushReplacementNamed(context, 'customer_dashboard')
                 },
                 buttonText: LoginStrings.loginButton,

@@ -4,12 +4,15 @@ import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
 import 'package:spl_front/widgets/order/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
-import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
@@ -53,70 +56,112 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 builder: (context, state) {
                   if (state is OrderStatusLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } 
-                  else if (state is OrderStatusLoaded) {
+                  } else if (state is OrderStatusLoaded) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Order modification options
-                        if (SPLVariables.hasRealTimeTracking && userType == UserType.business) ...[
-                          const SizedBox(height: 20),
-                          ModifyOrderStatusOptions(
-                            selectedStatus: state.selectedStatus,
-                            onStatusChanged: (status) {
-                              context.read<OrderStatusBloc>().add(ChangeSelectedStatusEvent(status));
-                            },
-                          ),
-                          const SizedBox(height: 24.0),
-                          OrderActionButtons(selectedStatus: state.selectedStatus, showDetailsButton: false, userType: userType,),
-                          const SizedBox(height: 24.0),
-                        ],
 
-                        // Order details content
-                        _buildSectionTitle(OrderStrings.orderDetailsTitle),
-                        _buildInfoRow(OrderStrings.orderNumber, orderData['numeroOrden']),
-                        _buildInfoRow(OrderStrings.orderDate, orderData['fecha']),
-                        _buildInfoRow(OrderStrings.orderProductCount, "${orderData['numProductos']}", actionText: OrderStrings.viewProducts, onActionTap: () {
-                          _showProductPopup(context); // Open the product popup
-                        }),
-                        _buildInfoRow(OrderStrings.orderTotal, "\$${orderData['total'].toStringAsFixed(0)}"),
-                        const SizedBox(height: 20),
-
-                        // Customer details content
-                        _buildSectionTitle(OrderStrings.customerDetailsTitle),
-                        _buildInfoRow(OrderStrings.customerName, customerData['cliente']),
-                        _buildInfoRow(OrderStrings.deliveryAddress, customerData['direccion']),
-
-                        // Real-time tracking or company selection
-                        if (SPLVariables.hasRealTimeTracking) ...[
-                          const SizedBox(height: 20),
-                          _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
-                          _buildInfoRow(OrderStrings.deliveryPersonName, OrderStrings.noDeliveryPersonAssigned),
-                        ] else ...[
-                          const SizedBox(height: 20),
-                          _buildSectionTitle(OrderStrings.shippingCompanyTitle),
-                          if (userType == UserType.business) ...[
-                            _buildSelectableRow(OrderStrings.selectedShippingCompany, selectedShippingCompany, onActionTap: () {
-                              _showShippingCompanyPopup(context); // Open the shipping company selection popup
-                            }),
-                          ] else ...[
-                            _buildInfoRow(OrderStrings.shippingCompany, selectedShippingCompany,),
+                        if (SPLVariables.hasRealTimeTracking &&
+                                userType == UserType.business ||
+                            userType == UserType.delivery) ...[
+                          if (SPLVariables.hasRealTimeTracking &&
+                              userType == UserType.business) ...[
+                            const SizedBox(height: 20),
+                            ModifyOrderStatusOptions(
+                              selectedStatus: state.selectedStatus,
+                              onStatusChanged: (status) {
+                                context
+                                    .read<OrderStatusBloc>()
+                                    .add(ChangeSelectedStatusEvent(status));
+                              },
+                            ),
+                            const SizedBox(height: 24.0),
+                            OrderActionButtons(
+                              selectedStatus: state.selectedStatus,
+                              showDetailsButton: false,
+                              userType: userType,
+                            ),
+                            const SizedBox(height: 24.0),
                           ],
-                        ]
+
+                          // Order details content
+                          _buildSectionTitle(OrderStrings.orderDetailsTitle),
+                          _buildInfoRow(OrderStrings.orderNumber,
+                              orderData['numeroOrden']),
+                          _buildInfoRow(
+                              OrderStrings.orderDate, orderData['fecha']),
+                          _buildInfoRow(OrderStrings.orderProductCount,
+                              "${orderData['numProductos']}",
+                              actionText: OrderStrings.viewProducts,
+                              onActionTap: () {
+                            _showProductPopup(
+                                context); // Open the product popup
+                          }),
+                          _buildInfoRow(OrderStrings.orderTotal,
+                              "\$${orderData['total'].toStringAsFixed(0)}"),
+                          const SizedBox(height: 20),
+
+                          // Customer details content
+                          _buildSectionTitle(OrderStrings.customerDetailsTitle),
+                          _buildInfoRow(OrderStrings.customerName,
+                              customerData['cliente']),
+                          _buildInfoRow(OrderStrings.deliveryAddress,
+                              customerData['direccion']),
+
+                          // Real-time tracking or company selection
+                          if (SPLVariables.hasRealTimeTracking) ...[
+                            const SizedBox(height: 20),
+                            _buildSectionTitle(
+                                OrderStrings.deliveryDetailsTitle),
+                            _buildInfoRow(OrderStrings.deliveryPersonName,
+                                OrderStrings.noDeliveryPersonAssigned),
+                          ] else ...[
+                            const SizedBox(height: 20),
+                            _buildSectionTitle(
+                                OrderStrings.shippingCompanyTitle),
+                            if (userType == UserType.business) ...[
+                              _buildSelectableRow(
+                                  OrderStrings.selectedShippingCompany,
+                                  selectedShippingCompany, onActionTap: () {
+                                _showShippingCompanyPopup(
+                                    context); // Open the shipping company selection popup
+                              }),
+                            ] else ...[
+                              _buildInfoRow(
+                                OrderStrings.shippingCompany,
+                                selectedShippingCompany,
+                              ),
+                            ],
+                          ]
+                        ],
                       ],
                     );
-                  } 
-                  else {
-                    return const Center(child: Text(OrderStrings.errorLoadingOrderStatus));
+                  } else {
+                    return const Center(
+                        child: Text(OrderStrings.errorLoadingOrderStatus));
                   }
                 },
               ),
             ),
           ),
+          _getBottomNavigationBar(),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
     );
+  }
+
+  Widget _getBottomNavigationBar() {
+    if (userType == UserType.customer) {
+      return const CustomerBottomNavigationBar();
+    } else if (userType == UserType.business) {
+      return const BusinessBottomNavigationBar();
+    } else if (userType == UserType.delivery) {
+      return const DeliveryUserBottomNavigationBar();
+    } else {
+      return const SizedBox();
+    }
   }
 
   // Helper function to get simulated order data
@@ -175,7 +220,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   // Helper to build a row with action (e.g. "Ver productos")
-  Widget _buildInfoRow(String label, String value, {String? actionText, VoidCallback? onActionTap}) {
+  Widget _buildInfoRow(String label, String value,
+      {String? actionText, VoidCallback? onActionTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -184,9 +230,17 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black)),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black)),
               const SizedBox(height: 2),
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300, color: Colors.grey)),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.grey)),
             ],
           ),
           if (actionText != null)
@@ -194,7 +248,13 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               onTap: onActionTap,
               child: Row(
                 children: [
-                  Text(actionText, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey, fontStyle: FontStyle.italic, decoration: TextDecoration.underline)),
+                  Text(actionText,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                          decoration: TextDecoration.underline)),
                   const Icon(Icons.chevron_right, color: Colors.grey),
                 ],
               ),
@@ -205,7 +265,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   }
 
   // Helper to build a selectable row (for company selection)
-  Widget _buildSelectableRow(String label, String value, {String? subtitle, VoidCallback? onActionTap}) {
+  Widget _buildSelectableRow(String label, String value,
+      {String? subtitle, VoidCallback? onActionTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: GestureDetector(
@@ -213,7 +274,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black)),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black)),
             const SizedBox(height: 2),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,9 +286,17 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300, color: Colors.grey)),
+                    Text(value,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.grey)),
                     if (subtitle != null)
-                      Text(subtitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w300, color: Colors.grey)),
+                      Text(subtitle,
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.grey)),
                   ],
                 ),
                 const Spacer(),

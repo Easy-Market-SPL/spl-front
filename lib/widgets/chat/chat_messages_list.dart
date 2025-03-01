@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/pages/chat/chat.dart';
 import 'chat_message_bubble.dart';
 import '../../bloc/ui_management/chat/chat_state.dart';
 import '../../bloc/ui_management/chat/chat_bloc.dart';
 
 class ChatMessagesList extends StatelessWidget {
   final ScrollController scrollController;
-  final UserType userType;
+  final ChatUserType userType;
   final FocusNode focusNode;
 
   const ChatMessagesList({
@@ -46,7 +46,7 @@ class ChatMessagesList extends StatelessWidget {
                   // Messages
                   ...messages.map((message) => ChatMessageBubble(
                     message: message,
-                    isCurrentUser: message.sender == (userType == UserType.customer ? 'cliente' : 'soporte'),
+                    isCurrentUser: message.sender == (userType == ChatUserType.customer ? 'cliente' : 'soporte'),
                     focusNode: focusNode,
                   )),
                 ],

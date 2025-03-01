@@ -43,10 +43,14 @@ class MenuPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _getUserTypeText(userType),
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        _getUserType(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
-                      const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),
+                      const Text(MenuStrings.myProfile,
+                          style: TextStyle(color: Colors.white70)),
                     ],
                   ),
                 ],
@@ -67,49 +71,117 @@ class MenuPage extends StatelessWidget {
     final Map<UserType, String> avatarTexts = {
       UserType.customer: 'UC',
       UserType.business: 'UE',
+      UserType.delivery: 'UD', // Consider adding delivery as well
     };
 
-    return avatarTexts[userType] ?? 'U';
+    return avatarTexts[userType] ?? 'NN';
   }
 
-  String _getUserTypeText(UserType userType) {
+  String _getUserType() {
     final Map<UserType, String> userTypeTexts = {
       UserType.customer: MenuStrings.userCustomer,
       UserType.business: MenuStrings.userBusiness,
+      UserType.delivery:
+          MenuStrings.userDelivery, // Consider adding delivery as well
     };
 
-    return userTypeTexts[userType] ?? 'User';
+    return userTypeTexts[userType] ?? 'Unknown User';
   }
 
   List<Widget> _getMenuItems(BuildContext context, UserType userType) {
     final Map<UserType, List<Map<String, dynamic>>> menuItems = {
       UserType.customer: [
-        {'icon': Icons.home, 'text': MenuStrings.home, 'route': 'customer_dashboard'},
-        {'icon': Icons.shopping_cart, 'text': MenuStrings.cart, 'route': 'customer_user_cart'},
-        {'icon': Icons.shopping_bag, 'text': MenuStrings.myPurchases, 'route': 'customer_user_orders'},
-        {'icon': Icons.person, 'text': MenuStrings.myAccount, 'route': 'customer_profile'},
-        {'icon': Icons.notifications, 'text': MenuStrings.notifications, 'route': 'customer_notifications'},
-        {'icon': Icons.headset_mic, 'text': MenuStrings.customerSupport, 'route': 'customer_user_chat'},
+        {
+          'icon': Icons.home,
+          'text': MenuStrings.home,
+          'route': 'customer_dashboard'
+        },
+        {
+          'icon': Icons.shopping_cart,
+          'text': MenuStrings.cart,
+          'route': 'customer_user_cart'
+        },
+        {
+          'icon': Icons.shopping_bag,
+          'text': MenuStrings.myPurchases,
+          'route': 'customer_user_orders'
+        },
+        {
+          'icon': Icons.person,
+          'text': MenuStrings.myAccount,
+          'route': 'customer_profile'
+        },
+        {
+          'icon': Icons.notifications,
+          'text': MenuStrings.notifications,
+          'route': 'customer_notifications'
+        },
+        {
+          'icon': Icons.headset_mic,
+          'text': MenuStrings.customerSupport,
+          'route': 'customer_user_chat'
+        },
       ],
       UserType.business: [
-        {'icon': Icons.home, 'text': MenuStrings.home, 'route': 'business_dashboard'},
-        {'icon': Icons.history, 'text': MenuStrings.orderHistory, 'route': 'business_user_orders'},
-        {'icon': Icons.admin_panel_settings, 'text': MenuStrings.adminPanel, 'route': 'admin_profile'},
-        {'icon': Icons.person, 'text': MenuStrings.myAccount, 'route': 'business_user_profile'},
-        {'icon': Icons.notifications, 'text': MenuStrings.notifications, 'route': 'business_notifications'},
-        {'icon': Icons.headset_mic, 'text': MenuStrings.customerSupport, 'route': 'business_user_chats'},
+        {
+          'icon': Icons.home,
+          'text': MenuStrings.home,
+          'route': 'business_dashboard'
+        },
+        {
+          'icon': Icons.history,
+          'text': MenuStrings.orderHistory,
+          'route': 'business_user_orders'
+        },
+        {
+          'icon': Icons.admin_panel_settings,
+          'text': MenuStrings.adminPanel,
+          'route': 'admin_profile'
+        },
+        {
+          'icon': Icons.person,
+          'text': MenuStrings.myAccount,
+          'route': 'business_user_profile'
+        },
+        {
+          'icon': Icons.notifications,
+          'text': MenuStrings.notifications,
+          'route': 'business_notifications'
+        },
+        {
+          'icon': Icons.headset_mic,
+          'text': MenuStrings.customerSupport,
+          'route': 'business_user_chats'
+        },
       ],
-      //TODO: Add delivery user menu items
+      UserType.delivery: [
+        {
+          'icon': Icons.backpack,
+          'text': MenuStrings.orders,
+          'route': 'delivery_user_orders'
+        },
+        {
+          'icon': Icons.person,
+          'text': MenuStrings.myAccount,
+          'route': 'delivery_profile'
+        },
+        {
+          'icon': Icons.notifications,
+          'text': MenuStrings.notifications,
+          'route': 'delivery_notifications'
+        },
+      ],
     };
 
     return menuItems[userType]?.map((item) {
-      return ListTile(
-        leading: Icon(item['icon']),
-        title: Text(item['text']),
-        onTap: () {
-          Navigator.pushNamed(context, item['route']);
-        },
-      );
-    }).toList() ?? [];
+          return ListTile(
+            leading: Icon(item['icon']),
+            title: Text(item['text']),
+            onTap: () {
+              Navigator.pushNamed(context, item['route']);
+            },
+          );
+        }).toList() ??
+        [];
   }
 }

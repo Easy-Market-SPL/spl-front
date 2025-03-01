@@ -4,10 +4,10 @@ import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
 import 'package:spl_front/bloc/ui_management/chats/chats_event.dart';
 import 'package:spl_front/bloc/ui_management/chats/chats_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
 import 'package:spl_front/widgets/chat/chat_item.dart';
 import 'package:spl_front/widgets/chat/chats_header.dart';
-import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 class ChatsScreen extends StatelessWidget {
@@ -88,13 +88,15 @@ class _ChatsPageState extends State<ChatsPage> {
                         final chat = state.filteredChats[index];
                         return GestureDetector(
                           onTap: () {
-                            _searchFocusNode.unfocus(); // Avoid the keyboard to stay open
+                            _searchFocusNode
+                                .unfocus(); // Avoid the keyboard to stay open
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ChatScreen(
-                                  userType: UserType.business,
-                                  userName: chat.name, //TODO: Add a real parameter like the ID
+                                  userType: ChatUserType.business,
+                                  userName: chat
+                                      .name, //TODO: Add a real parameter like the ID
                                 ),
                               ),
                             );
@@ -111,7 +113,8 @@ class _ChatsPageState extends State<ChatsPage> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business),
+      bottomNavigationBar:
+          CustomBottomNavigationBar(userType: UserType.business),
     );
   }
 }

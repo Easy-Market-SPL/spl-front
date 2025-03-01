@@ -1,2 +1,1 @@
-
-enum UserType { customer, business }
+enum UserType { customer, business, delivery }

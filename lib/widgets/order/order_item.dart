@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
+import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
@@ -34,12 +34,12 @@ class OrderItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // Date
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.date}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: DateHelper.formatDate(order.date),
@@ -55,7 +55,8 @@ class OrderItem extends StatelessWidget {
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.client}: ',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
                         children: <TextSpan>[
                           TextSpan(
                             text: order.clientName,
@@ -65,15 +66,34 @@ class OrderItem extends StatelessWidget {
                       ),
                     ),
 
+                  if (userType == UserType.delivery)
+                    RichText(
+                      text: TextSpan(
+                        text: '${OrderStrings.deliveryIn}: ',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: order.address,
+                            style: TextStyle(fontWeight: FontWeight.normal),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 4),
+
                   // Status
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.status}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: order.status,
-                          style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black),
                         ),
                       ],
                     ),
@@ -84,7 +104,8 @@ class OrderItem extends StatelessWidget {
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.items}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: order.items.toString(),
@@ -96,17 +117,30 @@ class OrderItem extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(width: 10),
 
             //Order tracking button
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingScreen(userType: userType)));
+                print('Order Address: ${order.address}');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            DeliveryUserTracking(order: order)));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
               ),
-              child: Text(OrderStrings.viewOrder, style: TextStyle(color: Colors.white)),
+              child: userType == UserType.delivery
+                  ? Text(
+                      OrderStrings.takeOrder,
+                      style: TextStyle(color: Colors.white),
+                    )
+                  : Text(OrderStrings.viewOrder,
+                      style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

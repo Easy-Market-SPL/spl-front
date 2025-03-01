@@ -15,11 +15,13 @@ import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/login_page_web.dart';
 import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/pages/notifications/notifications.dart';
+import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
 import 'package:spl_front/pages/order/order_details.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 
 import '../pages/chat/chat.dart';
+import '../pages/delivery_user/delivery_user_tracking.dart';
 import '../pages/login/login_page.dart';
 import '../pages/login/login_page_variant.dart';
 import '../pages/register/register_page.dart';
@@ -39,10 +41,11 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_dashboard': (_) => BusinessUserMainDashboard(),
   'add_product': (_) => AddProductPage(),
   'customer_user_chat': (_) =>
-      ChatScreen(userType: UserType.customer, userName: "userName"),
+      ChatScreen(userType: ChatUserType.customer, userName: "userName"),
   'business_user_chat': (_) =>
-      ChatScreen(userType: UserType.business, userName: "customerName"),
+      ChatScreen(userType: ChatUserType.business, userName: "customerName"),
   'business_user_chats': (_) => ChatsScreen(),
+  'delivery_user_menu': (_) => MenuScreen(userType: UserType.delivery),
   'business_user_menu': (_) => MenuScreen(userType: UserType.business),
   'customer_user_menu': (_) => MenuScreen(userType: UserType.customer),
   'business_user_order_tracking': (_) => OrderTrackingScreen(
@@ -57,12 +60,18 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       OrderDetailsPage(userType: UserType.customer),
   'business_user_orders': (_) => OrdersScreen(userType: UserType.business),
   'customer_user_orders': (_) => OrdersScreen(userType: UserType.customer),
+  'delivery_user_orders': (_) => OrdersScreenDelivery(),
+  'delivery_user_tracking': (_) => DeliveryUserTracking(),
   'add_address': (_) => AddAddressPage(),
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),
   'customer_user_cart': (_) => CartScreen(),
-  'customer_notifications': (_) => NotificationsScreen(userType: UserType.customer,),
-  'business_notifications': (_) => NotificationsScreen(userType: UserType.business,),
+  'customer_notifications': (_) => NotificationsScreen(
+        userType: UserType.customer,
+      ),
+  'business_notifications': (_) => NotificationsScreen(
+        userType: UserType.business,
+      ),
 
   // WEB PAGES
   'login_web': (_) => WebLoginPage(),

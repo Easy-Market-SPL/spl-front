@@ -31,3 +31,5 @@ class ApplyAdditionalFiltersEvent extends OrderListEvent {
 }
 
 class ClearAdditionalFiltersEvent extends OrderListEvent {}
+
+class ClearAdditionalFiltersDeliveryEvent extends OrderListEvent {}
