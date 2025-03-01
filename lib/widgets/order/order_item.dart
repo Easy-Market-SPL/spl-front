@@ -34,12 +34,12 @@ class OrderItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // Date
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.date}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: DateHelper.formatDate(order.date),
@@ -51,11 +51,13 @@ class OrderItem extends StatelessWidget {
                   SizedBox(height: 4),
 
                   // Client
-                  if (userType == ChatUserType.business)
+                  if (userType == ChatUserType.business ||
+                      userType == ChatUserType.delivery)
                     RichText(
                       text: TextSpan(
                         text: '${OrderStrings.client}: ',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
                         children: <TextSpan>[
                           TextSpan(
                             text: order.clientName,
@@ -69,11 +71,14 @@ class OrderItem extends StatelessWidget {
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.status}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: order.status,
-                          style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black),
                         ),
                       ],
                     ),
@@ -84,7 +89,8 @@ class OrderItem extends StatelessWidget {
                   RichText(
                     text: TextSpan(
                       text: '${OrderStrings.items}: ',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.black),
                       children: <TextSpan>[
                         TextSpan(
                           text: order.items.toString(),
@@ -100,13 +106,19 @@ class OrderItem extends StatelessWidget {
             //Order tracking button
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => OrderTrackingScreen(userType: userType)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            OrderTrackingScreen(userType: userType)));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
               ),
-              child: Text(OrderStrings.viewOrder, style: TextStyle(color: Colors.white)),
+              child: Text(OrderStrings.viewOrder,
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

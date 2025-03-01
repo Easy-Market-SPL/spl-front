@@ -8,11 +8,13 @@ import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/customer_nav_bar.dart';
 import 'package:spl_front/widgets/order/horizontal_order_status.dart';
-import 'package:spl_front/widgets/order/order_tracking_header.dart';
 import 'package:spl_front/widgets/order/modify_order_status_options.dart';
 import 'package:spl_front/widgets/order/order_action_buttons.dart';
+import 'package:spl_front/widgets/order/order_tracking_header.dart';
 import 'package:spl_front/widgets/order/shipping_guide.dart';
 import 'package:spl_front/widgets/order/vertical_order_status.dart';
+
+import '../../widgets/navigation_bars/delivery_user_nav_bar.dart';
 
 enum OrderUserType { costumer, business }
 
@@ -66,59 +68,99 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     color: Colors.grey[300],
                                     child: Center(child: Text('Mapa aquí')),
                                   ),
-                                ] 
-                                else ...[
+                                ] else ...[
                                   const SizedBox(height: 24.0),
                                   ModifyOrderStatusOptions(
                                     selectedStatus: state.selectedStatus,
                                     onStatusChanged: (status) {
-                                      context.read<OrderStatusBloc>().add(ChangeSelectedStatusEvent(status));
+                                      context.read<OrderStatusBloc>().add(
+                                          ChangeSelectedStatusEvent(status));
                                     },
                                   ),
                                   const SizedBox(height: 24.0),
-                                  OrderActionButtons(selectedStatus: state.selectedStatus, userType: userType,),
+                                  OrderActionButtons(
+                                    selectedStatus: state.selectedStatus,
+                                    userType: userType,
+                                  ),
                                 ],
-                              ] 
-                              
+                              ]
+
                               // Costumer Screen
-                              else if (userType == ChatUserType.customer)...[
+                              else if (userType == ChatUserType.customer) ...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 500,
                                     color: Colors.grey[300],
                                     child: Center(child: Text('Mapa aquí')),
                                   ),
-                                ] 
-                                else ...[
+                                ] else ...[
                                   const VerticalOrderStatus(),
                                   const SizedBox(height: 24.0),
-                                  ShippingGuide(orderNumber: "123456", estimatedDeliveryDate: "2025-02-20"),
+                                  ShippingGuide(
+                                      orderNumber: "123456",
+                                      estimatedDeliveryDate: "2025-02-20"),
                                   const SizedBox(height: 10.0),
-                                  OrderActionButtons(selectedStatus: state.selectedStatus, showConfirmButton: false, userType: userType,),
+                                  OrderActionButtons(
+                                    selectedStatus: state.selectedStatus,
+                                    showConfirmButton: false,
+                                    userType: userType,
+                                  ),
                                 ],
-                              ]
+                              ],
 
                               // TODO: Delivery screen
-                              else ...[
-                                const Text('Error al cargar el estado de la orden')
+                              if (userType == ChatUserType.delivery) ...[
+                                HorizontalOrderStatus(),
+                                if (SPLVariables.hasRealTimeTracking) ...[
+                                  Container(
+                                    height: 400,
+                                    color: Colors.grey[300],
+                                    child: Center(child: Text('Mapa aquí')),
+                                  ),
+                                ] else ...[
+                                  const SizedBox(height: 24.0),
+                                  ModifyOrderStatusOptions(
+                                    selectedStatus: state.selectedStatus,
+                                    onStatusChanged: (status) {
+                                      context.read<OrderStatusBloc>().add(
+                                          ChangeSelectedStatusEvent(status));
+                                    },
+                                  ),
+                                  const SizedBox(height: 24.0),
+                                  OrderActionButtons(
+                                    selectedStatus: state.selectedStatus,
+                                    userType: userType,
+                                  ),
+                                ],
+                              ] else ...[
+                                const Text(
+                                    'Error al cargar el estado de la orden')
                               ]
                             ],
                           ),
                         ),
                       );
                     } else {
-                      return Center(child: Text('Error al cargar el estado de la orden'));
+                      return Center(
+                          child: Text('Error al cargar el estado de la orden'));
                     }
                   },
                 ),
               ),
-              if (userType == ChatUserType.customer) const CustomerBottomNavigationBar() 
-              else const BusinessBottomNavigationBar(),
+              if (userType == ChatUserType.customer)
+                const CustomerBottomNavigationBar()
+              else if (userType == ChatUserType.business)
+                const BusinessBottomNavigationBar()
+              else if (userType == ChatUserType.delivery)
+                const DeliveryUserBottomNavigationBar()
+              else
+                Container(),
             ],
           ),
 
           // Buttons that have to be at the bottom of the screen
-          if (userType == ChatUserType.business && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == ChatUserType.business &&
+              SPLVariables.hasRealTimeTracking) ...[
             Positioned(
               bottom: 80.0,
               left: 16.0,
@@ -130,19 +172,25 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
               ),
             ),
           ],
-          
+
           // Shipping guide for costumers
-          if (userType == ChatUserType.customer && SPLVariables.hasRealTimeTracking) ...[
+          if (userType == ChatUserType.customer &&
+              SPLVariables.hasRealTimeTracking) ...[
             Positioned(
               bottom: 80.0,
               left: 16.0,
               right: 16.0,
               child: Column(
-              children: [
-                ShippingGuide(orderNumber: "123456", estimatedDeliveryDate: "2025-02-20"),
-                const SizedBox(height: 10.0),
-                OrderActionButtons(selectedStatus: "", showConfirmButton: false, userType: userType),
-              ],
+                children: [
+                  ShippingGuide(
+                      orderNumber: "123456",
+                      estimatedDeliveryDate: "2025-02-20"),
+                  const SizedBox(height: 10.0),
+                  OrderActionButtons(
+                      selectedStatus: "",
+                      showConfirmButton: false,
+                      userType: userType),
+                ],
               ),
             ),
           ]

@@ -11,18 +11,53 @@ class Order {
   final DateTime date;
   final int items;
 
-  Order({required this.clientName, required this.status, DateTime? date, int? items})
+  Order(
+      {required this.clientName,
+      required this.status,
+      DateTime? date,
+      int? items})
       : date = date ?? DateTime.now(),
         items = items ?? 0;
 }
 
 class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
+  // TODO: Do the fetch of the information with real data
   final List<Order> orders = [
-    Order(clientName: "Ana María", status: OrderStrings.statusConfirmed, date: DateTime.now().subtract(Duration(days: 3)), items: 7),
-    Order(clientName: "Juan Peláez", status: OrderStrings.statusOnTheWay, date: DateTime.now().subtract(Duration(days: 1)), items: 5),
-    Order(clientName: "Carlos López", status: OrderStrings.statusPreparing, date: DateTime.now().subtract(Duration(days: 4)), items: 2),
-    Order(clientName: "Cristian Camelo", status: OrderStrings.statusOnTheWay, date: DateTime.now().subtract(Duration(days: 2)), items: 3),
-    Order(clientName: "María Pérez", status: OrderStrings.statusDelivered, date: DateTime.now().subtract(Duration(days: 5)), items: 10),
+    Order(
+        clientName: "Ana María",
+        status: OrderStrings.statusConfirmed,
+        date: DateTime.now().subtract(Duration(days: 3)),
+        items: 7),
+    Order(
+        clientName: "Juan Peláez",
+        status: OrderStrings.statusOnTheWay,
+        date: DateTime.now().subtract(Duration(days: 1)),
+        items: 5),
+    Order(
+        clientName: "Carlos López",
+        status: OrderStrings.statusPreparing,
+        date: DateTime.now().subtract(Duration(days: 4)),
+        items: 2),
+    Order(
+        clientName: "Juan Ramírez",
+        status: OrderStrings.statusPreparing,
+        date: DateTime.now().subtract(Duration(days: 2)),
+        items: 7),
+    Order(
+        clientName: "Leonardo Castro",
+        status: OrderStrings.statusPreparing,
+        date: DateTime.now().subtract(Duration(days: 1)),
+        items: 4),
+    Order(
+        clientName: "Cristian Camelo",
+        status: OrderStrings.statusOnTheWay,
+        date: DateTime.now().subtract(Duration(days: 2)),
+        items: 3),
+    Order(
+        clientName: "María Pérez",
+        status: OrderStrings.statusDelivered,
+        date: DateTime.now().subtract(Duration(days: 5)),
+        items: 10),
   ];
 
   List<String> selectedFilters = [];
@@ -35,14 +70,19 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     on<SearchOrdersEvent>(_onSearchOrders);
     on<ApplyAdditionalFiltersEvent>(_onApplyAdditionalFilters);
     on<ClearAdditionalFiltersEvent>(_onClearAdditionalFilters);
+    on<ClearAdditionalFiltersDeliveryEvent>(_onClearAdditionalFiltersDelivery);
   }
 
-  void _onLoadOrders(LoadOrdersEvent event, Emitter<OrderListState> emit) async {
+  void _onLoadOrders(
+      LoadOrdersEvent event, Emitter<OrderListState> emit) async {
     // TODO: Implement real data load
     try {
       await Future.delayed(Duration(seconds: 2));
-      final filteredOrders = applyFilters(orders, selectedFilters, additionalFilters, selectedDateRange);
-      emit(OrderListLoaded(orders, filteredOrders, selectedFilters, additionalFilters, selectedDateRange: selectedDateRange));
+      final filteredOrders = applyFilters(
+          orders, selectedFilters, additionalFilters, selectedDateRange);
+      emit(OrderListLoaded(
+          orders, filteredOrders, selectedFilters, additionalFilters,
+          selectedDateRange: selectedDateRange));
     } catch (e) {
       emit(OrderListError(e.toString()));
     }
@@ -59,8 +99,11 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         selectedFilters.add(event.status);
       }
 
-      final filteredOrders = applyFilters(loadedState.orders, selectedFilters, loadedState.additionalFilters, selectedDateRange);
-      emit(OrderListLoaded(loadedState.orders, filteredOrders, selectedFilters, loadedState.additionalFilters, selectedDateRange: selectedDateRange));
+      final filteredOrders = applyFilters(loadedState.orders, selectedFilters,
+          loadedState.additionalFilters, selectedDateRange);
+      emit(OrderListLoaded(loadedState.orders, filteredOrders, selectedFilters,
+          loadedState.additionalFilters,
+          selectedDateRange: selectedDateRange));
     }
   }
 
@@ -71,31 +114,61 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
 
       final filteredOrders = loadedState.orders.where((order) {
         return order.clientName.toLowerCase().contains(query) ||
-          DateHelper.isDateMatchingQuery(order.date, query);
+            DateHelper.isDateMatchingQuery(order.date, query);
       }).toList();
 
-      emit(OrderListLoaded(loadedState.orders, filteredOrders, loadedState.selectedFilters, loadedState.additionalFilters, selectedDateRange: selectedDateRange));
+      emit(OrderListLoaded(loadedState.orders, filteredOrders,
+          loadedState.selectedFilters, loadedState.additionalFilters,
+          selectedDateRange: selectedDateRange));
     }
   }
 
-  void _onApplyAdditionalFilters(ApplyAdditionalFiltersEvent event, Emitter<OrderListState> emit) {
+  void _onApplyAdditionalFilters(
+      ApplyAdditionalFiltersEvent event, Emitter<OrderListState> emit) {
     if (state is OrderListLoaded) {
       final loadedState = state as OrderListLoaded;
       final filters = event.filters;
 
-      final filteredOrders = applyFilters(loadedState.orders, loadedState.selectedFilters, filters, selectedDateRange);
-      emit(OrderListLoaded(loadedState.orders, filteredOrders, loadedState.selectedFilters, filters, selectedDateRange: selectedDateRange));
+      final filteredOrders = applyFilters(loadedState.orders,
+          loadedState.selectedFilters, filters, selectedDateRange);
+      emit(OrderListLoaded(loadedState.orders, filteredOrders,
+          loadedState.selectedFilters, filters,
+          selectedDateRange: selectedDateRange));
     }
   }
 
-  void _onClearAdditionalFilters(ClearAdditionalFiltersEvent event, Emitter<OrderListState> emit) {
+  void _onClearAdditionalFilters(
+      ClearAdditionalFiltersEvent event, Emitter<OrderListState> emit) {
     if (state is OrderListLoaded) {
       final loadedState = state as OrderListLoaded;
-      emit(OrderListLoaded(loadedState.orders, loadedState.orders, loadedState.selectedFilters, [], selectedDateRange: selectedDateRange));
+      emit(OrderListLoaded(loadedState.orders, loadedState.orders,
+          loadedState.selectedFilters, [],
+          selectedDateRange: selectedDateRange));
     }
   }
 
-  List<Order> applyFilters(List<Order> orders, List<String> selectedFilters, List<String> additionalFilters, DateTimeRange? dateRange) {
+  void _onClearAdditionalFiltersDelivery(
+      ClearAdditionalFiltersDeliveryEvent event, Emitter<OrderListState> emit) {
+    if (state is OrderListLoaded) {
+      final loadedState = state as OrderListLoaded;
+
+      // Emitimos el estado cargado con los filtros aplicados
+      emit(OrderListLoaded(
+        loadedState.orders.where((order) {
+          return order.status == OrderStrings.statusPreparing;
+        }).toList(),
+        loadedState.orders.where((order) {
+          return order.status == OrderStrings.statusPreparing;
+        }).toList(),
+        loadedState.selectedFilters,
+        [],
+        selectedDateRange: loadedState.selectedDateRange,
+      ));
+    }
+  }
+
+  List<Order> applyFilters(List<Order> orders, List<String> selectedFilters,
+      List<String> additionalFilters, DateTimeRange? dateRange) {
     List<Order> filteredOrders = orders;
 
     if (selectedFilters.isNotEmpty) {

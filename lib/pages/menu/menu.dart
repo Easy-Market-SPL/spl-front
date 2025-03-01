@@ -36,17 +36,21 @@ class MenuPage extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     radius: 25,
-                    child: Text(userType == ChatUserType.customer ? 'UC' : 'UE'),
+                    child: Text(_getUserTypePrefix()),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userType == ChatUserType.customer ? MenuStrings.userCustomer : MenuStrings.userBusiness,
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        _getUserType(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
-                      const Text(MenuStrings.myProfile, style: TextStyle(color: Colors.white70)),
+                      const Text(MenuStrings.myProfile,
+                          style: TextStyle(color: Colors.white70)),
                     ],
                   ),
                 ],
@@ -55,7 +59,7 @@ class MenuPage extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              children: userType == ChatUserType.customer ? customerMenuItems(context) : businessMenuItems(context),
+              children: _getListWidgets(context),
             ),
           ),
         ],
@@ -65,29 +69,87 @@ class MenuPage extends StatelessWidget {
 
   //TODO: Implement the routes for each menu item
 
+  String _getUserTypePrefix() {
+    if (userType == ChatUserType.customer) {
+      return 'UC';
+    } else if (userType == ChatUserType.business) {
+      return 'UE';
+    } else if (userType == ChatUserType.delivery) {
+      return 'UD';
+    } else {
+      return 'NN';
+    }
+  }
+
+  String _getUserType() {
+    if (userType == ChatUserType.customer) {
+      return MenuStrings.userCustomer;
+    } else if (userType == ChatUserType.business) {
+      return MenuStrings.userBusiness;
+    } else if (userType == ChatUserType.delivery) {
+      return MenuStrings.userDelivery;
+    } else {
+      return '';
+    }
+  }
+
+  List<Widget> _getListWidgets(BuildContext context) {
+    if (userType == ChatUserType.customer) {
+      return customerMenuItems(context);
+    } else if (userType == ChatUserType.business) {
+      return businessMenuItems(context);
+    } else if (userType == ChatUserType.delivery) {
+      return deliveryMenuItems(context);
+    } else {
+      return [];
+    }
+  }
+
   List<Widget> customerMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'customer_dashboard'),
-      menuItem(context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
-      menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases, 'customer_user_orders'),
-      menuItem(context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, 'customer_notifications'),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'customer_user_chat'),
+      menuItem(
+          context, Icons.shopping_cart, MenuStrings.cart, 'customer_user_cart'),
+      menuItem(context, Icons.shopping_bag, MenuStrings.myPurchases,
+          'customer_user_orders'),
+      menuItem(
+          context, Icons.person, MenuStrings.myAccount, 'customer_profile'),
+      menuItem(context, Icons.notifications, MenuStrings.notifications,
+          'customer_notifications'),
+      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport,
+          'customer_user_chat'),
+    ];
+  }
+
+  List<Widget> deliveryMenuItems(BuildContext context) {
+    return [
+      menuItem(
+          context, Icons.backpack, MenuStrings.orders, 'delivery_user_orders'),
+      menuItem(
+          context, Icons.person, MenuStrings.myAccount, 'delivery_profile'),
+      menuItem(context, Icons.notifications, MenuStrings.notifications,
+          'delivery_notifications'),
     ];
   }
 
   List<Widget> businessMenuItems(BuildContext context) {
     return [
       menuItem(context, Icons.home, MenuStrings.home, 'business_dashboard'),
-      menuItem(context, Icons.history, MenuStrings.orderHistory, 'business_user_orders'),
-      menuItem(context, Icons.admin_panel_settings, MenuStrings.adminPanel, 'admin_profile'),
-      menuItem(context, Icons.person, MenuStrings.myAccount, 'business_user_profile'),
-      menuItem(context, Icons.notifications, MenuStrings.notifications, 'business_notifications'),
-      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport, 'business_user_chats'),
+      menuItem(context, Icons.history, MenuStrings.orderHistory,
+          'business_user_orders'),
+      menuItem(context, Icons.admin_panel_settings, MenuStrings.adminPanel,
+          'admin_profile'),
+      menuItem(context, Icons.person, MenuStrings.myAccount,
+          'business_user_profile'),
+      menuItem(context, Icons.notifications, MenuStrings.notifications,
+          'business_notifications'),
+      menuItem(context, Icons.headset_mic, MenuStrings.customerSupport,
+          'business_user_chats'),
     ];
   }
 
-  Widget menuItem(BuildContext context, IconData icon, String text, String routeName) {
+  Widget menuItem(
+      BuildContext context, IconData icon, String text, String routeName) {
     return ListTile(
       leading: Icon(icon),
       title: Text(text),
