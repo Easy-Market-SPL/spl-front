@@ -41,10 +41,6 @@ class _MapAddressPageState extends State<MapAddressPage> {
               Map<String, Polyline> polylines = mapState.polyLines;
               Map<String, Marker> markers = mapState.markers;
 
-              if (!mapState.showMyRoute) {
-                polylines.removeWhere((key, value) => key == 'my_route');
-              }
-
               return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
                 builder: (context, searchPlacesState) {
                   return SingleChildScrollView(
