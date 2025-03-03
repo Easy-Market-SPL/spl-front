@@ -24,6 +24,19 @@ class SearchOrdersEvent extends OrderListEvent {
   const SearchOrdersEvent(this.query);
 }
 
+class UpdateOrderStatusEvent extends OrderListEvent {
+  final String orderId;
+  final String status;
+
+  const UpdateOrderStatusEvent(this.orderId, this.status);
+}
+
+class UpdateDeliveryInformationOrderEvent extends OrderListEvent {
+  final String orderId;
+  final String deliveryName;
+  const UpdateDeliveryInformationOrderEvent(this.orderId, this.deliveryName);
+}
+
 class ApplyAdditionalFiltersEvent extends OrderListEvent {
   final List<String> filters;
 
