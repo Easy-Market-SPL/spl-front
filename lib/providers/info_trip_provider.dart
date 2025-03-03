@@ -16,4 +16,10 @@ class InfoTripProvider extends ChangeNotifier {
     _duration = duration;
     notifyListeners();
   }
+
+  void reset() {
+    _distance = 0.0;
+    _duration = 0.0;
+    notifyListeners();
+  }
 }

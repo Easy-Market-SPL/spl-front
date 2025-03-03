@@ -35,16 +35,17 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
         BlocProvider.of<SearchPlacesBloc>(context, listen: false);
     final infoTripProvider =
         Provider.of<InfoTripProvider>(context, listen: false);
-
-    // Set as blank the distance and duration of the trip
-    infoTripProvider.setDistance(0);
-    infoTripProvider.setDuration(0);
-
     locationBloc.getCurrentPosition();
     locationBloc.startFollowingUser();
 
-    drawDestinationRoute(
-        context, locationBloc, mapBloc, searchBloc, infoTripProvider);
+    // Wait for the first frame to be drawn
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Set as blank the distance and duration of the trip
+      infoTripProvider.reset();
+
+      drawDestinationRoute(
+          context, locationBloc, mapBloc, searchBloc, infoTripProvider);
+    });
   }
 
   Future<void> drawDestinationRoute(
