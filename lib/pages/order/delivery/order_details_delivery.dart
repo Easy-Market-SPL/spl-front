@@ -8,7 +8,6 @@ import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
-import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
 import '../../../bloc/ui_management/orders_list/orders_list_bloc.dart';
 
@@ -150,7 +149,7 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ),
@@ -215,51 +214,6 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
     );
   }
 
-  // Helper to build a selectable row (for company selection)
-  Widget _buildSelectableRow(String label, String value,
-      {String? subtitle, VoidCallback? onActionTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: GestureDetector(
-        onTap: onActionTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black)),
-            const SizedBox(height: 2),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(value,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.grey)),
-                    if (subtitle != null)
-                      Text(subtitle,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.grey)),
-                  ],
-                ),
-                const Spacer(),
-                const Icon(Icons.chevron_right, color: Colors.grey),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Show the products in a popup when the user taps "Ver productos"
   void _showProductPopup(BuildContext context) {
     showDialog(
@@ -267,24 +221,6 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return const ProductPopup(); // Open the product popup dialog
-      },
-    );
-  }
-
-  // Show the shipping company selection popup
-  void _showShippingCompanyPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return ShippingCompanyPopup(
-          selectedCompany: selectedShippingCompany,
-          onCompanySelected: (company) {
-            setState(() {
-              selectedShippingCompany = company;
-            });
-          },
-        );
       },
     );
   }

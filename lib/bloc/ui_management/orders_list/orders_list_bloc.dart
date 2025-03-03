@@ -133,20 +133,39 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     on<ClearAdditionalFiltersEvent>(_onClearAdditionalFilters);
     on<ClearAdditionalFiltersDeliveryEvent>(_onClearAdditionalFiltersDelivery);
     on<UpdateDeliveryInformationOrderEvent>(_onDeliveryInfoEvent);
+    on<UpdateOrderStatusEvent>(_onUpdateStatusEvent);
   }
 
   void _onLoadOrders(
       LoadOrdersEvent event, Emitter<OrderListState> emit) async {
-    // TODO: Implement real data load
-    try {
-      await Future.delayed(Duration(seconds: 2));
+    if (state is OrderListLoaded) {
+      final loadedState = state as OrderListLoaded;
+
+      final updatedOrders = List<Order>.from(loadedState.orders);
+
+      final filteredOrders = updatedOrders.where((order) {
+        return loadedState.selectedFilters.contains(order.status);
+      }).toList();
+
+      emit(OrderListLoaded(
+        updatedOrders,
+        filteredOrders,
+        loadedState.selectedFilters,
+        loadedState.additionalFilters,
+        selectedDateRange: loadedState.selectedDateRange,
+      ));
+    } else {
+      await Future.delayed(Duration(milliseconds: 500));
       final filteredOrders = applyFilters(
           orders, selectedFilters, additionalFilters, selectedDateRange);
+
       emit(OrderListLoaded(
-          orders, filteredOrders, selectedFilters, additionalFilters,
-          selectedDateRange: selectedDateRange));
-    } catch (e) {
-      emit(OrderListError(e.toString()));
+        orders,
+        filteredOrders,
+        selectedFilters,
+        additionalFilters,
+        selectedDateRange: selectedDateRange,
+      ));
     }
   }
 
@@ -246,6 +265,32 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
           return order.copyWith(deliveryName: event.deliveryName);
         }
         return order;
+      }).toList();
+
+      emit(OrderListLoaded(
+        updatedOrders,
+        updatedFilteredOrders,
+        loadedState.selectedFilters,
+        loadedState.additionalFilters,
+        selectedDateRange: loadedState.selectedDateRange,
+      ));
+    }
+  }
+
+  void _onUpdateStatusEvent(
+      UpdateOrderStatusEvent event, Emitter<OrderListState> emit) {
+    if (state is OrderListLoaded) {
+      final loadedState = state as OrderListLoaded;
+
+      final updatedOrders = loadedState.orders.map((order) {
+        if (order.id == event.orderId) {
+          return order.copyWith(status: event.status);
+        }
+        return order;
+      }).toList();
+
+      final updatedFilteredOrders = updatedOrders.where((order) {
+        return loadedState.selectedFilters.contains(order.status);
       }).toList();
 
       emit(OrderListLoaded(
