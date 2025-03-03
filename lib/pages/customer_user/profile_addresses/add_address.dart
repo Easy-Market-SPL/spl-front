@@ -76,8 +76,10 @@ class _AddAddressPageState extends State<AddAddressPage> {
                       color: Colors.blue),
                   title: Text(MapStrings.selectOnMap),
                   onTap: () {
-                    _handleAddManualMarker(context, () {
-                      _handleGpsAnswer(context, gpsBloc);
+                    handleWaitGpsStatus(context, () {
+                      if (handleGpsAnswer(context, gpsBloc)) {
+                        Navigator.popAndPushNamed(context, 'map_address');
+                      }
                     });
                   },
                 ),
@@ -95,28 +97,28 @@ class _AddAddressPageState extends State<AddAddressPage> {
       },
     );
   }
+}
 
-  Future<void> _handleAddManualMarker(
-      BuildContext context, VoidCallback gpsAction) async {
-    final gpsBloc = BlocProvider.of<GpsBloc>(context);
+Future<void> handleWaitGpsStatus(
+    BuildContext context, VoidCallback gpsAction) async {
+  final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
-    if (gpsBloc.state.isLoading) {
-      await Future.delayed(Duration(milliseconds: 100));
-    }
-    gpsAction.call();
+  if (gpsBloc.state.isLoading) {
+    await Future.delayed(Duration(milliseconds: 500));
+  }
+  gpsAction.call();
+}
+
+bool handleGpsAnswer(BuildContext context, GpsBloc gpsBloc) {
+  if (!gpsBloc.state.isGpsEnabled) {
+    showGpsLocationDialog(context);
+    return false;
   }
 
-  void _handleGpsAnswer(BuildContext context, GpsBloc gpsBloc) {
-    if (!gpsBloc.state.isGpsEnabled) {
-      showGpsLocationDialog(context);
-      return;
-    }
-
-    if (!gpsBloc.state.isGpsPermissionGranted) {
-      showLocationPermissionDialog(context, gpsBloc);
-      return;
-    }
-
-    Navigator.popAndPushNamed(context, 'map_address');
+  if (!gpsBloc.state.isGpsPermissionGranted) {
+    showLocationPermissionDialog(context, gpsBloc);
+    return false;
   }
+
+  return true;
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+
+import '../../bloc/ui_management/gps/gps_bloc.dart';
+import '../../pages/customer_user/profile_addresses/add_address.dart';
 
 class OrderItem extends StatelessWidget {
   final Order order;
@@ -13,6 +17,8 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gpsBloc = BlocProvider.of<GpsBloc>(context);
+
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -122,12 +128,17 @@ class OrderItem extends StatelessWidget {
             //Order tracking button
             ElevatedButton(
               onPressed: () {
-                print('Order Address: ${order.address}');
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            DeliveryUserTracking(order: order)));
+                // print('Order Address: ${order.address}');
+
+                handleWaitGpsStatus(context, () {
+                  if (handleGpsAnswer(context, gpsBloc)) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                DeliveryUserTracking(order: order)));
+                  }
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
