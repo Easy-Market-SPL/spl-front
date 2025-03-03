@@ -68,7 +68,7 @@ class TagsInputWidget extends StatelessWidget {
               .where((tag) => !productFormProvider.selectedTags.contains(tag))
               .where((tag) => tag.toLowerCase().contains(filter.toLowerCase()))
               .toList(),
-          onChanged: (value) {
+          onSaved: (value) {
             if (value != null) productFormProvider.toggleTagSelection(value);
           },
         ),

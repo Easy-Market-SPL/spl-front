@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
+import 'package:spl_front/utils/map/helpers/custom_marker_helper.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../models/ui/general/route_destination.dart';
 
@@ -79,10 +81,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(state.copyWith(polyLines: currentPolylines));
   }
 
-  Future<double> drawMyRoutePolyLine(RouteDestination destination) async {
+  Future<Tuple2<double, double>> drawMyRoutePolyLine(
+      RouteDestination destination) async {
     final myRoute = Polyline(
       polylineId: const PolylineId('delivery_route'),
-      color: Colors.black,
+      color: Color(0xff111b75),
       points: destination.points,
       width: 5,
       startCap: Cap.roundCap,
@@ -96,30 +99,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     double tripDuration = (destination.duration / 60).floorToDouble();
 
     // Custom Markers
-    //final startMarkerIcon = await getCustomMarkerIcon();
-    //final endMarkerIcon = await getNetworkImageMarker();
+    final startMarkerIcon = await getCustomMarkerIcon('delivery-location.png');
+    final endMarkerIcon = await getCustomMarkerIcon('delivery-destination.png');
 
     // Draw Markers
     final startMarker = Marker(
-      //icon: startMarkerIcon,
+      icon: startMarkerIcon,
       markerId: MarkerId('start'),
       position: destination.points.first,
-      infoWindow: InfoWindow(
-        title: 'Inicio',
-        snippet: 'Kms: $kilometers - Duración: $tripDuration minutos',
-      ),
     );
 
     final endMarker = Marker(
       markerId: MarkerId('end'),
-      //icon: endMarkerIcon,
+      icon: endMarkerIcon,
       position: destination.points.last,
-      //anchor : const Offset(0, 0),
-      infoWindow: InfoWindow(
-        title: destination.endPlace.properties.name,
-        snippet: ('${destination.endPlace.properties.coordinates.latitude}'
-            ', ${destination.endPlace.properties.coordinates.longitude}'),
-      ),
     );
 
     final currentPolylines = Map<String, Polyline>.from(state.polyLines);
@@ -131,12 +124,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     add(DisplayPolylinesEvent(currentPolylines, currentMarkers));
 
-    await Future.delayed(const Duration(milliseconds: 3000));
+    await Future.delayed(const Duration(milliseconds: 200));
 
-    // Add the info window per default to the starting marker
-    _mapController?.showMarkerInfoWindow(const MarkerId('start'));
-
-    return kilometers;
+    return Tuple2(kilometers, tripDuration);
   }
 
   @override
