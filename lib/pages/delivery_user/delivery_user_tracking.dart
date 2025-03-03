@@ -6,12 +6,12 @@ import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
 
 import '../../bloc/ui_management/map/map_bloc.dart';
 import '../../providers/info_trip_provider.dart';
 import '../../widgets/map/map_view_address.dart';
+import '../order/delivery/order_details_delivery.dart';
 
 class DeliveryUserTracking extends StatefulWidget {
   final Order? order;
@@ -223,7 +223,8 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            OrderTrackingScreen(
+                                            OrderDetailsDeliveryScreen(
+                                                order: widget.order,
                                                 userType: UserType.delivery),
                                       ),
                                     );

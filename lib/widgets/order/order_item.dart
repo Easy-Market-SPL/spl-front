@@ -7,6 +7,7 @@ import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 import '../../bloc/ui_management/gps/gps_bloc.dart';
+import '../../bloc/ui_management/orders_list/orders_list_event.dart';
 import '../../pages/customer_user/profile_addresses/add_address.dart';
 
 class OrderItem extends StatelessWidget {
@@ -128,15 +129,22 @@ class OrderItem extends StatelessWidget {
             //Order tracking button
             ElevatedButton(
               onPressed: () {
-                // print('Order Address: ${order.address}');
+                final orderListBloc = BlocProvider.of<OrderListBloc>(context);
+                final updatedOrder =
+                    order.copyWith(deliveryName: "Felipe Valero");
+
+                orderListBloc.add(UpdateDeliveryInformationOrderEvent(
+                    order.id!, "Felipe Valero Agudelo"));
 
                 handleWaitGpsStatus(context, () {
                   if (handleGpsAnswer(context, gpsBloc)) {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                DeliveryUserTracking(order: order)));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DeliveryUserTracking(order: updatedOrder),
+                      ),
+                    );
                   }
                 });
               },

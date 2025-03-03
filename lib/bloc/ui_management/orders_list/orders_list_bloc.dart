@@ -5,41 +5,49 @@ import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart'
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
-import 'package:uuid/uuid.dart';
 
 class Order {
-  final Uuid id = Uuid();
+  final String? id;
   final String clientName;
   final String status;
   final DateTime date;
   final int items;
   final LatLng? location;
   final String? address;
+  final String? deliveryName;
 
   // TODO: Fetch the address and location from the database
   Order({
+    this.id,
     required this.clientName,
     required this.status,
     DateTime? date,
     this.location,
     this.address,
+    this.deliveryName,
     int? items,
   })  : date = date ?? DateTime.now(),
         items = items ?? 0;
 
   Order copyWith({
+    String? id,
     String? clientName,
     String? status,
     DateTime? date,
     int? items,
     LatLng? location,
+    String? address,
+    String? deliveryName, // <- Asegurar que esto se copie correctamente
   }) {
     return Order(
+      id: id ?? this.id,
       clientName: clientName ?? this.clientName,
       status: status ?? this.status,
       date: date ?? this.date,
       items: items ?? this.items,
       location: location ?? this.location,
+      address: address ?? this.address,
+      deliveryName: deliveryName ?? this.deliveryName, // <- CORREGIDO AQUÍ
     );
   }
 }
@@ -48,6 +56,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
   // TODO: Do the fetch of the information with real data (Specially location and address from the database)
   final List<Order> orders = [
     Order(
+        id: '123',
         clientName: "Ana María",
         status: OrderStrings.statusConfirmed,
         date: DateTime.now().subtract(Duration(days: 3)),
@@ -55,6 +64,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 7),
     Order(
+        id: '1234',
         clientName: "Juan Peláez",
         status: OrderStrings.statusOnTheWay,
         date: DateTime.now().subtract(Duration(days: 1)),
@@ -62,6 +72,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 5),
     Order(
+        id: '12345',
         clientName: "Carlos López",
         status: OrderStrings.statusPreparing,
         date: DateTime.now().subtract(Duration(days: 4)),
@@ -69,6 +80,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 2),
     Order(
+        id: '123456',
         clientName: "Camilo Mora",
         status: OrderStrings.statusPreparing,
         date: DateTime.now().subtract(Duration(days: 2)),
@@ -76,6 +88,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 7),
     Order(
+        id: '1234567',
         clientName: "Leonardo Castro",
         status: OrderStrings.statusPreparing,
         date: DateTime.now().subtract(Duration(days: 1)),
@@ -83,6 +96,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 4),
     Order(
+        id: '12345678',
         clientName: "Juan Ramirez",
         status: OrderStrings.statusPreparing,
         date: DateTime.now().subtract(Duration(days: 0)),
@@ -90,6 +104,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 3),
     Order(
+        id: '12345679',
         clientName: "Cristian Camelo",
         status: OrderStrings.statusOnTheWay,
         date: DateTime.now().subtract(Duration(days: 2)),
@@ -97,6 +112,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         address: 'Calle 22A #52-79',
         items: 3),
     Order(
+        id: '123456710',
         clientName: "María Pérez",
         status: OrderStrings.statusDelivered,
         date: DateTime.now().subtract(Duration(days: 5)),
@@ -116,6 +132,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     on<ApplyAdditionalFiltersEvent>(_onApplyAdditionalFilters);
     on<ClearAdditionalFiltersEvent>(_onClearAdditionalFilters);
     on<ClearAdditionalFiltersDeliveryEvent>(_onClearAdditionalFiltersDelivery);
+    on<UpdateDeliveryInformationOrderEvent>(_onDeliveryInfoEvent);
   }
 
   void _onLoadOrders(
@@ -207,6 +224,35 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
         }).toList(),
         loadedState.selectedFilters,
         [],
+        selectedDateRange: loadedState.selectedDateRange,
+      ));
+    }
+  }
+
+  void _onDeliveryInfoEvent(
+      UpdateDeliveryInformationOrderEvent event, Emitter<OrderListState> emit) {
+    if (state is OrderListLoaded) {
+      final loadedState = state as OrderListLoaded;
+
+      final updatedOrders = loadedState.orders.map((order) {
+        if (order.id == event.orderId) {
+          return order.copyWith(deliveryName: event.deliveryName);
+        }
+        return order;
+      }).toList();
+
+      final updatedFilteredOrders = loadedState.filteredOrders.map((order) {
+        if (order.id == event.orderId) {
+          return order.copyWith(deliveryName: event.deliveryName);
+        }
+        return order;
+      }).toList();
+
+      emit(OrderListLoaded(
+        updatedOrders,
+        updatedFilteredOrders,
+        loadedState.selectedFilters,
+        loadedState.additionalFilters,
         selectedDateRange: loadedState.selectedDateRange,
       ));
     }
