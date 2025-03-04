@@ -13,4 +13,5 @@ class ChatStrings {
   static const String errorDownloadingVideo = 'Error al descargar el video.';
   static const String permissionDenied = 'Permiso denegado para acceder a la galería.';
   static const String error = 'Error:';
+  static const String customerDisclaimer = 'Aquí puedes hablar directamente con la empresa para diferentes necesidades que tengas.';
 }

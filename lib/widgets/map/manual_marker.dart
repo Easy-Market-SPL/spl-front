@@ -29,7 +29,7 @@ class ManualMarker extends StatelessWidget {
                 child: Icon(
                   Icons.location_pin,
                   size: 60,
-                  color: Colors.black,
+                  color: Color(0xFF0B2477),
                 ),
               ),
             ),
@@ -49,7 +49,7 @@ class ManualMarker extends StatelessWidget {
                 height: 50,
                 shape: const StadiumBorder(),
                 minWidth: size.width - 120,
-                color: Colors.black,
+                color: Color(0xFF0B2477),
                 child: const Text(
                   MapStrings.destinationConfirm,
                   style: TextStyle(color: Colors.white),

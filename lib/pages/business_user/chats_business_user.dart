@@ -11,17 +11,39 @@ import 'package:spl_front/widgets/chat/chats_header.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 class ChatsScreen extends StatelessWidget {
-  const ChatsScreen({super.key});
+  final Function(String)? onChatSelected;
+  final Color? backgroundColor;
+  final bool isWeb;
+
+  const ChatsScreen({
+    super.key,
+    this.onChatSelected,
+    this.backgroundColor,
+    this.isWeb = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     context.read<ChatsBloc>().add(LoadChatsEvent());
-    return ChatsPage();
+    return ChatsPage(
+      onChatSelected: onChatSelected,
+      backgroundColor: backgroundColor,
+      isWeb: isWeb,
+    );
   }
 }
 
 class ChatsPage extends StatefulWidget {
-  const ChatsPage({super.key});
+  final Function(String)? onChatSelected;
+  final Color? backgroundColor;
+  final bool isWeb;
+
+  const ChatsPage({
+    super.key,
+    this.onChatSelected,
+    this.backgroundColor,
+    this.isWeb = false,
+  });
 
   @override
   State<ChatsPage> createState() => _ChatsPageState();
@@ -52,6 +74,7 @@ class _ChatsPageState extends State<ChatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: widget.backgroundColor ?? Colors.white,
       body: GestureDetector(
         onTap: () {
           _searchFocusNode.unfocus(); // Avoid the keyboard to stay open
@@ -83,23 +106,26 @@ class _ChatsPageState extends State<ChatsPage> {
                 builder: (context, state) {
                   if (state is ChatsLoaded) {
                     return ListView.builder(
+                      padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                       itemCount: state.filteredChats.length,
                       itemBuilder: (context, index) {
                         final chat = state.filteredChats[index];
                         return GestureDetector(
                           onTap: () {
-                            _searchFocusNode
-                                .unfocus(); // Avoid the keyboard to stay open
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  userType: ChatUserType.business,
-                                  userName: chat
-                                      .name, //TODO: Add a real parameter like the ID
+                            _searchFocusNode.unfocus(); // Avoid the keyboard to stay open
+                            if (widget.onChatSelected != null) {
+                              widget.onChatSelected!(chat.name);
+                            } else if (!widget.isWeb) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(
+                                    userType: UserType.business,
+                                    userName: chat.name,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: chatItem(chat.name, chat.message, chat.date),
                         );
@@ -113,8 +139,9 @@ class _ChatsPageState extends State<ChatsPage> {
           ],
         ),
       ),
-      bottomNavigationBar:
-          CustomBottomNavigationBar(userType: UserType.business),
+      bottomNavigationBar: widget.isWeb
+          ? null
+          : CustomBottomNavigationBar(userType: UserType.business),
     );
   }
 }

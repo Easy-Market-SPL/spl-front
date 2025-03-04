@@ -56,6 +56,7 @@ class MapViewAddress extends StatelessWidget {
               zoomControlsEnabled: false,
               zoomGesturesEnabled: true,
               myLocationButtonEnabled: false,
+              // style: jsonEncode(gtaMapStyle),
               style: jsonEncode(blueStandardMapStyle),
               polylines: polyLines,
               markers: markers,

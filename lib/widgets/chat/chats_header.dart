@@ -7,7 +7,7 @@ class ChatsBusinessUserHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double topPadding = screenHeight * 0.05;
+    final double topPadding = screenHeight * 0.08;
 
     return Padding(
       padding: EdgeInsets.only(top: topPadding, left: 10.0, right: 10.0),

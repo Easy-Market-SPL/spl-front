@@ -6,6 +6,7 @@ import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
+import 'package:spl_front/pages/chat/chats_web.dart';
 import 'package:spl_front/pages/customer_user/cart.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart';
@@ -58,10 +59,12 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// CHAT PAGES
   'customer_user_chat': (_) =>
-      ChatScreen(userType: ChatUserType.customer, userName: "userName"),
+      ChatScreen(userType: UserType.customer, userName: "userName"),
+  'customer_chat_web': (_) => ChatWeb(userType: UserType.customer,),
   'business_user_chat': (_) =>
-      ChatScreen(userType: ChatUserType.business, userName: "customerName"),
+      ChatScreen(userType: UserType.business, userName: "customerName"),
   'business_user_chats': (_) => ChatsScreen(),
+  'business_chat_web': (_) => ChatWeb(userType: UserType.business,),
 
   /// ORDER PAGES
   'add_product': (_) => AddProductPage(),

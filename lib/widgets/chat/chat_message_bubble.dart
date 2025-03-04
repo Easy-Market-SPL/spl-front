@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/widgets/chat/chat_image_manager.dart';
 import 'package:spl_front/widgets/chat/chat_video_player.dart';
@@ -58,7 +59,7 @@ class ChatMessageBubble extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                child: message.fileUrl!.startsWith('http')
+                                child: kIsWeb
                                     ? Image.network(
                                         message.fileUrl!,
                                         width: 200,

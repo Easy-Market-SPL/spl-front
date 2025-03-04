@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../../pages/chat/chat.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatHeader extends StatelessWidget {
-  final ChatUserType userType;
+  final UserType userType;
   final String userName;
 
   const ChatHeader({
@@ -21,15 +22,16 @@ class ChatHeader extends StatelessWidget {
       padding: EdgeInsets.only(top: topPadding, left: 10.0, right: 10.0),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+          if (!kIsWeb)
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
           const SizedBox(width: 10),
           Text(
-            userType == ChatUserType.customer
+            userType == UserType.customer
                 ? ChatStrings.attentionToCustomers
                 : ChatStrings.chatWithCustomer,
             style: const TextStyle(

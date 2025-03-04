@@ -68,6 +68,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                               Navigator.pop(context);
                             },
                           ),
+                          SizedBox(height: 10),
                           LogOutButton(),
                         ],
                       );
