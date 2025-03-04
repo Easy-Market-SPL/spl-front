@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
-import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/addresses/address_section.dart';
 import 'package:spl_front/widgets/buttons/log_out_button.dart';
@@ -69,6 +68,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                               Navigator.pop(context);
                             },
                           ),
+                          SizedBox(height: 10),
                           LogOutButton(),
                         ],
                       );

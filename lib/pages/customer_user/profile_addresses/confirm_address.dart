@@ -7,6 +7,8 @@ import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/widgets/addresses/helpers/address_dialogs.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../bloc/ui_management/gps/gps_bloc.dart';
+import 'add_address.dart';
 
 class ConfirmAddressPage extends StatefulWidget {
   const ConfirmAddressPage({super.key});
@@ -22,6 +24,7 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
   @override
   Widget build(BuildContext context) {
     final apiKey = dotenv.env['MAPS_API_KEY'];
+    final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
     return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
       builder: (context, state) {
@@ -86,8 +89,12 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                         right: 100,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, 'map_address');
+                            handleWaitGpsStatus(context, () {
+                              if (handleGpsAnswer(context, gpsBloc)) {
+                                Navigator.pushReplacementNamed(
+                                    context, 'map_address');
+                              }
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
