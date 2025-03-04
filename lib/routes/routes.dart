@@ -13,7 +13,7 @@ import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
-import 'package:spl_front/pages/login_page_web.dart';
+import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/pages/notifications/notifications.dart';
 import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
