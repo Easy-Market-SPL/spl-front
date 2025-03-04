@@ -13,7 +13,8 @@ class LogOutButton extends StatelessWidget {
         onPressed: () {
           // Sign out the user
           SupabaseAuth.signOut();
-          Navigator.pushReplacementNamed(context, 'login');
+          // Delete pages stack
+          Navigator.of(context).popUntil((route) => route.isFirst);
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),

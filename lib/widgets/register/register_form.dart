@@ -4,7 +4,6 @@ import 'package:spl_front/widgets/buttons/custom_login_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 
 import '../../services/supabase/auth/auth_service.dart';
-import '../../services/supabase/supabase_config.dart';
 
 class RegisterForm extends StatefulWidget {
   final TextEditingController usernameController;
