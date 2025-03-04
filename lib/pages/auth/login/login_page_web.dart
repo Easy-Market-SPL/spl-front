@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:spl_front/pages/auth/login/register_link.dart';
 import 'package:spl_front/utils/strings/login_strings.dart';
 import 'package:spl_front/widgets/login/custom_welcome.dart';
 import 'package:spl_front/widgets/login/login_form.dart';
@@ -54,26 +55,3 @@ class WebLoginPage extends StatelessWidget {
   }
 }
 
-class RegisterLink extends StatelessWidget {
-  const RegisterLink({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        text: LoginStrings.noAccountText,
-        style: TextStyle(color: Colors.grey[600]),
-        children: [
-          TextSpan(
-            text: LoginStrings.registerLink,
-            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                // Navigator.pushReplacementNamed(context, 'register');
-              },
-          ),
-        ],
-      ),
-    );
-  }
-}
