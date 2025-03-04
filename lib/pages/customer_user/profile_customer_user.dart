@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/addresses/address_section.dart';
+import 'package:spl_front/widgets/buttons/log_out_button.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/payment/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
@@ -67,6 +68,8 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                               Navigator.pop(context);
                             },
                           ),
+                          SizedBox(height: 10),
+                          LogOutButton(),
                         ],
                       );
                     } else if (state.showedTab == 1) {

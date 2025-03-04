@@ -12,4 +12,9 @@ class LoginStrings {
   static const String continueOption = "O continúa con";
   static const String facebookText = "Facebook";
   static const String googleText = "Google";
+  static const String successfulLogin = "Inicio de sesión exitoso";
+  static const String wrongCredentials = "Correo o contraseña incorrectos";
+  static const String emptyFields = "Por favor llena todos los campos";
+  static const String invalidEmail = "Correo inválido";
+  static const String unknownError = "Error desconocido";
 }

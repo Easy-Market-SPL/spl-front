@@ -33,7 +33,10 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
   @override
   void initState() {
     final OrderListBloc orderListBloc = BlocProvider.of<OrderListBloc>(context);
-    orderListBloc.selectedFilters = [OrderStrings.statusPreparing];
+    orderListBloc.selectedFilters = [
+      OrderStrings.statusPreparing,
+      OrderStrings.onTheWay,
+    ];
     super.initState();
   }
 

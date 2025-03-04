@@ -7,32 +7,36 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/modify_order_status_options.dart';
-import 'package:spl_front/widgets/order/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/products_popup.dart';
-import 'package:spl_front/widgets/order/shipping_company_selection.dart';
 
-class OrderDetailsScreen extends StatelessWidget {
+import '../../../bloc/ui_management/orders_list/orders_list_bloc.dart';
+
+class OrderDetailsDeliveryScreen extends StatelessWidget {
   final UserType userType;
+  final Order? order;
 
-  const OrderDetailsScreen({super.key, required this.userType});
+  const OrderDetailsDeliveryScreen(
+      {super.key, required this.userType, this.order});
 
   @override
   Widget build(BuildContext context) {
-    return OrderDetailsPage(userType: userType);
+    return OrderDetailsDeliveryPage(userType: userType, order: order);
   }
 }
 
-class OrderDetailsPage extends StatefulWidget {
+class OrderDetailsDeliveryPage extends StatefulWidget {
   final UserType userType;
+  final Order? order;
 
-  const OrderDetailsPage({super.key, required this.userType});
+  const OrderDetailsDeliveryPage(
+      {super.key, required this.userType, this.order});
 
   @override
-  State<OrderDetailsPage> createState() => _OrderDetailsPageState();
+  State<OrderDetailsDeliveryPage> createState() =>
+      _OrderDetailsDeliveryPageState();
 }
 
-class _OrderDetailsPageState extends State<OrderDetailsPage> {
+class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
   UserType get userType => widget.userType;
   String selectedShippingCompany = "Sin seleccionar";
 
@@ -41,6 +45,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     // Simulated order and customer data
     final orderData = _getOrderData();
     final customerData = _getCustomerData();
+    context.read<OrderStatusBloc>().add(LoadOrderStatusEvent());
 
     return Scaffold(
       body: Column(
@@ -59,27 +64,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       children: [
                         // Order modification options
                         if (SPLVariables.hasRealTimeTracking &&
-                                userType == UserType.business ||
                             userType == UserType.delivery) ...[
-                          if (SPLVariables.hasRealTimeTracking &&
-                              userType == UserType.business) ...[
-                            const SizedBox(height: 20),
-                            ModifyOrderStatusOptions(
-                              selectedStatus: state.selectedStatus,
-                              onStatusChanged: (status) {
-                                context
-                                    .read<OrderStatusBloc>()
-                                    .add(ChangeSelectedStatusEvent(status));
-                              },
-                            ),
-                            const SizedBox(height: 24.0),
-                            OrderActionButtons(
-                              selectedStatus: state.selectedStatus,
-                              showDetailsButton: false,
-                              userType: userType,
-                            ),
-                            const SizedBox(height: 24.0),
-                          ],
+                          const SizedBox(height: 24.0),
 
                           // Order details content
                           _buildSectionTitle(OrderStrings.orderDetailsTitle),
@@ -106,30 +92,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                               customerData['direccion']),
 
                           // Real-time tracking or company selection
-                          if (SPLVariables.hasRealTimeTracking) ...[
-                            const SizedBox(height: 20),
-                            _buildSectionTitle(
-                                OrderStrings.deliveryDetailsTitle),
-                            _buildInfoRow(OrderStrings.deliveryPersonName,
-                                OrderStrings.noDeliveryPersonAssigned),
-                          ] else ...[
-                            const SizedBox(height: 20),
-                            _buildSectionTitle(
-                                OrderStrings.shippingCompanyTitle),
-                            if (userType == UserType.business) ...[
-                              _buildSelectableRow(
-                                  OrderStrings.selectedShippingCompany,
-                                  selectedShippingCompany, onActionTap: () {
-                                _showShippingCompanyPopup(
-                                    context); // Open the shipping company selection popup
-                              }),
-                            ] else ...[
-                              _buildInfoRow(
-                                OrderStrings.shippingCompany,
-                                selectedShippingCompany,
-                              ),
-                            ],
-                          ]
+                          const SizedBox(height: 20),
+                          _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
+                          _buildInfoRow(
+                              OrderStrings.deliveryPersonName,
+                              widget.order?.deliveryName ??
+                                  OrderStrings.noDeliveryPersonAssigned),
                         ],
                       ],
                     );
@@ -150,19 +118,18 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   // Helper function to get simulated order data
   Map<String, dynamic> _getOrderData() {
     return {
-      'numeroOrden': "123456",
-      'fecha': "2025-02-17",
+      'numeroOrden': widget.order?.id ?? "123456",
+      'fecha': widget.order?.date.toString() ?? "2025-02-17",
       'numProductos': 5,
       'total': 150.0,
     };
   }
 
-  // Helper function to get simulated customer data
+// Helper function to get simulated customer data
   Map<String, dynamic> _getCustomerData() {
     return {
-      'cliente': "Juan Pérez",
-      'direccion': "Calle Falsa 123",
-      'empresaSeleccionada': "",
+      'cliente': widget.order?.clientName ?? "Juan Ramirez",
+      'direccion': widget.order?.address ?? "Calle Falsa 123",
     };
   }
 
@@ -182,7 +149,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ),
@@ -222,7 +189,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               Text(value,
                   style: const TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w300,
+                      fontWeight: FontWeight.w500,
                       color: Colors.grey)),
             ],
           ),
@@ -247,51 +214,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  // Helper to build a selectable row (for company selection)
-  Widget _buildSelectableRow(String label, String value,
-      {String? subtitle, VoidCallback? onActionTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: GestureDetector(
-        onTap: onActionTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black)),
-            const SizedBox(height: 2),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(value,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.grey)),
-                    if (subtitle != null)
-                      Text(subtitle,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.grey)),
-                  ],
-                ),
-                const Spacer(),
-                const Icon(Icons.chevron_right, color: Colors.grey),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Show the products in a popup when the user taps "Ver productos"
   void _showProductPopup(BuildContext context) {
     showDialog(
@@ -299,24 +221,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return const ProductPopup(); // Open the product popup dialog
-      },
-    );
-  }
-
-  // Show the shipping company selection popup
-  void _showShippingCompanyPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return ShippingCompanyPopup(
-          selectedCompany: selectedShippingCompany,
-          onCompanySelected: (company) {
-            setState(() {
-              selectedShippingCompany = company;
-            });
-          },
-        );
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/login_strings.dart';
 import 'package:spl_front/widgets/buttons/custom_login_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
@@ -18,6 +19,50 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  /// Validate form fields
+  /// Returns true if all fields are filled and email is valid
+  bool _validate() {
+    // Validation of empty fields
+    if (widget.emailController.text.isEmpty ||
+        widget.passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(LoginStrings.emptyFields)),
+      );
+      return false;
+    }
+    // Validation of email with regex
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (widget.emailController.text.isEmpty ||
+        !emailRegex.hasMatch(widget.emailController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(LoginStrings.invalidEmail)),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  /// Sign in method using Supabase
+  /// If the login is successful, the user is redirected to the home page according to his role
+  void login() async {
+    if (!_validate()) return;
+
+    try {
+      await SupabaseAuth.signIn(
+          email: widget.emailController.text,
+          password: widget.passwordController.text);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(LoginStrings.wrongCredentials)),
+        );
+      }
+    }
+  }
+
+  /////////////////////
+  /// BUILD METHOD
+  ////////////////////
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -52,12 +97,7 @@ class _LoginFormState extends State<LoginForm> {
 
               // Login Button
               SignButton(
-                eventHandler: () => {
-                  // TODO: Implement the logic of auth according to the role of the current user
-                  Navigator.pushReplacementNamed(
-                      context, 'delivery_user_orders')
-                  //Navigator.pushReplacementNamed(context, 'customer_dashboard')
-                },
+                eventHandler: () => login(),
                 buttonText: LoginStrings.loginButton,
               ),
             ],

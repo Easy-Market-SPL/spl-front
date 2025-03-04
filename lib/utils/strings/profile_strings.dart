@@ -43,4 +43,5 @@ class ProfileStrings {
   static const ccvHint = "XXX";
   static const saveCard = "Guardar Tarjeta";
   static const addresses = "Direcciones";
+  static const logout = "Cerrar Sesión";
 }

@@ -3,6 +3,8 @@ import 'package:spl_front/utils/strings/register_strings.dart';
 import 'package:spl_front/widgets/buttons/custom_login_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 
+import '../../services/supabase/auth/auth_service.dart';
+
 class RegisterForm extends StatefulWidget {
   final TextEditingController usernameController;
   final TextEditingController nameController;
@@ -19,11 +21,62 @@ class RegisterForm extends StatefulWidget {
     required this.verifyPasswordController,
   });
 
+
+
   @override
   State<RegisterForm> createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<RegisterForm> {
+  void _register() async {
+    final email = widget.emailController.text;
+    final password = widget.passwordController.text;
+
+    if (!_validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    final response = await SupabaseAuth.signUp(email: email, password: password);
+    if (response.user != null) {
+      Navigator.pop(context);
+    } else {
+      // Handle registration error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed')),
+      );
+    }
+  }
+
+  bool _validate() {
+    final email = widget.emailController.text;
+    final password = widget.passwordController.text;
+    final verifyPassword = widget.verifyPasswordController.text;
+    final username = widget.usernameController.text;
+    final name = widget.nameController.text;
+
+    // Check no empty fields
+    if (email.isEmpty || password.isEmpty || verifyPassword.isEmpty || username.isEmpty || name.isEmpty) {
+      return false;
+    }
+
+    // Check if password and verify password are the same
+    if (password != verifyPassword) {
+      return false;
+    }
+
+    // Check if email is valid with regex
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -80,7 +133,7 @@ class _LoginFormState extends State<RegisterForm> {
             // Verify Password Field
             CustomInput(
               hintText: RegisterStrings.verifyPasswordHint,
-              textController: widget.passwordController,
+              textController: widget.verifyPasswordController,
               labelText: RegisterStrings.verifyPasswordLabel,
               isPassword: true,
             ),
@@ -89,10 +142,7 @@ class _LoginFormState extends State<RegisterForm> {
 
             // Login Button
             SignButton(
-              eventHandler: () => {
-                // TODO: Implement the logic of auth according to the email and password
-                // print("A Mora le gusta el Gil")
-              },
+              eventHandler: _register,
               buttonText: RegisterStrings.registerButton,
             ),
           ],

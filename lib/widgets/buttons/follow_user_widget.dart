@@ -22,7 +22,7 @@ class BtnFollowUser extends StatelessWidget {
                 state.isFollowingUser
                     ? Icons.directions_run_rounded
                     : Icons.hail_rounded,
-                color: Colors.black87,
+                color: Color(0xFF0B2477),
               ),
               onPressed: () {
                 mapBloc.add(OnStartFollowingUser());
