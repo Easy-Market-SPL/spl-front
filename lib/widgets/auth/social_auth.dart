@@ -46,7 +46,7 @@ class SocialAuthButtons extends StatelessWidget {
                   image: AssetImage("assets/images/google_logo.png"),
                   onTap: () {
                     SupabaseAuth.nativeGoogleSignIn();
-                    Navigator.pop(context);
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                 ),
               ),
