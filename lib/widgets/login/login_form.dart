@@ -51,37 +51,14 @@ class _LoginFormState extends State<LoginForm> {
       await SupabaseAuth.signIn(
           email: widget.emailController.text,
           password: widget.passwordController.text);
-      _redirectOnceLogged();
     } catch (e) {
       if (context.mounted) {
-        print(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(LoginStrings.wrongCredentials)),
         );
       }
     }
   }
-
-  void _redirectOnceLogged() {
-    final user = SupabaseAuth.getCurrentSession()?.user;
-    if(user == null) return;
-
-    // TODO Add user retrieval from the database and check the role
-    // TODO Add the redirection for delivery
-    var userRole = 'customer'; // user.role
-    userRole == 'admin' || userRole == 'business'
-        ? Navigator.pushReplacementNamed(context, 'business_dashboard')
-        : userRole == 'delivery'
-        ? Navigator.pushReplacementNamed(context, 'delivery_profile')
-        : userRole == 'customer'
-        ? Navigator.pushReplacementNamed(context, 'customer_dashboard')
-        // If the user has no role no redirection is done and an error message is displayed
-        : ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(LoginStrings.unknownError)),
-          );
-  }
-
-
 
   /////////////////////
   /// BUILD METHOD
