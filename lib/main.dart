@@ -76,17 +76,6 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-
-  // Get the platform initial route
-  Widget _getInitialRoute() {
-    // Check if the platform is web, in this case, don't use the SPL var cause KIsWeb allows to check if the platform nature
-    if (kIsWeb) {
-      return const WebLoginPage();
-    } else {
-      // Mobile platform, so check if the third auth is enabled with the SPL Vars
-      return SPLVariables.hasThirdAuth ? LoginPageVariant() : LoginPage();
-    }
-  }
 }
 
 class Wrapper extends StatelessWidget {
@@ -110,14 +99,14 @@ class Wrapper extends StatelessWidget {
               var userRole = 'customer'; // user.role
 
               if (userRole == 'admin' || userRole == 'business') {
-                return const BusinessUserMainDashboard();
+                return BusinessUserMainDashboard();
               } else if (userRole == 'delivery') {
-                return const DeliveryProfilePage();
+                return DeliveryProfilePage();
               } else if (userRole == 'customer') {
-                return const CustomerMainDashboard();
+                return CustomerMainDashboard();
               }
             } else {
-              return const LoginPage();
+              return SPLVariables.hasThirdAuth ? LoginPageVariant() : LoginPage();
             }
           }
           return const SizedBox.shrink();
