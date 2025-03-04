@@ -13,7 +13,7 @@ class BtnBackLocation extends StatelessWidget {
         child: IconButton(
           icon: Icon(
             Icons.backspace_rounded,
-            color: Colors.black,
+            color: Color(0xFF0B2477),
           ),
           onPressed: () {
             Navigator.popAndPushNamed(context, 'add_address');
