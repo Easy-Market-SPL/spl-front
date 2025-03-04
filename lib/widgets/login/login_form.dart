@@ -64,7 +64,7 @@ class _LoginFormState extends State<LoginForm> {
 
   void _redirectOnceLogged() {
     final user = SupabaseAuth.getCurrentSession()?.user;
-    if(user == null) return;
+    if (user == null) return;
 
     // TODO Add user retrieval from the database and check the role
     // TODO Add the redirection for delivery
@@ -72,16 +72,14 @@ class _LoginFormState extends State<LoginForm> {
     userRole == 'admin' || userRole == 'business'
         ? Navigator.pushReplacementNamed(context, 'business_dashboard')
         : userRole == 'delivery'
-        ? Navigator.pushReplacementNamed(context, 'delivery_profile')
-        : userRole == 'customer'
-        ? Navigator.pushReplacementNamed(context, 'customer_dashboard')
-        // If the user has no role no redirection is done and an error message is displayed
-        : ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(LoginStrings.unknownError)),
-          );
+            ? Navigator.pushReplacementNamed(context, 'delivery_user_orders')
+            : userRole == 'customer'
+                ? Navigator.pushReplacementNamed(context, 'customer_dashboard')
+                // If the user has no role no redirection is done and an error message is displayed
+                : ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(LoginStrings.unknownError)),
+                  );
   }
-
-
 
   /////////////////////
   /// BUILD METHOD
