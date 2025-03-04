@@ -4,30 +4,41 @@ import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
 import 'package:spl_front/widgets/order/order_item.dart';
 import 'package:spl_front/widgets/order/orders_filters_popup.dart';
 
-class OrdersScreen extends StatelessWidget {
-  final UserType userType;
-
-  const OrdersScreen({super.key, required this.userType});
+// This class is exclusively for the delivery user and will be visible when the SPL Variable of RealTimeTracking is True
+class OrdersScreenDelivery extends StatelessWidget {
+  const OrdersScreenDelivery({super.key});
 
   @override
   Widget build(BuildContext context) {
     context.read<OrderListBloc>().add(LoadOrdersEvent());
-    return OrdersPage(userType: userType);
+    return OrdersPageDelivery();
   }
 }
 
-class OrdersPage extends StatelessWidget {
-  final UserType userType;
+class OrdersPageDelivery extends StatefulWidget {
+  const OrdersPageDelivery({super.key});
 
-  const OrdersPage({super.key, required this.userType});
+  @override
+  State<OrdersPageDelivery> createState() => _OrdersPageDeliveryState();
+}
+
+class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
+  @override
+  void initState() {
+    final OrderListBloc orderListBloc = BlocProvider.of<OrderListBloc>(context);
+    orderListBloc.selectedFilters = [
+      OrderStrings.statusPreparing,
+      OrderStrings.onTheWay,
+    ];
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +46,7 @@ class OrdersPage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          OrderStrings.ordersTitle,
+          OrderStrings.ordersTitleDelivery,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         forceMaterialTransparency: true,
@@ -48,7 +59,6 @@ class OrdersPage extends StatelessWidget {
               child: Column(
                 children: [
                   searchBar(context),
-                  filterChips(context),
                   Expanded(
                     child: BlocBuilder<OrderListBloc, OrderListState>(
                       builder: (context, state) {
@@ -61,7 +71,7 @@ class OrdersPage extends StatelessWidget {
                               final order = state.filteredOrders[index];
                               return OrderItem(
                                 order: order,
-                                userType: userType,
+                                userType: UserType.delivery,
                               );
                             },
                           );
@@ -77,79 +87,9 @@ class OrdersPage extends StatelessWidget {
               ),
             ),
           ),
-          MenuPage(userType: userType)
+          const DeliveryUserBottomNavigationBar(),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
-    );
-  }
-
-  Widget filterChips(BuildContext context) {
-    return BlocBuilder<OrderListBloc, OrderListState>(
-      builder: (context, state) {
-        if (state is OrderListLoaded) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                children: [
-                  filterChip(context, OrderStrings.statusConfirmed,
-                      selected: state.selectedFilters
-                          .contains(OrderStrings.statusConfirmed)),
-                  filterChip(context, OrderStrings.statusPreparing,
-                      selected: state.selectedFilters
-                          .contains(OrderStrings.statusPreparing)),
-                  filterChip(context, OrderStrings.statusOnTheWay,
-                      selected: state.selectedFilters
-                          .contains(OrderStrings.statusOnTheWay)),
-                  filterChip(context, OrderStrings.statusDelivered,
-                      selected: state.selectedFilters
-                          .contains(OrderStrings.statusDelivered)),
-                ],
-              ),
-              if (state.additionalFilters.isNotEmpty)
-                Wrap(
-                  alignment: WrapAlignment.start,
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: [
-                    ...state.additionalFilters.map((filter) => filterChip(
-                        context, filter,
-                        selected: true, isAditionalFilter: true)),
-                    if (state.selectedDateRange != null)
-                      dateRangeChip(context, state.selectedDateRange!),
-                  ],
-                ),
-            ],
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
-  }
-
-  Widget filterChip(BuildContext context, String label,
-      {bool selected = false, bool isAditionalFilter = false}) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (bool selected) {
-        if (!isAditionalFilter) {
-          context.read<OrderListBloc>().add(FilterOrdersEvent(label));
-        }
-      },
-      selectedColor: Colors.blue,
-      disabledColor: Colors.grey[300],
-      labelStyle: TextStyle(
-          color: selected ? Colors.white : Colors.black, fontSize: 12),
-      backgroundColor: Colors.grey[200],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-      showCheckmark: false,
     );
   }
 
@@ -212,7 +152,7 @@ class OrdersPage extends StatelessWidget {
                 onClearFilters: () {
                   context
                       .read<OrderListBloc>()
-                      .add(ClearAdditionalFiltersEvent());
+                      .add(ClearAdditionalFiltersDeliveryEvent());
                   context.read<OrderListBloc>().selectedDateRange = null;
                 },
                 currentAdditionalFilters: currentAdditionalFilters,

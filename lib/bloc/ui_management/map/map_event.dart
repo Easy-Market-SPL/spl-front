@@ -34,3 +34,8 @@ class DisplayPolylinesEvent extends MapEvent {
   final Map<String, Marker> markers;
   const DisplayPolylinesEvent(this.polylines, this.markers);
 }
+
+class UpdateUserPolyLineEvent extends MapEvent {
+  final List<LatLng> userLocationHistory;
+  const UpdateUserPolyLineEvent(this.userLocationHistory);
+}

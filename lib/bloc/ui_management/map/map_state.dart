@@ -5,10 +5,7 @@ class MapState extends Equatable {
   final bool isFollowingUser;
   final bool showMyRoute;
 
-  // Poly-lines
   final Map<String, Polyline> polyLines;
-
-  // Markers
   final Map<String, Marker> markers;
 
   /*

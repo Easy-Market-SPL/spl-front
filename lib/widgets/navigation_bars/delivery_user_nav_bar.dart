@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../utils/strings/bottom_navigation_strings.dart';
 
-class BusinessBottomNavigationBar extends StatelessWidget {
-  const BusinessBottomNavigationBar({
-    super.key,
-  });
+class DeliveryUserBottomNavigationBar extends StatelessWidget {
+  const DeliveryUserBottomNavigationBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +12,6 @@ class BusinessBottomNavigationBar extends StatelessWidget {
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       items: const [
-        BottomNavigationBarItem(
-            icon: Icon(Icons.home), label: BottomNavigationStrings.home),
         BottomNavigationBarItem(
             icon: Icon(Icons.backpack_sharp),
             label: BottomNavigationStrings.orders),
@@ -29,16 +25,13 @@ class BusinessBottomNavigationBar extends StatelessWidget {
         // TODO: Handle bottom navigation
         switch (index) {
           case 0:
-            Navigator.pushNamed(context, 'business_dashboard');
+            Navigator.pushNamed(context, 'delivery_user_orders');
             break;
           case 1:
-            Navigator.pushNamed(context, 'business_user_orders');
+            Navigator.pushNamed(context, 'delivery_user_notifications');
             break;
           case 2:
-            Navigator.pushNamed(context, 'business_notifications');
-            break;
-          case 3:
-            Navigator.pushNamed(context, 'business_user_menu');
+            Navigator.pushNamed(context, 'delivery_user_menu');
             break;
         }
       },

@@ -17,6 +17,7 @@ import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.da
 import 'package:spl_front/pages/login/login_page.dart';
 import 'package:spl_front/pages/login/login_page_variant.dart';
 import 'package:spl_front/pages/login_page_web.dart';
+import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
@@ -53,12 +54,15 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ProfileTabBloc()),
         BlocProvider(create: (context) => AddressBloc()),
         BlocProvider(create: (context) => LabelsStoreBloc()),
-        ChangeNotifierProvider(create: (context) => ProductFormProvider()),
-        ChangeNotifierProvider(create: (context) => LabelsProvider()),
         BlocProvider(create: (context) => ChatBloc()),
         BlocProvider(create: (context) => OrderStatusBloc()),
         BlocProvider(create: (context) => ChatsBloc()),
         BlocProvider(create: (context) => OrderListBloc()),
+
+        // Change Notifier Providers
+        ChangeNotifierProvider(create: (context) => ProductFormProvider()),
+        ChangeNotifierProvider(create: (context) => LabelsProvider()),
+        ChangeNotifierProvider(create: (context) => InfoTripProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

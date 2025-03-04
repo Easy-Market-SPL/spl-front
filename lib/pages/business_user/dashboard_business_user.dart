@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
-import 'package:spl_front/widgets/navigation_bars/business_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
 import 'package:spl_front/widgets/products/grids/business_product_rated_grid.dart';
 
@@ -82,12 +83,10 @@ class BusinessUserMainDashboard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom Navigation Bar
-            BusinessBottomNavigationBar(),
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business),
     );
   }
 
