@@ -66,8 +66,7 @@ class RegisterLink extends StatelessWidget {
             style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                // TODO: Make the variability according to the SPL Configuration
-                Navigator.pushReplacementNamed(context, 'register');
+                Navigator.pushNamed(context, 'register');
               },
           ),
         ],

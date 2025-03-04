@@ -28,20 +28,6 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<RegisterForm> {
-  @override
-  void initState() {
-    super.initState();
-    _checkSession();
-  }
-
-  void _checkSession() async {
-    final session = SupabaseAuth.getCurrentSession();
-    if (session != null) {
-      Navigator.pushReplacementNamed(context, 'customer_dashboard');
-    }
-  }
-
-
   void _register() async {
     final email = widget.emailController.text;
     final password = widget.passwordController.text;
@@ -55,8 +41,7 @@ class _LoginFormState extends State<RegisterForm> {
 
     final response = await SupabaseAuth.signUp(email: email, password: password);
     if (response.user != null) {
-      // Registration successful
-      Navigator.pushReplacementNamed(context, 'customer_dashboard');
+      Navigator.pop(context);
     } else {
       // Handle registration error
       ScaffoldMessenger.of(context).showSnackBar(
