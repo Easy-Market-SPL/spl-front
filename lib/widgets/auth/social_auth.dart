@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/login_strings.dart';
 
 class SocialAuthButtons extends StatelessWidget {
   const SocialAuthButtons({super.key});
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class SocialAuthButtons extends StatelessWidget {
                   color: Colors.white,
                   image: AssetImage("assets/images/google_logo.png"),
                   onTap: () {
-                    // TODO: Implement the Google Sign In
+                    SupabaseAuth.nativeGoogleSignIn();
                   },
                 ),
               ),
