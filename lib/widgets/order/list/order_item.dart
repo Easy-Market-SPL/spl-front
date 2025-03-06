@@ -6,10 +6,10 @@ import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
-import '../../bloc/ui_management/gps/gps_bloc.dart';
-import '../../bloc/ui_management/orders_list/orders_list_event.dart';
-import '../../bloc/ui_management/orders_list/orders_list_state.dart';
-import '../../pages/customer_user/profile_addresses/add_address.dart';
+import '../../../bloc/ui_management/gps/gps_bloc.dart';
+import '../../../bloc/ui_management/orders_list/orders_list_event.dart';
+import '../../../bloc/ui_management/orders_list/orders_list_state.dart';
+import '../../../pages/customer_user/profile_addresses/add_address.dart';
 
 class OrderItem extends StatelessWidget {
   final Order order;

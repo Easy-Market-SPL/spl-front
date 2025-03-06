@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -33,6 +34,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var initialRoute = 'business_user_orders';
+    if (kIsWeb) initialRoute = 'business_user_orders_web';
     return MultiBlocProvider(
       // Providers using BLoC, managed on the folder lib/bloc/...
       providers: [
@@ -62,7 +65,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SPL Front',
-        home: appRoutes['']!(context), // Wrapper is a widget that manage the auth state
+        //home: appRoutes[initialRoute]!(context), // Wrapper is a widget that manage the auth state
+        initialRoute: initialRoute,
         routes: appRoutes,
       ),
     );

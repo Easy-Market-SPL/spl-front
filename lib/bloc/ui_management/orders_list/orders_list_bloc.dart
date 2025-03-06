@@ -193,7 +193,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
       final loadedState = state as OrderListLoaded;
       final query = event.query.toLowerCase();
 
-      final filteredOrders = loadedState.orders.where((order) {
+      final filteredOrders = loadedState.filteredOrders.where((order) {
         return order.clientName.toLowerCase().contains(query) ||
             DateHelper.isDateMatchingQuery(order.date, query);
       }).toList();
@@ -224,7 +224,7 @@ class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
       final loadedState = state as OrderListLoaded;
       emit(OrderListLoaded(loadedState.orders, loadedState.orders,
           loadedState.selectedFilters, [],
-          selectedDateRange: selectedDateRange));
+          selectedDateRange: null));
     }
   }
 

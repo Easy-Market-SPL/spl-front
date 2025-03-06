@@ -7,6 +7,8 @@ class SearchBarInput extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onEditingComplete;
   final VoidCallback? onFilterPressed;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onTapOutside;
   final bool showFilterButton;
 
   const SearchBarInput({
@@ -17,6 +19,8 @@ class SearchBarInput extends StatelessWidget {
     this.onChanged,
     this.onEditingComplete,
     this.onFilterPressed,
+    this.onSubmitted,
+    this.onTapOutside,
     this.showFilterButton = false,
   });
 
@@ -29,7 +33,13 @@ class SearchBarInput extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         onEditingComplete: onEditingComplete,
-        onTapOutside: (event) => focusNode.unfocus(),
+        onSubmitted: onSubmitted,
+        onTapOutside: (event) {
+          focusNode.unfocus();
+          if (onTapOutside != null) {
+            onTapOutside!();
+          }
+        },
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Icon(Icons.search),

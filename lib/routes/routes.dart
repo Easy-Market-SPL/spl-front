@@ -21,6 +21,7 @@ import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
 import 'package:spl_front/pages/order/order_details.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
+import 'package:spl_front/pages/order/web/orders_list_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 import '../pages/chat/chat.dart';
@@ -69,6 +70,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   /// ORDER PAGES
   'add_product': (_) => AddProductPage(),
   'business_user_orders': (_) => OrdersScreen(userType: UserType.business),
+  'business_user_orders_web': (_) => OrdersListWeb(userType: UserType.business),
   'customer_user_orders': (_) => OrdersScreen(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
   // order tracking

@@ -7,10 +7,10 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/modify_order_status_options.dart';
-import 'package:spl_front/widgets/order/order_action_buttons.dart';
-import 'package:spl_front/widgets/order/products_popup.dart';
-import 'package:spl_front/widgets/order/shipping_company_selection.dart';
+import 'package:spl_front/widgets/order/tracking/modify_order_status_options.dart';
+import 'package:spl_front/widgets/order/tracking/order_action_buttons.dart';
+import 'package:spl_front/widgets/order/list/products_popup.dart';
+import 'package:spl_front/widgets/order/tracking/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final UserType userType;
