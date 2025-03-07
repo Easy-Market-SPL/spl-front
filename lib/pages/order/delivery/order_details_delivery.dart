@@ -7,7 +7,7 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/products_popup.dart';
+import 'package:spl_front/widgets/order/list/products_popup.dart';
 
 import '../../../bloc/ui_management/orders_list/orders_list_bloc.dart';
 

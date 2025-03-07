@@ -8,8 +8,8 @@ import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
 import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
-import 'package:spl_front/widgets/order/order_item.dart';
-import 'package:spl_front/widgets/order/orders_filters_popup.dart';
+import 'package:spl_front/widgets/order/list/order_item.dart';
+import 'package:spl_front/widgets/order/list/orders_filters_popup.dart';
 
 // This class is exclusively for the delivery user and will be visible when the SPL Variable of RealTimeTracking is True
 class OrdersScreenDelivery extends StatelessWidget {

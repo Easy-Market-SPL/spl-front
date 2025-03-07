@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/auth/wrapper.dart';
@@ -21,6 +22,8 @@ import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
 import 'package:spl_front/pages/order/order_details.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
+import 'package:spl_front/pages/order/web/order_tracking_web.dart';
+import 'package:spl_front/pages/order/web/orders_list_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 import '../pages/chat/chat.dart';
@@ -58,26 +61,31 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_dashboard': (_) => BusinessUserMainDashboard(),
 
   /// CHAT PAGES
-  'customer_user_chat': (_) =>
-      ChatScreen(userType: UserType.customer, userName: "userName"),
-  'customer_chat_web': (_) => ChatWeb(userType: UserType.customer,),
+  'customer_user_chat': (_) => !kIsWeb
+      ?  ChatScreen(userType: UserType.customer, userName: "userName")
+      :  ChatWeb(userType: UserType.customer,),
+  'business_user_chats': (_) => !kIsWeb
+      ? ChatsScreen()
+      : ChatWeb(userType: UserType.business,),
   'business_user_chat': (_) =>
       ChatScreen(userType: UserType.business, userName: "customerName"),
-  'business_user_chats': (_) => ChatsScreen(),
-  'business_chat_web': (_) => ChatWeb(userType: UserType.business,),
 
   /// ORDER PAGES
   'add_product': (_) => AddProductPage(),
-  'business_user_orders': (_) => OrdersScreen(userType: UserType.business),
-  'customer_user_orders': (_) => OrdersScreen(userType: UserType.customer),
+  'business_user_orders': (_) => !kIsWeb
+      ? OrdersScreen(userType: UserType.business)
+      : OrdersListWeb(userType: UserType.business),
+  'customer_user_orders': (_) => !kIsWeb
+      ? OrdersScreen(userType: UserType.customer)
+      : OrdersListWeb(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
   // order tracking
-  'business_user_order_tracking': (_) => OrderTrackingScreen(
-        userType: UserType.business,
-      ),
-  'customer_user_order_tracking': (_) => OrderTrackingScreen(
-        userType: UserType.customer,
-      ),
+  'business_user_order_tracking': (_) => !kIsWeb
+      ? OrderTrackingScreen(userType: UserType.business)
+      : OrderTrackingWebScreen(userType: UserType.business),
+  'customer_user_order_tracking': (_) => !kIsWeb
+      ? OrderTrackingScreen(userType: UserType.customer)
+      : OrderTrackingWebScreen(userType: UserType.customer),
   'delivery_user_tracking': (_) => DeliveryUserTracking(),
   // order details
   'business_user_order_details': (_) =>

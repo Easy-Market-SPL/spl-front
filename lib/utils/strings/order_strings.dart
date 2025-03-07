@@ -29,6 +29,10 @@ class OrderStrings {
       'Error al cargar el estado de la orden';
   static const String filtersTitle = 'Filtros';
   static const String sortBy = 'Ordenar por:';
+  static const String filterByStatus = 'Filtrar por estado:';
+  static const String showByStatus = 'Mostrar por estado';
+  static const String searchByDate = 'Buscar por fecha:';
+  static const String selectDateRange = 'Seleccionar rango de fechas';
   static const String mostRecent = 'Más recientes';
   static const String leastRecent = 'Menos recientes';
   static const String mostItems = 'Más items';

@@ -6,14 +6,12 @@ import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/horizontal_order_status.dart';
-import 'package:spl_front/widgets/order/modify_order_status_options.dart';
-import 'package:spl_front/widgets/order/order_action_buttons.dart';
-import 'package:spl_front/widgets/order/order_tracking_header.dart';
-import 'package:spl_front/widgets/order/shipping_guide.dart';
-import 'package:spl_front/widgets/order/vertical_order_status.dart';
-
-enum OrderUserType { costumer, business }
+import 'package:spl_front/widgets/order/tracking/horizontal_order_status.dart';
+import 'package:spl_front/widgets/order/tracking/modify_order_status_options.dart';
+import 'package:spl_front/widgets/order/tracking/order_action_buttons.dart';
+import 'package:spl_front/widgets/order/tracking/order_tracking_header.dart';
+import 'package:spl_front/widgets/order/tracking/shipping_guide.dart';
+import 'package:spl_front/widgets/order/tracking/vertical_order_status.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
@@ -104,10 +102,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     userType: userType,
                                   ),
                                 ],
-                              ],
+                              ]
 
-                              // TODO: Delivery screen
-                              if (userType == UserType.delivery) ...[
+                              // Delivery Screen
+                              else if (userType == UserType.delivery) ...[
                                 HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
@@ -130,7 +128,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     userType: userType,
                                   ),
                                 ],
-                              ] else ...[
+                              ] 
+                              
+                              else ...[
                                 const Text(
                                     'Error al cargar el estado de la orden')
                               ]

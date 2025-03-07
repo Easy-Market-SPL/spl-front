@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 class CustomDateRangePicker extends StatefulWidget {
   final DateTimeRange? initialDateRange;
   final Function(DateTimeRange) onDateRangeSelected;
+  final TextEditingController controller;
 
   const CustomDateRangePicker({
     super.key,
     this.initialDateRange,
     required this.onDateRangeSelected,
+    required this.controller,
   });
 
   @override
@@ -23,6 +26,9 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
   void initState() {
     super.initState();
     selectedDateRange = widget.initialDateRange;
+    if (selectedDateRange != null) {
+      widget.controller.text = "${DateHelper.formatDate(selectedDateRange!.start)} - ${DateHelper.formatDate(selectedDateRange!.end)}";
+    }
   }
 
   @override
@@ -31,11 +37,20 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Buscar por fechas:',
+          OrderStrings.searchByDate,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        TextButton(
-          onPressed: () async {
+        TextField(
+          controller: widget.controller,
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: OrderStrings.selectDateRange,
+            suffixIcon: Icon(Icons.calendar_today),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+          ),
+          onTap: () async {
             final List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
               context: context,
               startInitialDate: DateTime.now(),
@@ -43,7 +58,7 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
               startLastDate: DateTime.now().add(const Duration(days: 3652)),
               endInitialDate: DateTime.now(),
               endFirstDate: DateTime(2000),
-              endLastDate: DateTime.now().add(const Duration(days: 3652)),
+              endLastDate: DateTime.now().add(const Duration(days: 3653)),
               isShowSeconds: false,
               is24HourMode: true,
               minutesInterval: 1,
@@ -68,16 +83,11 @@ class _CustomDateRangePickerState extends State<CustomDateRangePicker> {
               );
               setState(() {
                 selectedDateRange = newDateRange;
+                widget.controller.text = "${DateHelper.formatDate(newDateRange.start)} - ${DateHelper.formatDate(newDateRange.end)}";
                 widget.onDateRangeSelected(newDateRange);
               });
             }
           },
-          child: Text(
-            selectedDateRange == null
-                ? "Seleccionar rango de fechas"
-                : "${DateHelper.formatDate(selectedDateRange!.start)} - ${DateHelper.formatDate(selectedDateRange!.end)}",
-            style: TextStyle(color: Colors.blue),
-          ),
         ),
       ],
     );
