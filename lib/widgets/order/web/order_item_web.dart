@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 
 class OrderItemWeb extends StatelessWidget {
   final Order order;
@@ -18,10 +18,12 @@ class OrderItemWeb extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
+        // Usamos mainAxisSize.min para que el Column se ajuste a su contenido
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with Icon and Order Info
+            // Header con ícono y datos de la orden
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -37,7 +39,10 @@ class OrderItemWeb extends StatelessWidget {
                       child: Icon(Icons.shopping_bag, size: 30, color: Colors.blueGrey),
                     ),
                     const SizedBox(height: 5),
-                    Text('${OrderStrings.items}: ${order.items.toString()}', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(
+                      '${OrderStrings.items}: ${order.items.toString()}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ],
                 ),
                 const SizedBox(width: 16),
@@ -45,36 +50,47 @@ class OrderItemWeb extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${OrderStrings.orderDate}: ${DateHelper.formatDate(order.date)}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                      Text(
+                        '${OrderStrings.orderDate}: ${DateHelper.formatDate(order.date)}',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
                       const SizedBox(height: 5),
                       if (userType == UserType.business) ...[
-                        Text('${OrderStrings.client}: ${order.clientName}', style: TextStyle(fontSize: 14), overflow: TextOverflow.ellipsis),
+                        Text(
+                          '${OrderStrings.client}: ${order.clientName}',
+                          style: const TextStyle(fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         const SizedBox(height: 5),
                       ],
-                      Text('${OrderStrings.status}: ${order.status}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text(
+                        '${OrderStrings.status}: ${order.status}',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-            const Spacer(), // Pushes the button to the bottom
-            // Button Section
+            // Separamos con un SizedBox en lugar de usar Spacer
+            const SizedBox(height: 10),
+            // Botón centrado
             Align(
               alignment: Alignment.center,
               child: ElevatedButton(
                 onPressed: () {
                   if (userType == UserType.business) {
-                    Navigator.of(context).pushNamed('business_user_order_tracking_web', arguments: order);
+                    Navigator.of(context).pushNamed('business_user_order_tracking', arguments: order);
                   } else {
-                    Navigator.of(context).pushNamed('customer_user_order_tracking_web', arguments: order);
+                    Navigator.of(context).pushNamed('customer_user_order_tracking', arguments: order);
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 ),
-                child: Text('Ver orden', style: TextStyle(color: Colors.white)),
+                child: const Text('Ver orden', style: TextStyle(color: Colors.white)),
               ),
             ),
           ],

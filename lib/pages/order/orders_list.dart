@@ -11,15 +11,28 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/order_item.dart';
 import 'package:spl_front/widgets/order/list/orders_filters_popup.dart';
 
-class OrdersScreen extends StatelessWidget {
+class OrdersScreen extends StatefulWidget {
   final UserType userType;
 
   const OrdersScreen({super.key, required this.userType});
 
   @override
+  State<OrdersScreen> createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final currentState = context.read<OrderListBloc>().state;
+    if (currentState is! OrderListLoaded) {
+      context.read<OrderListBloc>().add(LoadOrdersEvent());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    context.read<OrderListBloc>().add(LoadOrdersEvent());
-    return OrdersPage(userType: userType);
+    return OrdersPage(userType: widget.userType);
   }
 }
 

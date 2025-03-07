@@ -13,8 +13,6 @@ import 'package:spl_front/widgets/order/tracking/order_tracking_header.dart';
 import 'package:spl_front/widgets/order/tracking/shipping_guide.dart';
 import 'package:spl_front/widgets/order/tracking/vertical_order_status.dart';
 
-enum OrderUserType { costumer, business }
-
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
   const OrderTrackingScreen({super.key, required this.userType});
@@ -104,10 +102,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     userType: userType,
                                   ),
                                 ],
-                              ],
+                              ]
 
-                              // TODO: Delivery screen
-                              if (userType == UserType.delivery) ...[
+                              // Delivery Screen
+                              else if (userType == UserType.delivery) ...[
                                 HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
@@ -130,7 +128,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     userType: userType,
                                   ),
                                 ],
-                              ] else ...[
+                              ] 
+                              
+                              else ...[
                                 const Text(
                                     'Error al cargar el estado de la orden')
                               ]

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
@@ -136,38 +137,55 @@ class OrderItem extends StatelessWidget {
                 //Order tracking button
                 ElevatedButton(
                   onPressed: () {
-                    final orderListBloc =
-                        BlocProvider.of<OrderListBloc>(context);
-                    final updatedOrder =
-                        order.copyWith(deliveryName: "Felipe Valero");
+                    final orderListBloc = BlocProvider.of<OrderListBloc>(context);
+                    final updatedOrder = order.copyWith(deliveryName: "Felipe Valero");
 
-                    orderListBloc.add(UpdateDeliveryInformationOrderEvent(
-                        order.id!, "Felipe Valero Agudelo"));
+                    orderListBloc.add(
+                      UpdateDeliveryInformationOrderEvent(order.id!, "Felipe Valero Agudelo"),
+                    );
 
-                    handleWaitGpsStatus(context, () {
-                      if (handleGpsAnswer(context, gpsBloc)) {
+                    void navigateToTracking() {
+                      if (userType == UserType.delivery) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                DeliveryUserTracking(order: updatedOrder),
+                            builder: (context) => DeliveryUserTracking(order: updatedOrder),
                           ),
                         );
+                      } else if (userType == UserType.business) {
+                        Navigator.pushNamed(
+                          context,
+                          'business_user_order_tracking',
+                          arguments: updatedOrder,
+                        );
+                      } else {
+                        Navigator.pushNamed(
+                          context,
+                          'customer_user_order_tracking',
+                          arguments: updatedOrder,
+                        );
                       }
-                    });
+                    }
+
+                    if (SPLVariables.hasRealTimeTracking) {
+                      handleWaitGpsStatus(context, () {
+                        if (handleGpsAnswer(context, gpsBloc)) {
+                          navigateToTracking();
+                        }
+                      });
+                    } else {
+                      navigateToTracking();
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
                   ),
                   child: userType == UserType.delivery
-                      ? Text(
-                          OrderStrings.takeOrder,
-                          style: TextStyle(color: Colors.white),
-                        )
-                      : Text(OrderStrings.viewOrder,
-                          style: TextStyle(color: Colors.white)),
+                      ? Text(OrderStrings.takeOrder, style: TextStyle(color: Colors.white))
+                      : Text(OrderStrings.viewOrder, style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
