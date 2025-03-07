@@ -19,12 +19,12 @@ class OrdersListWeb extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          // Filtros en el lado izquierdo
+          // Filters Section
           Expanded(
             flex: 1,
             child: Container(
               alignment: Alignment.topLeft,
-              color: PrimaryColors.blueWeb, // Color de fondo para la sección de filtros
+              color: PrimaryColors.blueWeb,
               padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 20),
               child: SingleChildScrollView(
                 child: Padding(
@@ -61,7 +61,8 @@ class OrdersListWeb extends StatelessWidget {
               ),
             ),
           ),
-          // Lista de órdenes en el lado derecho
+          
+          // Orders List
           Expanded(
             flex: 3,
             child: Padding(
@@ -89,10 +90,10 @@ class OrdersList extends StatelessWidget {
         } else if (state is OrderListLoaded) {
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 450, // Ancho máximo de cada elemento
+              maxCrossAxisExtent: 450,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
-              childAspectRatio: 2, // Relación de aspecto de los elementos
+              childAspectRatio: 2,
             ),
             itemCount: state.filteredOrders.length,
             itemBuilder: (context, index) {

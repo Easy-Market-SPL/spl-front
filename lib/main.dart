@@ -34,8 +34,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    var initialRoute = 'business_user_orders';
-    if (kIsWeb) initialRoute = 'business_user_orders_web';
+    var initialRoute = 'business_user_order_tracking';
+    if (kIsWeb) initialRoute = 'business_user_order_tracking_web';
     return MultiBlocProvider(
       // Providers using BLoC, managed on the folder lib/bloc/...
       providers: [

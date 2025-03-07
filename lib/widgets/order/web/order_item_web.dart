@@ -63,10 +63,14 @@ class OrderItemWeb extends StatelessWidget {
               alignment: Alignment.center,
               child: ElevatedButton(
                 onPressed: () {
-                  // Navigate or open order details
+                  if (userType == UserType.business) {
+                    Navigator.of(context).pushNamed('business_user_order_tracking_web', arguments: order);
+                  } else {
+                    Navigator.of(context).pushNamed('customer_user_order_tracking_web', arguments: order);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 ),

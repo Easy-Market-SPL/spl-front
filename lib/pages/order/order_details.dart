@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
@@ -25,8 +26,9 @@ class OrderDetailsScreen extends StatelessWidget {
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
+  final Color backgroundColor; // Agregar el parámetro backgroundColor
 
-  const OrderDetailsPage({super.key, required this.userType});
+  const OrderDetailsPage({super.key, required this.userType, this.backgroundColor = Colors.white});
 
   @override
   State<OrderDetailsPage> createState() => _OrderDetailsPageState();
@@ -43,9 +45,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     final customerData = _getCustomerData();
 
     return Scaffold(
+      backgroundColor: widget.backgroundColor,
       body: Column(
         children: [
-          _headerOrderDetails(context),
+          if(!kIsWeb) _headerOrderDetails(context),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -57,79 +60,74 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Order modification options
-                        if (SPLVariables.hasRealTimeTracking &&
-                                userType == UserType.business ||
-                            userType == UserType.delivery) ...[
-                          if (SPLVariables.hasRealTimeTracking &&
-                              userType == UserType.business) ...[
-                            const SizedBox(height: 20),
-                            ModifyOrderStatusOptions(
-                              selectedStatus: state.selectedStatus,
-                              onStatusChanged: (status) {
-                                context
-                                    .read<OrderStatusBloc>()
-                                    .add(ChangeSelectedStatusEvent(status));
+                        _buildSectionTitle(OrderStrings.orderDetailsTitle),
+
+                        // Order status and action buttons
+                        if (userType == UserType.business || userType == UserType.delivery) ...[
+                          const SizedBox(height: 20),
+                          ModifyOrderStatusOptions(
+                            selectedStatus: state.selectedStatus,
+                            onStatusChanged: (status) {
+                              context
+                                  .read<OrderStatusBloc>()
+                                  .add(ChangeSelectedStatusEvent(status));
+                            },
+                          ),
+                          const SizedBox(height: 24.0),
+                          OrderActionButtons(
+                            selectedStatus: state.selectedStatus,
+                            showDetailsButton: false,
+                            userType: userType,
+                          ),
+                          const SizedBox(height: 24.0),
+                        ],
+
+                        // Order details
+                        _buildInfoRow(OrderStrings.orderNumber, orderData['numeroOrden']),
+                        _buildInfoRow(OrderStrings.orderDate, orderData['fecha']),
+                        _buildInfoRow(
+                          OrderStrings.orderProductCount,
+                          "${orderData['numProductos']}",
+                          actionText: OrderStrings.viewProducts,
+                          onActionTap: () {
+                            _showProductPopup(context);
+                          },
+                        ),
+                        _buildInfoRow(
+                            OrderStrings.orderTotal,
+                            "\$${orderData['total'].toStringAsFixed(0)}",
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Customer details
+                        if (userType == UserType.business || userType == UserType.delivery) ...[
+                          _buildSectionTitle(OrderStrings.customerDetailsTitle),
+                          _buildInfoRow(OrderStrings.customerName, customerData['cliente']),
+                          _buildInfoRow(OrderStrings.deliveryAddress, customerData['direccion']),
+                        ],
+
+                        // Real-time tracking or company selection
+                        if (SPLVariables.hasRealTimeTracking) ...[
+                          const SizedBox(height: 20),
+                          _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
+                          _buildInfoRow(OrderStrings.deliveryPersonName, OrderStrings.noDeliveryPersonAssigned),
+                        ] else ...[
+                          const SizedBox(height: 20),
+                          _buildSectionTitle(OrderStrings.shippingCompanyTitle),
+                          if (userType == UserType.business) ...[
+                            _buildSelectableRow(
+                              OrderStrings.selectedShippingCompany,
+                              selectedShippingCompany,
+                              onActionTap: () {
+                                _showShippingCompanyPopup(context);
                               },
                             ),
-                            const SizedBox(height: 24.0),
-                            OrderActionButtons(
-                              selectedStatus: state.selectedStatus,
-                              showDetailsButton: false,
-                              userType: userType,
-                            ),
-                            const SizedBox(height: 24.0),
-                          ],
-
-                          // Order details content
-                          _buildSectionTitle(OrderStrings.orderDetailsTitle),
-                          _buildInfoRow(OrderStrings.orderNumber,
-                              orderData['numeroOrden']),
-                          _buildInfoRow(
-                              OrderStrings.orderDate, orderData['fecha']),
-                          _buildInfoRow(OrderStrings.orderProductCount,
-                              "${orderData['numProductos']}",
-                              actionText: OrderStrings.viewProducts,
-                              onActionTap: () {
-                            _showProductPopup(
-                                context); // Open the product popup
-                          }),
-                          _buildInfoRow(OrderStrings.orderTotal,
-                              "\$${orderData['total'].toStringAsFixed(0)}"),
-                          const SizedBox(height: 20),
-
-                          // Customer details content
-                          _buildSectionTitle(OrderStrings.customerDetailsTitle),
-                          _buildInfoRow(OrderStrings.customerName,
-                              customerData['cliente']),
-                          _buildInfoRow(OrderStrings.deliveryAddress,
-                              customerData['direccion']),
-
-                          // Real-time tracking or company selection
-                          if (SPLVariables.hasRealTimeTracking) ...[
-                            const SizedBox(height: 20),
-                            _buildSectionTitle(
-                                OrderStrings.deliveryDetailsTitle),
-                            _buildInfoRow(OrderStrings.deliveryPersonName,
-                                OrderStrings.noDeliveryPersonAssigned),
                           ] else ...[
-                            const SizedBox(height: 20),
-                            _buildSectionTitle(
-                                OrderStrings.shippingCompanyTitle),
-                            if (userType == UserType.business) ...[
-                              _buildSelectableRow(
-                                  OrderStrings.selectedShippingCompany,
-                                  selectedShippingCompany, onActionTap: () {
-                                _showShippingCompanyPopup(
-                                    context); // Open the shipping company selection popup
-                              }),
-                            ] else ...[
-                              _buildInfoRow(
-                                OrderStrings.shippingCompany,
-                                selectedShippingCompany,
-                              ),
-                            ],
-                          ]
+                            _buildInfoRow(
+                              OrderStrings.shippingCompany,
+                              selectedShippingCompany,
+                            ),
+                          ],
                         ],
                       ],
                     );
@@ -207,42 +205,50 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       {String? actionText, VoidCallback? onActionTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black)),
-              const SizedBox(height: 2),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.grey)),
-            ],
-          ),
-          if (actionText != null)
-            GestureDetector(
-              onTap: onActionTap,
-              child: Row(
-                children: [
-                  Text(actionText,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
-                          decoration: TextDecoration.underline)),
-                  const Icon(Icons.chevron_right, color: Colors.grey),
-                ],
-              ),
-            ),
-        ],
+      child: GestureDetector(
+        onTap: onActionTap,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isSmallScreen = constraints.maxWidth < 150;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black)),
+                      const SizedBox(height: 2),
+                      Text(value,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.grey)),
+                    ],
+                  ),
+                ),
+                if (actionText != null)
+                  Row(
+                    children: [
+                      if (!isSmallScreen)
+                        Text(actionText,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic,
+                                decoration: TextDecoration.underline)),
+                      const Icon(Icons.chevron_right, color: Colors.grey),
+                    ],
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -294,11 +300,26 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   // Show the products in a popup when the user taps "Ver productos"
   void _showProductPopup(BuildContext context) {
+    var horizontalFactor = 0.8;
+    if (kIsWeb) horizontalFactor = 0.4;
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return const ProductPopup(); // Open the product popup dialog
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: 200,
+              minWidth: 150,
+              maxWidth: MediaQuery.of(context).size.width * horizontalFactor, // Establecer el ancho máximo relativo al tamaño de la pantalla
+              maxHeight: MediaQuery.of(context).size.height * 0.8, // Establecer la altura máxima relativa al tamaño de la pantalla
+            ),
+            child: const ProductPopup(), // Mostrar el popup de productos
+          ),
+        );
       },
     );
   }
