@@ -139,8 +139,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                         ),
                       );
                     } else {
-                      return Center(
-                          child: Text('Error al cargar el estado de la orden'));
+                      return 
+                      Center(
+                        child: Text('Error al cargar el estado de la orden')
+                      );
                     }
                   },
                 ),
@@ -192,7 +194,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           ],
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
     );
   }
 }

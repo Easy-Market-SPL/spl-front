@@ -26,7 +26,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
-  final Color backgroundColor; // Agregar el parámetro backgroundColor
+  final Color backgroundColor;
 
   const OrderDetailsPage({super.key, required this.userType, this.backgroundColor = Colors.white});
 
@@ -141,7 +141,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
     );
   }
 
@@ -314,10 +314,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             constraints: BoxConstraints(
               minHeight: 200,
               minWidth: 150,
-              maxWidth: MediaQuery.of(context).size.width * horizontalFactor, // Establecer el ancho máximo relativo al tamaño de la pantalla
-              maxHeight: MediaQuery.of(context).size.height * 0.8, // Establecer la altura máxima relativa al tamaño de la pantalla
+              maxWidth: MediaQuery.of(context).size.width * horizontalFactor,
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
             ),
-            child: const ProductPopup(), // Mostrar el popup de productos
+            child: const ProductPopup(),
           ),
         );
       },

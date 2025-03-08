@@ -91,7 +91,7 @@ class OrdersPage extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
     );
   }
 

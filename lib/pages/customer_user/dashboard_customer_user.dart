@@ -57,7 +57,7 @@ class CustomerMainDashboard extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer, context: context,),
     );
   }
 

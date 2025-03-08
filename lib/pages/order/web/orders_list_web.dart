@@ -8,16 +8,30 @@ import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/order/list/order_filters_section.dart';
 import 'package:spl_front/widgets/order/web/order_item_web.dart';
+import 'package:spl_front/widgets/web/scaffold_web.dart';
 
-class OrdersListWeb extends StatelessWidget {
+class OrdersListWeb extends StatefulWidget {
   final UserType userType;
-
   const OrdersListWeb({super.key, required this.userType});
 
   @override
+  State<OrdersListWeb> createState() => _OrdersListWebState();
+}
+
+class _OrdersListWebState extends State<OrdersListWeb> {
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<OrderListBloc>().state;
+    if (state is! OrderListLoaded) {
+      context.read<OrderListBloc>().add(LoadOrdersEvent());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    context.read<OrderListBloc>().add(LoadOrdersEvent());
-    return Scaffold(
+    return WebScaffold(
+      userType: widget.userType,
       body: Row(
         children: [
           // Filters Section
@@ -38,22 +52,16 @@ class OrdersListWeb extends StatelessWidget {
                         .add(ApplyAdditionalFiltersEvent(filters));
                     },
                     onClearFilters: () {
-                      context
-                          .read<OrderListBloc>()
-                          .add(ClearAdditionalFiltersEvent());
+                      context.read<OrderListBloc>().add(ClearAdditionalFiltersEvent());
                       context.read<OrderListBloc>().selectedDateRange = null;
                     },
                     onStatusFilter: (label) {
                       context.read<OrderListBloc>().add(FilterOrdersEvent(label));
                     },
                     currentAdditionalFilters: context.read<OrderListBloc>().state is OrderListLoaded
-                      ? (context.read<OrderListBloc>().state as OrderListLoaded)
-                          .additionalFilters
-                      : [],
+                      ? (context.read<OrderListBloc>().state as OrderListLoaded).additionalFilters : [],
                     currentDateRange: context.read<OrderListBloc>().state is OrderListLoaded
-                      ? (context.read<OrderListBloc>().state as OrderListLoaded)
-                          .selectedDateRange
-                      : null,
+                      ? (context.read<OrderListBloc>().state as OrderListLoaded).selectedDateRange : null,
                     onSearchOrders: (query){
                       context.read<OrderListBloc>().add(SearchOrdersEvent(query));
                     },
@@ -73,14 +81,14 @@ class OrdersListWeb extends StatelessWidget {
                 children: [
                   Text(
                     OrderStrings.ordersTitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Expanded(
-                    child: OrdersList(userType: userType),
+                    child: OrdersList(userType: widget.userType), // Asegúrate que OrdersList también no dispare eventos en build
                   ),
                 ],
               ),

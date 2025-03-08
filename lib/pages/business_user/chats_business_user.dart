@@ -141,7 +141,7 @@ class _ChatsPageState extends State<ChatsPage> {
       ),
       bottomNavigationBar: widget.isWeb
           ? null
-          : CustomBottomNavigationBar(userType: UserType.business),
+          : CustomBottomNavigationBar(userType: UserType.business, context: context,),
     );
   }
 }
