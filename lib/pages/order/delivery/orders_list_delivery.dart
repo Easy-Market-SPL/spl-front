@@ -7,7 +7,7 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
-import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/order_item.dart';
 import 'package:spl_front/widgets/order/list/orders_filters_popup.dart';
 
@@ -87,7 +87,7 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
               ),
             ),
           ),
-          const DeliveryUserBottomNavigationBar(),
+          CustomBottomNavigationBar(userType: UserType.delivery, context: context,),
         ],
       ),
     );

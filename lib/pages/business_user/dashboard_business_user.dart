@@ -86,7 +86,7 @@ class BusinessUserMainDashboard extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business, context: context,),
     );
   }
 

@@ -111,7 +111,7 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
     );
   }
 

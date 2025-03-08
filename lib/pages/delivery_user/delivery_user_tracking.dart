@@ -8,7 +8,7 @@ import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart'
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
-import 'package:spl_front/widgets/navigation_bars/delivery_user_nav_bar.dart';
+import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 import '../../bloc/ui_management/map/map_bloc.dart';
 import '../../providers/info_trip_provider.dart';
@@ -251,7 +251,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                   ),
                 ],
               ),
-              bottomNavigationBar: DeliveryUserBottomNavigationBar(),
+              bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.delivery, context: context,),
             );
           },
         );

@@ -12,6 +12,7 @@ import 'package:spl_front/widgets/order/tracking/order_action_buttons.dart';
 import 'package:spl_front/widgets/order/tracking/order_tracking_header.dart';
 import 'package:spl_front/pages/order/order_details.dart';
 import 'package:spl_front/widgets/order/web/horizontal_order_status_web.dart';
+import 'package:spl_front/widgets/web/scaffold_web.dart';
 
 class OrderTrackingWebScreen extends StatelessWidget {
   final UserType userType;
@@ -37,7 +38,8 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WebScaffold(
+      userType: userType,
       body: Row(
         children: [
           // Tracking Section

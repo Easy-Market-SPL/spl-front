@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/times/time_helper.dart';
-import 'package:spl_front/widgets/app_bars/menu_app_bar.dart';
+import 'package:spl_front/widgets/menu/menu_header.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
 class NotificationsScreen extends StatelessWidget {
@@ -23,10 +23,11 @@ class NotificationsScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType),
+      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
     );
   }
 
+  //TODO: Replace with real data
   List<Widget> _notificationItems() {
     return [
       _notificationItem(

@@ -4,6 +4,7 @@ import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
+import 'package:spl_front/widgets/web/scaffold_web.dart';
 
 class ChatWeb extends StatefulWidget {
   final UserType userType;
@@ -29,10 +30,11 @@ class _ChatWebState extends State<ChatWeb> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WebScaffold(
+      userType: widget.userType,
       body: Row(
         children: [
-          // Lista de chats
+          // Chats list
             Expanded(
             flex: 1,
             child: widget.userType == UserType.business
@@ -63,12 +65,12 @@ class _ChatWebState extends State<ChatWeb> {
                       ChatStrings.customerDisclaimer,
                       style: TextStyle(fontSize: 18,),
                     ),
-                    // Aquí puedes agregar el texto que desees debajo del título
                   ],
                 ),
               ),
             ),
-          // Conversación seleccionada
+            
+          // Selected chat
           Expanded(
             flex: 2,
             child: selectedChatUserName != null
