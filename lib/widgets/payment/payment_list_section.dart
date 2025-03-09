@@ -54,9 +54,9 @@ class PaymentMethodsSection extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final card = state.cards[index];
                   return PaymentMethodCard(
-                    type: "Tarjeta de Crédito",
                     details: formatCardNumber(card.cardNumber),
                     iconPath: "assets/images/payment_card.jpg",
+                    index: index,
                   );
                 },
               );
