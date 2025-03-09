@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/payment/add_payment_dialog.dart';
-import 'package:spl_front/widgets/payment/payment_method_card.dart';
+import 'package:spl_front/widgets/payment/methods/add_payment_dialog.dart';
+import 'package:spl_front/widgets/payment/methods/payment_method_card.dart';
 
-import '../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../../bloc/ui_management/payment/payment_bloc.dart';
 
 class PaymentMethodsSection extends StatelessWidget {
   const PaymentMethodsSection({super.key});

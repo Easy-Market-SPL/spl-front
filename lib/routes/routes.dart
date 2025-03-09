@@ -31,6 +31,7 @@ import '../pages/auth/login/login_page_variant.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
 import '../pages/chat/chat.dart';
+import '../pages/customer_user/payment/payment.dart';
 import '../pages/delivery_user/delivery_user_tracking.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
@@ -107,4 +108,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_notifications': (_) => NotificationsScreen(
         userType: UserType.business,
       ),
+
+  // PAYMENT
+  'customer_payment': (_) => PaymentScreen(),
 };

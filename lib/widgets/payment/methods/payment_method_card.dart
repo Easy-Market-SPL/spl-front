@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 
-import '../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../../bloc/ui_management/payment/payment_bloc.dart';
 
 class PaymentMethodCard extends StatelessWidget {
   final String details;

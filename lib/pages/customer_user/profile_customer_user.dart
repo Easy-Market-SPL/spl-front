@@ -5,7 +5,7 @@ import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/addresses/address_section.dart';
 import 'package:spl_front/widgets/buttons/log_out_button.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
-import 'package:spl_front/widgets/payment/payment_list_section.dart';
+import 'package:spl_front/widgets/payment/methods/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 

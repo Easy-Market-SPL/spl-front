@@ -4,9 +4,9 @@ import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/inputs/card_input.dart';
 
-import '../../bloc/ui_management/payment/payment_bloc.dart';
-import '../../models/ui/credit_card/address_payment_model.dart';
-import '../../models/ui/credit_card/credit_card_model.dart';
+import '../../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../../models/ui/credit_card/address_payment_model.dart';
+import '../../../models/ui/credit_card/credit_card_model.dart';
 
 class AddPaymentDialog extends StatefulWidget {
   const AddPaymentDialog({super.key});

@@ -3,26 +3,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_event.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
+import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
-import 'package:spl_front/widgets/cart/cart_subtotal.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/payment/process/payment_total.dart';
 
-class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+class PaymentScreen extends StatelessWidget {
+  const PaymentScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CartBloc()..add(LoadCart()),
-      child: CartPage(),
+      child: PaymentPage(),
     );
   }
 }
 
-class CartPage extends StatelessWidget {
-  const CartPage({super.key});
+class PaymentPage extends StatelessWidget {
+  const PaymentPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +106,7 @@ class CartPage extends StatelessWidget {
             ),
           ),
         ),
-        Subtotal(subtotal: 0, isEmpty: true),
+        Total(total: 0),
       ],
     );
   }
@@ -113,6 +115,9 @@ class CartPage extends StatelessWidget {
       List<Map<String, dynamic>> items, BuildContext context) {
     double subtotal =
         items.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
+
+    final PaymentCardModel card = context.read<PaymentBloc>().state.cards.first;
+
     return Column(
       children: [
         Expanded(
@@ -124,7 +129,10 @@ class CartPage extends StatelessWidget {
           ),
         ),
         _buildClearCartButton(context),
-        Subtotal(subtotal: subtotal),
+        Total(
+          total: subtotal,
+          card: card,
+        ),
       ],
     );
   }
