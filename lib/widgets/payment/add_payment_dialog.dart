@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/inputs/card_input.dart';
+
+import '../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../models/ui/credit_card/address_payment_model.dart';
+import '../../models/ui/credit_card/credit_card_model.dart';
 
 class AddPaymentDialog extends StatefulWidget {
   const AddPaymentDialog({super.key});
@@ -12,8 +17,9 @@ class AddPaymentDialog extends StatefulWidget {
 
 class AddPaymentDialogState extends State<AddPaymentDialog> {
   final TextEditingController cardNumberController = TextEditingController();
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController expirationController = TextEditingController();
   final TextEditingController ccvController = TextEditingController();
   bool isCardValid = false;
@@ -26,17 +32,19 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
     cardNumberController.addListener(_validateCardNumber);
     expirationController.addListener(_formatExpirationDate);
     ccvController.addListener(_validateCcv);
-    firstNameController.addListener(_updateCard);
-    lastNameController.addListener(_updateCard);
+    nameController.addListener(_updateCard);
+    emailController.addListener(_updateCard);
+    phoneController.addListener(_updateCard);
   }
 
   @override
   void dispose() {
     cardNumberController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
+    nameController.dispose();
+    emailController.dispose();
     expirationController.dispose();
     ccvController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
@@ -120,7 +128,7 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                   cardNumber: cardNumberController.text,
                   expiryDate: expirationController.text,
                   cardHolderName:
-                      '${firstNameController.text} ${lastNameController.text}',
+                      '${nameController.text} ${emailController.text}',
                   cvvCode: ccvController.text,
                   showBackView: false,
                   onCreditCardWidgetChange: (creditCardBrand) {},
@@ -135,15 +143,22 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
               ),
               const SizedBox(height: 16),
               CardInput(
-                controller: firstNameController,
+                controller: nameController,
                 labelText: ProfileStrings.nameLabel,
                 hintText: ProfileStrings.nameHint,
               ),
               const SizedBox(height: 16),
               CardInput(
-                controller: lastNameController,
+                controller: emailController,
                 labelText: ProfileStrings.lastNameLabel,
                 hintText: ProfileStrings.lastNameHint,
+              ),
+              const SizedBox(height: 16),
+              CardInput(
+                controller: phoneController,
+                labelText: ProfileStrings.phoneLabel,
+                hintText: ProfileStrings.phoneNameHint,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               CardInput(
@@ -165,6 +180,24 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                 child: ElevatedButton(
                   onPressed: isCardValid && isExpirationValid && isCcvValid
                       ? () {
+                          final paymentBloc =
+                              BlocProvider.of<PaymentBloc>(context);
+
+                          paymentBloc.add(
+                            AddCardEvent(
+                              PaymentCardModel(
+                                  cardNumber: cardNumberController.text,
+                                  cvv: ccvController.text,
+                                  email: emailController.text,
+                                  phone: '+57${phoneController.text}',
+                                  expiryDate: expirationController.text,
+                                  cardHolderName: nameController.text,
+
+                                  // TODO: This should be the address of the user selected in the UI
+                                  addressPayment: genericPaymentAddress()),
+                            ),
+                          );
+
                           Navigator.pop(context);
                         }
                       : null,

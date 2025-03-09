@@ -1,31 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/payment/add_payment_dialog.dart';
 import 'package:spl_front/widgets/payment/payment_method_card.dart';
 
+import '../../bloc/ui_management/payment/payment_bloc.dart';
+
 class PaymentMethodsSection extends StatelessWidget {
   const PaymentMethodsSection({super.key});
 
+  String formatCardNumber(String cardNumber) {
+    if (cardNumber.length >= 8) {
+      return '${cardNumber.substring(0, 4)} **** **** ${cardNumber.substring(cardNumber.length - 4)}';
+    }
+    return cardNumber; // En caso de error, muestra el número completo
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> paymentMethods = [
-      {
-        "type": ProfileStrings.paymentCard,
-        "details": "Mastercard *1234",
-        "icon": "assets/images/payment_card.jpg"
-      },
-      {
-        "type": ProfileStrings.paymentCard,
-        "details": "Visa *5678",
-        "icon": "assets/images/payment_card.jpg"
-      },
-      {
-        "type": ProfileStrings.paymentPlatform,
-        "details": "Stripe",
-        "icon": "assets/images/stripe.png"
-      },
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -47,14 +39,26 @@ class PaymentMethodsSection extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: ListView.builder(
-            itemCount: paymentMethods.length,
-            itemBuilder: (context, index) {
-              final method = paymentMethods[index];
-              return PaymentMethodCard(
-                type: method["type"]!,
-                details: method["details"]!,
-                iconPath: method["icon"]!,
+          child: BlocBuilder<PaymentBloc, PaymentState>(
+            builder: (context, state) {
+              if (state.cards.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No hay métodos de pago registrados",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: state.cards.length,
+                itemBuilder: (context, index) {
+                  final card = state.cards[index];
+                  return PaymentMethodCard(
+                    type: "Tarjeta de Crédito",
+                    details: formatCardNumber(card.cardNumber),
+                    iconPath: "assets/images/payment_card.jpg",
+                  );
+                },
               );
             },
           ),

@@ -31,7 +31,6 @@ import '../pages/auth/login/login_page_variant.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
 import '../pages/chat/chat.dart';
-import '../pages/credit_card/credit_card_main_page.dart';
 import '../pages/delivery_user/delivery_user_tracking.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
@@ -108,6 +107,4 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_notifications': (_) => NotificationsScreen(
         userType: UserType.business,
       ),
-
-  'home-credit': (_) => HomePageCreditCard(),
 };
