@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
+import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/auth/wrapper.dart';
 import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
@@ -15,7 +16,6 @@ import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
-import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/pages/notifications/notifications.dart';
 import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
@@ -26,23 +26,21 @@ import 'package:spl_front/pages/order/web/order_tracking_web.dart';
 import 'package:spl_front/pages/order/web/orders_list_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
-import '../pages/chat/chat.dart';
-import '../pages/delivery_user/delivery_user_tracking.dart';
 import '../pages/auth/login/login_page.dart';
 import '../pages/auth/login/login_page_variant.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
+import '../pages/chat/chat.dart';
+import '../pages/credit_card/credit_card_main_page.dart';
+import '../pages/delivery_user/delivery_user_tracking.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   /// AUTH RELATED
   '': (_) => Wrapper(),
   // auth forms
-  'login': (_) => !SPLVariables.hasThirdAuth
-      ? LoginPage() 
-      : LoginPageVariant(),
-  'register': (_) => !SPLVariables.hasThirdAuth
-      ? RegisterPage()
-      : RegisterPageVariant(),
+  'login': (_) => !SPLVariables.hasThirdAuth ? LoginPage() : LoginPageVariant(),
+  'register': (_) =>
+      !SPLVariables.hasThirdAuth ? RegisterPage() : RegisterPageVariant(),
   'login_web': (_) => WebLoginPage(),
 
   /// PROFILE PAGES
@@ -62,11 +60,15 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// CHAT PAGES
   'customer_user_chat': (_) => !kIsWeb
-      ?  ChatScreen(userType: UserType.customer, userName: "userName")
-      :  ChatWeb(userType: UserType.customer,),
+      ? ChatScreen(userType: UserType.customer, userName: "userName")
+      : ChatWeb(
+          userType: UserType.customer,
+        ),
   'business_user_chats': (_) => !kIsWeb
       ? ChatsScreen()
-      : ChatWeb(userType: UserType.business,),
+      : ChatWeb(
+          userType: UserType.business,
+        ),
   'business_user_chat': (_) =>
       ChatScreen(userType: UserType.business, userName: "customerName"),
 
@@ -106,4 +108,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'business_notifications': (_) => NotificationsScreen(
         userType: UserType.business,
       ),
+
+  'home-credit': (_) => HomePageCreditCard(),
 };

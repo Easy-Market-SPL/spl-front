@@ -11,6 +11,7 @@ import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
@@ -18,6 +19,7 @@ import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
+import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/services/supabase/supabase_config.dart';
 
 Future main() async {
@@ -33,6 +35,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Stripe Service as a singleton
+    StripeService().init();
+
     return MultiBlocProvider(
       // Providers using BLoC, managed on the folder lib/bloc/...
       providers: [
@@ -54,6 +59,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ChatsBloc()),
         BlocProvider(create: (context) => OrderListBloc()),
 
+        // Provider for Payment Management
+        BlocProvider(create: (context) => PaymentBloc()),
+
         // Change Notifier Providers
         ChangeNotifierProvider(create: (context) => ProductFormProvider()),
         ChangeNotifierProvider(create: (context) => LabelsProvider()),
@@ -62,7 +70,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SPL Front',
-        home: appRoutes['']!(context), // Wrapper is a widget that manage the auth state
+        home: appRoutes['']!(
+            context), // Wrapper is a widget that manage the auth state
         routes: appRoutes,
       ),
     );

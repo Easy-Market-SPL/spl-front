@@ -1,7 +1,5 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/auth/login/register_link.dart';
-import 'package:spl_front/utils/strings/login_strings.dart';
 import 'package:spl_front/widgets/login/custom_welcome.dart';
 import 'package:spl_front/widgets/login/login_form.dart';
 
