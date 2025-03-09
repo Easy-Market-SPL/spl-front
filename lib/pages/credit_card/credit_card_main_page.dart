@@ -15,32 +15,7 @@ class HomePageCreditCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<PaymentCardModel> tarjetas = <PaymentCardModel>[
-      PaymentCardModel(
-          cardNumberHidden: '4242',
-          cardNumber: '4242424242424242',
-          brand: 'visa',
-          cvv: '213',
-          expiracyDate: '01/25',
-          email: 'juanframireze@gmail.com',
-          cardHolderName: 'Fernando Herrera'),
-      PaymentCardModel(
-          cardNumberHidden: '5555',
-          cardNumber: '5555555555554444',
-          brand: 'mastercard',
-          email: 'juanframireze@gmail.com',
-          cvv: '213',
-          expiracyDate: '01/25',
-          cardHolderName: 'Melissa Flores'),
-      PaymentCardModel(
-          cardNumberHidden: '3782',
-          cardNumber: '378282246310005',
-          email: 'juanframireze@gmail.com',
-          brand: 'american express',
-          cvv: '2134',
-          expiracyDate: '01/25',
-          cardHolderName: 'Eduardo Rios'),
-    ];
+    final List<PaymentCardModel> tarjetas = <PaymentCardModel>[];
 
     final size = MediaQuery.of(context).size;
 
@@ -84,7 +59,7 @@ class HomePageCreditCard extends StatelessWidget {
                       tag: tarjetas[index].cardNumber,
                       child: CreditCardWidget(
                         cardNumber: tarjetas[index].cardNumber,
-                        expiryDate: tarjetas[index].expiracyDate,
+                        expiryDate: tarjetas[index].expiryDate,
                         cardHolderName: tarjetas[index].cardHolderName,
                         cvvCode: tarjetas[index].cvv,
                         showBackView: false,
@@ -261,7 +236,7 @@ class TarjetaPage extends StatelessWidget {
             tag: tarjeta.cardNumber,
             child: CreditCardWidget(
               cardNumber: tarjeta.cardNumber,
-              expiryDate: tarjeta.expiracyDate,
+              expiryDate: tarjeta.expiryDate,
               cardHolderName: tarjeta.cardHolderName,
               cvvCode: tarjeta.cvv,
               showBackView: false,

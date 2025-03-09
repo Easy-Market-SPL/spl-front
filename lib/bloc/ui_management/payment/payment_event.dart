@@ -1,12 +1,26 @@
 part of 'payment_bloc.dart';
 
-@immutable
-abstract class PaymentEvent {}
+abstract class PaymentEvent extends Equatable {
+  const PaymentEvent();
 
-class OnSelectCard extends PaymentEvent {
-  final PaymentCardModel card;
-
-  OnSelectCard(this.card);
+  @override
+  List<Object> get props => [];
 }
 
-class OnDeselectCard extends PaymentEvent {}
+class AddCardEvent extends PaymentEvent {
+  final PaymentCardModel card;
+
+  const AddCardEvent(this.card);
+
+  @override
+  List<Object> get props => [card];
+}
+
+class DeleteCardEvent extends PaymentEvent {
+  final int index;
+
+  const DeleteCardEvent(this.index);
+
+  @override
+  List<Object> get props => [index];
+}

@@ -1,18 +1,21 @@
+import 'address_payment_model.dart';
+
 class PaymentCardModel {
-  final String cardNumberHidden;
   final String cardNumber;
-  final String brand;
   final String cvv;
-  final String expiracyDate;
+  final String expiryDate;
   final String cardHolderName;
   final String email;
+  final String phone;
+  final AddressPaymentModel addressPayment;
 
-  PaymentCardModel(
-      {required this.cardNumberHidden,
-      required this.cardNumber,
-      required this.brand,
-      required this.cvv,
-      required this.email,
-      required this.expiracyDate,
-      required this.cardHolderName});
+  PaymentCardModel({
+    required this.cardNumber,
+    required this.cvv,
+    required this.email,
+    required this.phone,
+    required this.expiryDate,
+    required this.cardHolderName,
+    required this.addressPayment,
+  });
 }
