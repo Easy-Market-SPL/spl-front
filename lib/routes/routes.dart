@@ -81,7 +81,8 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       ? OrdersScreen(userType: UserType.customer)
       : OrdersListWeb(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
-  // order tracking
+
+  /// ORDER TRACKING
   'business_user_order_tracking': (_) => !kIsWeb
       ? OrderTrackingScreen(userType: UserType.business)
       : OrderTrackingWebScreen(userType: UserType.business),

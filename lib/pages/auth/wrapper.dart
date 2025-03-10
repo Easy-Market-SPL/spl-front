@@ -21,12 +21,12 @@ class Wrapper extends StatelessWidget {
               // final user = session.user;
               // TODO Add user retrieval from the database and check the role Add the redirection for delivery
 
-              var userRole = 'customer'; // user.role
+              var userRole = 'delivery'; // user.role
 
               if (userRole == 'admin' || userRole == 'business') {
                 return appRoutes['business_dashboard']!(context);
               } else if (userRole == 'delivery') {
-                return appRoutes['delivery_profile']!(context);
+                return appRoutes['delivery_user_orders']!(context);
               } else if (userRole == 'customer') {
                 return appRoutes['customer_dashboard']!(context);
               }
