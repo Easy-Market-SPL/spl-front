@@ -5,7 +5,7 @@ import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/addresses/address_section.dart';
 import 'package:spl_front/widgets/buttons/log_out_button.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
-import 'package:spl_front/widgets/payment/payment_list_section.dart';
+import 'package:spl_front/widgets/payment/methods/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
@@ -30,14 +30,23 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, 'customer_dashboard');
+          },
+        ),
+      ),
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),
           child: Column(
             children: [
               // Profile Header
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
+                padding: EdgeInsets.symmetric(vertical: 4.0),
                 child: ProfileHeader(
                   userRoleTitle: ProfileStrings.customerTitle,
                   userRoleDescription: ProfileStrings.roleDescription,
@@ -65,10 +74,11 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                           SaveChangesButton(
                             onPressed: () {
                               // TODO: Implement Save changes logic
-                              Navigator.pop(context);
+                              Navigator.pushReplacementNamed(
+                                  context, 'customer_dashboard');
                             },
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 15),
                           LogOutButton(),
                         ],
                       );

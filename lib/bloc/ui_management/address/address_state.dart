@@ -27,7 +27,7 @@ class AddressState extends Equatable {
   List<Object> get props => [addresses, isLoading, error];
 }
 
-// Modelo de la dirección
+// Address Model
 class Address {
   final String name;
   final String address;

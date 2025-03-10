@@ -1,6 +1,6 @@
 class MapStrings {
   static const selectOnMap = 'Seleccionar en el Mapa';
-  static const destinationConfirm = 'Confirmar Destino';
+  static const destinationConfirm = 'Confirmar Ubicación';
   static const activeGPS = 'Activar GPS';
   static const activeGPSDescription =
       'Por favor, active el GPS para seleccionar la dirección en el mapa.';

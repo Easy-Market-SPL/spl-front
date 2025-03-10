@@ -18,20 +18,29 @@ class Subtotal extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(CartStrings.subtotal, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('\$${subtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(CartStrings.subtotal,
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('\$${subtotal.toStringAsFixed(2)}',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             ElevatedButton(
-              onPressed: isEmpty ? null : () {
-                //TODO: Change this to navigate to payment screen
-                Navigator.of(context).pushNamed('customer_dashboard');
-              },
+              onPressed: isEmpty
+                  ? null
+                  : () {
+                      Navigator.of(context).pushNamed('customer_payment');
+                    },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isEmpty ? Colors.grey : const Color.fromARGB(255, 0, 93, 180),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                backgroundColor: isEmpty
+                    ? Colors.grey
+                    : const Color.fromARGB(255, 0, 93, 180),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
               ),
-              child: Text(CartStrings.checkoutButton, style: TextStyle(color: Colors.white)),
+              child: Text(CartStrings.checkoutButton,
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

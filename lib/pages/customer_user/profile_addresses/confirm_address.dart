@@ -173,7 +173,7 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                 SizedBox(height: 40),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (labelController.text.isEmpty ||
                           detailsController.text.isEmpty) {
                         // Show a dialog if any of the fields is empty
@@ -195,8 +195,48 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                           ),
                         );
 
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Center(
+                                child: Text(
+                                  AddressStrings.addressCreated,
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              content: const Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.check_circle,
+                                      color: Colors.blue, size: 50),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    AddressStrings.successAddressCreation,
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+
+                        await Future.delayed(
+                            const Duration(seconds: 1, milliseconds: 500));
                         searchBloc.add(OnClearSelectedPlaceEvent());
-                        Navigator.popAndPushNamed(context, 'customer_profile');
+                        Navigator.of(context).pop(); // Close the dialog
+
+                        Navigator.of(context).pop(); // Close the page
                       }
                     },
                     style: ElevatedButton.styleFrom(

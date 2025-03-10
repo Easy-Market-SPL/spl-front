@@ -35,10 +35,12 @@ class ProfileStrings {
   static const addPaymentCard = "Agregar Tarjeta de Pago";
   static const cardLabel = "Número de Tarjeta";
   static const cardHint = "XXXX XXXX XXXX XXXX";
-  static const lastNameLabel = "Apellido";
-  static const lastNameHint = "Apellido";
+  static const lastNameLabel = "Email";
+  static const lastNameHint = "Email";
   static const expirationDateLabel = "Fecha de Expiración";
   static const expirationDateHint = "MM/AA";
+  static const phoneLabel = "Teléfono (+57)";
+  static const phoneNameHint = "Teléfono (+57)";
   static const ccvLabel = "CCV";
   static const ccvHint = "XXX";
   static const saveCard = "Guardar Tarjeta";
