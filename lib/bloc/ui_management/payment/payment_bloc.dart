@@ -22,7 +22,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
               addressPayment: genericPaymentAddress(),
             ),
             PaymentCardModel(
-              cardNumber: '5253581247186341',
+              cardNumber: '5253525352535253',
               cvv: '852',
               email: 'pachoramirez13@gmail.com',
               phone: '3222472264',

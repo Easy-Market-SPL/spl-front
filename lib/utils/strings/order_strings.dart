@@ -73,6 +73,8 @@ class OrderStrings {
   static const String selectShippingCompany = 'Seleccionar Empresa de Envío';
   static const String productsInOrder = 'Productos en esta orden';
   static const String modifyOrderStatus = 'Modificar estado de la orden';
+  static const orderElements = 'Elementos de la Orden';
+  static const addressDelivery = 'Dirección de Entrega';
 
   static String showDateRangeString(String startDate, String endDate) {
     return 'Entre: $startDate - $endDate';

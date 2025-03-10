@@ -4,11 +4,12 @@ import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_event.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
-import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
+import 'package:spl_front/utils/strings/address_strings.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
@@ -160,7 +161,7 @@ class PaymentPageState extends State<PaymentPage> {
                     Text(
                       selectedCard != null
                           ? "**** ${selectedCard!.cardNumber.substring(selectedCard!.cardNumber.length - 4)}"
-                          : "Efectivo",
+                          : PaymentStrings.cash,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -169,7 +170,7 @@ class PaymentPageState extends State<PaymentPage> {
                   ],
                 ),
                 Text(
-                  "Cambiar",
+                  PaymentStrings.change,
                   style: TextStyle(
                     color: selectedCard == null ? Colors.green : Colors.blue,
                     fontSize: 14,
@@ -189,15 +190,13 @@ class PaymentPageState extends State<PaymentPage> {
     double subtotal =
         items.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
 
-    final PaymentCardModel card = context.read<PaymentBloc>().state.cards.first;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildAddressSelection(context),
         const SizedBox(height: 16),
         const Text(
-          "Elementos de la Orden",
+          OrderStrings.orderElements,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -215,7 +214,8 @@ class PaymentPageState extends State<PaymentPage> {
         _buildPaymentMethodSelection(context),
         Total(
           total: subtotal,
-          card: card,
+          card: selectedCard,
+          address: selectedAddress,
         ),
       ],
     );
@@ -226,7 +226,7 @@ class PaymentPageState extends State<PaymentPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Dirección de Entrega",
+          OrderStrings.addressDelivery,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -272,7 +272,7 @@ class PaymentPageState extends State<PaymentPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedAddress?.name ?? "Selecciona una dirección",
+                        selectedAddress?.name ?? AddressStrings.selectAnAddress,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -280,7 +280,8 @@ class PaymentPageState extends State<PaymentPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        selectedAddress?.address ?? "Toca para seleccionar",
+                        selectedAddress?.address ??
+                            AddressStrings.touchForSelect,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black54,

@@ -14,14 +14,14 @@ class Total extends StatelessWidget {
 
   const Total({super.key, required this.total, this.card, this.address});
 
-  void _showSelectCardDialog(BuildContext context) {
+  void _showSelectAddressDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Center(
             child: Text(
-              PaymentStrings.selectCard,
+              PaymentStrings.selectAddressBeforePayment,
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -30,13 +30,105 @@ class Total extends StatelessWidget {
             ),
           ),
           content: const Text(
-            PaymentStrings.selectCardBeforePayment,
+            PaymentStrings.selectAddressBeforePaymentDescription,
             style: TextStyle(
               color: Colors.black54,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSucessfullPaymentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.successPayment,
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.blue, size: 50),
+              SizedBox(height: 10),
+              Text(
+                PaymentStrings.confirmPaymentAssertion,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showErrorPaymentDialog(
+      BuildContext context, StripeCustomReponse response) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.errorInPayment,
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text(
+                response.msg ?? PaymentStrings.unknownError,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
           actions: [
             Center(
@@ -101,14 +193,61 @@ class Total extends StatelessWidget {
     );
   }
 
+  void _showSucessfullCashPaymentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.successPayment,
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.blue, size: 50),
+              SizedBox(height: 10),
+              Text(
+                PaymentStrings.confirmCashPaymentAssertion,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _processPayment(BuildContext context) async {
+    if (address == null) {
+      _showSelectAddressDialog(context);
+      return;
+    }
+
     if (card == null) {
-      _showSelectCardDialog(context);
+      // Means that the payment is cash
+      _showSucessfullCashPaymentDialog(context);
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+      Navigator.pop(context); // Close the dialog
+
+      // TODO: Update on API and DB the order status
+      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
       return;
     }
 
     _showLoadingDialog(context);
-
     final stripeService = StripeService();
     final amount = (total * 100).round().toString();
 
@@ -118,46 +257,12 @@ class Total extends StatelessWidget {
       currency: 'usd',
       card: card!,
     );
-
     // Close the loading dialog
     Navigator.pop(context);
 
     if (response.ok) {
       // Show success dialog and redirect to tracking order page
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            title: const Center(
-              child: Text(
-                PaymentStrings.successPayment,
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, color: Colors.blue, size: 50),
-                SizedBox(height: 10),
-                Text(
-                  PaymentStrings.confirmPaymentAssertion,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        },
-      );
+      _showSucessfullPaymentDialog(context);
 
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
@@ -166,57 +271,7 @@ class Total extends StatelessWidget {
       Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
     } else {
       // Mostrar mensaje de error
-      showDialog(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            title: const Center(
-              child: Text(
-                PaymentStrings.errorInPayment,
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 50),
-                const SizedBox(height: 10),
-                Text(
-                  response.msg ?? PaymentStrings.unknownError,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            actions: [
-              Center(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    minimumSize: const Size(120, 45),
-                  ),
-                  child: const Text(
-                    PaymentStrings.accept,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
+      _showErrorPaymentDialog(context, response);
     }
   }
 
