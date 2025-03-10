@@ -7,9 +7,13 @@ class PaymentStrings {
   static const paymentTittle = 'Confirma tu pago';
   static const total = 'Total';
   static const selectCard = 'Seleccionar tarjeta';
+  static const addCard = 'Agregar tarjeta';
+  static const cash = 'Efectivo';
+  static const notRegisteredCards = 'No hay tarjetas registradas';
   static const confirmPaymentAssertion =
       'Tu pago se ha procesado correctamente';
   static const accept = 'Aceptar';
+  static const selectPaymentMethod = 'Seleccionar Medio de Pago';
   static const successPayment = 'Pago exitoso';
   static const errorInPayment = 'Error en el pago';
   static const unknownError = 'Ocurrió un error inesperado';

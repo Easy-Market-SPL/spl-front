@@ -8,6 +8,7 @@ import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
+import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
@@ -99,6 +100,90 @@ class PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  Widget _buildPaymentMethodSelection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Método de Pago",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 15),
+        GestureDetector(
+          onTap: () async {
+            final selected = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SelectPaymentMethodScreen(),
+              ),
+            );
+            if (selected != null) {
+              setState(() {
+                selectedCard =
+                    selected; // Process when the user selects a credit/debit card
+              });
+            } else {
+              setState(() {
+                selectedCard = null; // Process when the user selects cash
+              });
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    selectedCard != null
+                        ? Icon(Icons.payment, color: Colors.blue, size: 24)
+                        : Icon(Icons.monetization_on,
+                            color: Colors.green, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      selectedCard != null
+                          ? "**** ${selectedCard!.cardNumber.substring(selectedCard!.cardNumber.length - 4)}"
+                          : "Efectivo",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  "Cambiar",
+                  style: TextStyle(
+                    color: selectedCard == null ? Colors.green : Colors.blue,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCartWithItems(
       List<Map<String, dynamic>> items, BuildContext context) {
     double subtotal =
@@ -127,6 +212,7 @@ class PaymentPageState extends State<PaymentPage> {
             },
           ),
         ),
+        _buildPaymentMethodSelection(context),
         Total(
           total: subtotal,
           card: card,

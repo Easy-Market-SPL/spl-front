@@ -162,8 +162,8 @@ class Total extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
 
-      // TODO: Redirect to the tracking order page
-      Navigator.of(context).pushReplacementNamed('customer_dashboard');
+      // TODO: Update on API and DB the order status
+      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
     } else {
       // Mostrar mensaje de error
       showDialog(
@@ -224,6 +224,9 @@ class Total extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(
+          height: 20,
+        ),
         const Divider(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -239,7 +242,10 @@ class Total extends StatelessWidget {
                 Text(
                   '\$${total.toStringAsFixed(2)}',
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
                 ),
               ],
             ),
