@@ -4,7 +4,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
@@ -13,7 +12,6 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import '../../bloc/ui_management/map/map_bloc.dart';
 import '../../providers/info_trip_provider.dart';
 import '../../widgets/map/map_view_address.dart';
-import '../order/delivery/order_details_delivery.dart';
 
 class DeliveryUserTracking extends StatefulWidget {
   final Order? order;
@@ -28,6 +26,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   double distanceToDestination = 0.0;
   double timeToDestination = 0.0;
   String? currentOrderStatus;
+  bool _isExpanded = false; // Manage the status of the expandable container
 
   @override
   void initState() {
@@ -39,7 +38,6 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     final infoTripProvider =
         Provider.of<InfoTripProvider>(context, listen: false);
 
-    // Inicializar el estado actual de la orden
     currentOrderStatus = widget.order?.status;
 
     locationBloc.getCurrentPosition();
@@ -86,13 +84,9 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
         return BlocBuilder<LocationBloc, LocationState>(
           builder: (context, locationState) {
             if (locationState.lastKnowLocation == null) {
-              return Scaffold(
+              return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
-            }
-
-            if (!mapState.polyLines.isNotEmpty) {
-              polylines.removeWhere((key, value) => key == 'delivery_route');
             }
 
             drawDestinationRoute(
@@ -101,14 +95,14 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
             return Scaffold(
               appBar: AppBar(
                 leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.black),
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
                   onPressed: () => Navigator.popAndPushNamed(
                       context, 'delivery_user_orders'),
                 ),
                 title: Text(
-                  'Orden #${widget.order?.id ?? "Unknown"}',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
+                  OrderStrings.orderNumberString(widget.order?.id),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 20),
                 ),
                 backgroundColor: Colors.white,
                 elevation: 0,
@@ -122,199 +116,117 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                       markers: markers.values.toSet(),
                     ),
                   ),
+
+                  // Floating Button for expandable container with delivery info
                   Positioned(
-                    bottom: 40,
-                    left: 20,
+                    bottom: MediaQuery.of(context).size.height * 0.05,
                     right: 20,
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                      backgroundColor: Colors.blue,
+                      child: Icon(
+                        Icons.expand_less_rounded,
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10,
-                              spreadRadius: 2),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Entregar en:',
-                                      style: TextStyle(
-                                          fontSize: 14, color: Colors.grey)),
-                                  Text(
-                                    widget.order?.address ?? 'No disponible',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                ],
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.run_circle,
-                                    color: Colors.blue, size: 33),
-                                onPressed: () {
-                                  _confirmStatusChange(
-                                      context, OrderStrings.onTheWay);
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'A nombre de: ${widget.order?.clientName ?? "Desconocido"}',
-                            style:
-                                TextStyle(fontSize: 16, color: Colors.black87),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.route, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text(
-                                  'Aún estás a: ${infoTripProvider.distance} km',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black87)),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(Icons.timer, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text(
-                                  'Tiempo estimado: ${infoTripProvider.duration} minutos',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black87)),
-                            ],
-                          ),
-                          SizedBox(height: 15),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _confirmStatusChange(
-                                        context, OrderStrings.statusDelivered);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    minimumSize: Size(140, 50),
-                                  ),
-                                  child: Text('Entregar',
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            OrderDetailsDeliveryScreen(
-                                          order: widget.order,
-                                          userType: UserType.delivery,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[300],
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    minimumSize: Size(140, 50),
-                                  ),
-                                  child: Text('Ver orden',
-                                      style: TextStyle(color: Colors.black)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ),
                     ),
                   ),
+
+                  // Expandable container with delivery info
+                  if (_isExpanded)
+                    Positioned(
+                      bottom: MediaQuery.of(context).size.height * 0.05,
+                      left: 20,
+                      right: 20,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 10,
+                                spreadRadius: 2),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  OrderStrings.deliverAt,
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.expand_more_outlined,
+                                      color: Colors.blue),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isExpanded = false;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            Text(
+                              widget.order?.address ??
+                                  OrderStrings.notAvailable,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              OrderStrings.nameOrder(widget.order?.clientName),
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.black87),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Icon(Icons.route, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  OrderStrings.estimatedDistanceKms(
+                                      infoTripProvider.distance),
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                const Icon(Icons.timer, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  OrderStrings.estimatedDeliveryMinutes(
+                                      infoTripProvider.duration),
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
-              bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.delivery, context: context,),
+              bottomNavigationBar: CustomBottomNavigationBar(
+                userType: UserType.delivery,
+                context: context,
+              ),
             );
           },
-        );
-      },
-    );
-  }
-
-  void _confirmStatusChange(BuildContext context, String selectedStatus) {
-    if (currentOrderStatus == selectedStatus) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Error',
-                style: TextStyle(fontWeight: FontWeight.w500)),
-            content: Text(
-                'La orden ya está en estado: "$selectedStatus". No puedes cambiarlo nuevamente.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(OrderStrings.accept,
-                    style: TextStyle(color: Colors.blue)),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(OrderStrings.confirmStatusChangeTitle,
-              style: TextStyle(fontWeight: FontWeight.w500)),
-          content:
-              Text(OrderStrings.confirmStatusChangeContent(selectedStatus)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(OrderStrings.cancel,
-                  style: TextStyle(color: Colors.blue)),
-            ),
-            TextButton(
-              onPressed: () {
-                context.read<OrderListBloc>().add(
-                    UpdateOrderStatusEvent(widget.order!.id!, selectedStatus));
-
-                setState(() {
-                  currentOrderStatus = selectedStatus;
-                });
-
-                if (selectedStatus == OrderStrings.delivered) {
-                  Navigator.popAndPushNamed(context, 'delivery_user_orders');
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text(OrderStrings.accept,
-                  style: TextStyle(color: Colors.blue)),
-            ),
-          ],
         );
       },
     );
