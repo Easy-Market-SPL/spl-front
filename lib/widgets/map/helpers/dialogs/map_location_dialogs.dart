@@ -80,7 +80,7 @@ void showLocationPermissionDialog(BuildContext context, GpsBloc gpsBloc) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              MapStrings.activeGPSDescription,
+              MapStrings.locationPermissionDescription,
               style: TextStyle(
                   color: Colors.black54,
                   fontSize: 14,

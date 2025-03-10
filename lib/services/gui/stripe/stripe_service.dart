@@ -56,15 +56,15 @@ class StripeService {
         params: PaymentMethodParams.card(
           paymentMethodData: PaymentMethodData(
             billingDetails: BillingDetails(
-              email: 'test@stripe.com',
-              phone: '+123456789',
+              email: card.email,
+              phone: card.phone,
               address: Address(
-                city: 'Bogotá',
+                city: card.addressPayment.city,
                 country: 'CO',
-                line1: 'Calle 123',
-                line2: 'Calle 123',
-                state: 'Cundinamarca',
-                postalCode: '110111',
+                line1: card.addressPayment.line1,
+                line2: card.addressPayment.line2,
+                state: card.addressPayment.state,
+                postalCode: card.addressPayment.postalCode,
               ),
             ),
           ),
@@ -90,7 +90,7 @@ class StripeService {
     try {
       final dio = Dio();
       final data = {
-        'amount': amount, // Convertir a centavos
+        'amount': amount,
         'currency': currency,
       };
 

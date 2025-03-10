@@ -7,7 +7,8 @@ import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
-import 'package:spl_front/utils/strings/cart_strings.dart';
+import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
+import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/payment/process/payment_total.dart';
@@ -44,7 +45,7 @@ class PaymentPageState extends State<PaymentPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: _buildCartHeader(context),
+        title: _buildPaymentHeader(context),
         automaticallyImplyLeading: false,
       ),
       body: Padding(
@@ -68,7 +69,7 @@ class PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  Widget _buildCartHeader(BuildContext context) {
+  Widget _buildPaymentHeader(BuildContext context) {
     return Stack(
       children: [
         Positioned(
@@ -85,7 +86,7 @@ class PaymentPageState extends State<PaymentPage> {
           child: Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: Text(
-              CartStrings.cartTitle,
+              PaymentStrings.paymentTittle,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -141,7 +142,7 @@ class PaymentPageState extends State<PaymentPage> {
         const Text(
           "Dirección de Entrega",
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -210,97 +211,6 @@ class PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class SelectAddressScreen extends StatelessWidget {
-  const SelectAddressScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Direcciones de Entrega"),
-      ),
-      body: BlocBuilder<AddressBloc, AddressState>(
-        builder: (context, state) {
-          if (state.addresses.isEmpty) {
-            return const Center(
-              child: Text("No hay direcciones disponibles"),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: state.addresses.length,
-            itemBuilder: (context, index) {
-              final address = state.addresses[index];
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pop(
-                        context, address); // Retornar dirección seleccionada
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.location_on,
-                            color: Colors.blue, size: 24),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                address.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                address.address,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              if (address.details.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    address.details,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }

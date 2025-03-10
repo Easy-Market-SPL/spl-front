@@ -3,7 +3,6 @@ class CartStrings {
   static const String emptyCartMessage =
       "Aún no tienes productos en el carrito de compras";
   static const String subtotal = "Subtotal";
-  static const String total = 'Total';
   static const String clearCartButton = "Vaciar Carrito";
   static const String checkoutButton = "Realizar Pago";
   static const String confirmPaymentButton = "Confirmar Pago";
