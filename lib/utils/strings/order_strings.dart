@@ -73,6 +73,10 @@ class OrderStrings {
   static const String selectShippingCompany = 'Seleccionar Empresa de Envío';
   static const String productsInOrder = 'Productos en esta orden';
   static const String modifyOrderStatus = 'Modificar estado de la orden';
+  static const orderElements = 'Elementos de la Orden';
+  static const addressDelivery = 'Dirección de Entrega';
+  static const notAvailable = 'No disponible';
+  static const deliverAt = 'Entregar en';
 
   static String showDateRangeString(String startDate, String endDate) {
     return 'Entre: $startDate - $endDate';
@@ -80,5 +84,21 @@ class OrderStrings {
 
   static String confirmStatusChangeContent(String status) {
     return '¿Estás seguro de que deseas cambiar el estado de la orden a "$status"?';
+  }
+
+  static String estimatedDeliveryMinutes(double minutes) {
+    return 'Tiempo estimado: $minutes min';
+  }
+
+  static String estimatedDistanceKms(double distance) {
+    return 'Distancia: $distance km';
+  }
+
+  static String nameOrder(String? clientName) {
+    return 'A nombre de: ${clientName ?? "Desconocido"}';
+  }
+
+  static String orderNumberString(String? orderNumber) {
+    return 'Orden #${orderNumber ?? "Desconocido"}';
   }
 }

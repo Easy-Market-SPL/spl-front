@@ -41,7 +41,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.popAndPushNamed(context, 'customer_profile');
+                Navigator.pop(context);
               },
             ),
           ),

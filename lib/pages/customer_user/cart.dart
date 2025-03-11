@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_bloc.dart';
-import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
 import 'package:spl_front/bloc/ui_management/cart/cart_event.dart';
+import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
@@ -36,13 +36,19 @@ class CartPage extends StatelessWidget {
         child: BlocBuilder<CartBloc, CartState>(
           builder: (context, state) {
             if (state.isLoading) {
-              return Center(child: CircularProgressIndicator(color: Colors.blue));
+              return Center(
+                  child: CircularProgressIndicator(color: Colors.blue));
             }
-            return state.items.isEmpty ? _buildEmptyCart(context) : _buildCartWithItems(state.items, context);
+            return state.items.isEmpty
+                ? _buildEmptyCart(context)
+                : _buildCartWithItems(state.items, context);
           },
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer, context: context,),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        userType: UserType.customer,
+        context: context,
+      ),
     );
   }
 
@@ -103,8 +109,10 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCartWithItems(List<Map<String, dynamic>> items, BuildContext context) {
-    double subtotal = items.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
+  Widget _buildCartWithItems(
+      List<Map<String, dynamic>> items, BuildContext context) {
+    double subtotal =
+        items.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
     return Column(
       children: [
         Expanded(
@@ -130,9 +138,11 @@ class CartPage extends StatelessWidget {
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color.fromARGB(255, 220, 76, 92),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        child: Text(CartStrings.clearCartButton, style: TextStyle(color: Colors.white)),
+        child: Text(CartStrings.clearCartButton,
+            style: TextStyle(color: Colors.white)),
       ),
     );
   }

@@ -20,4 +20,10 @@ class AddressStrings {
   static const inputLabelName = 'Nombre';
   static const inputLabelDetails = 'Detalles';
   static const searchAddress = 'Busca tu dirección';
+  static const notAvailableAddresses = 'No hay direcciones disponibles';
+  static const addressCreated = 'Dirección Creada';
+  static const selectAnAddress = 'Selecciona una dirección';
+  static const touchForSelect = 'Toca para seleccionar';
+  static const successAddressCreation =
+      'Se ha creado tu nueva dirección exitosamente';
 }
