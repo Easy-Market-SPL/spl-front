@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
+
+import '../../pages/business_user/profile_business_user.dart';
 
 class ProfileSection extends StatefulWidget {
   final TextEditingController userNameController;

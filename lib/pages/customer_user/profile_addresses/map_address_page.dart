@@ -38,7 +38,6 @@ class _MapAddressPageState extends State<MapAddressPage> {
 
           return BlocBuilder<MapBloc, MapState>(
             builder: (context, mapState) {
-              Map<String, Polyline> polylines = mapState.polyLines;
               Map<String, Marker> markers = mapState.markers;
 
               return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
@@ -49,7 +48,6 @@ class _MapAddressPageState extends State<MapAddressPage> {
                         // Google Map View
                         MapViewAddress(
                           initialLocation: locationState.lastKnowLocation!,
-                          polyLines: polylines.values.toSet(),
                           markers: markers.values.toSet(),
                         ),
                         // Marker to indicate the selected location

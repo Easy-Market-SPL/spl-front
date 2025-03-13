@@ -86,12 +86,18 @@ class OrderStrings {
     return '¿Estás seguro de que deseas cambiar el estado de la orden a "$status"?';
   }
 
-  static String estimatedDeliveryMinutes(double minutes) {
+  static String estimatedDeliveryMinutes(int minutes) {
     return 'Tiempo estimado: $minutes min';
   }
 
   static String estimatedDistanceKms(double distance) {
-    return 'Distancia: $distance km';
+    // Return the distance in kilometers with two decimals
+    return 'Distancia: ${distance.toStringAsFixed(2)} km';
+  }
+
+  static String estimatedDistanceMeters(double distance) {
+    // Return the distance in meters without decimals
+    return 'Distancia: ${distance.toInt()} metros';
   }
 
   static String nameOrder(String? clientName) {
