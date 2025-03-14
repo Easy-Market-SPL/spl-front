@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final String? userName;
+  final String userName;
   final String userRoleTitle;
   final String userRoleDescription;
   const ProfileHeader(
       {super.key,
-      this.userName,
+      required this.userName,
       required this.userRoleTitle,
       required this.userRoleDescription});
 
@@ -21,7 +21,7 @@ class ProfileHeader extends StatelessWidget {
           radius: 40,
           child: Text(
             // Manage the user name
-            userName != null ? userName!.substring(0, 2).toUpperCase() : "JF",
+            _subStringUserName(userName),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -52,5 +52,9 @@ class ProfileHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _subStringUserName(String userName) {
+    return userName.substring(0, 2).toUpperCase();
   }
 }

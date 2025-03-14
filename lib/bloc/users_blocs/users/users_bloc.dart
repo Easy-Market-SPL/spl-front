@@ -23,6 +23,14 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     add(OnUpdateSessionUserEvent(user));
   }
 
+  Future<bool> updateUser(UserModel user) async {
+    bool answer = await UserService.updateUser(user, user.id);
+    if (answer) {
+      add(OnUpdateSessionUserEvent(user));
+    }
+    return answer;
+  }
+
   void clearUser() {
     add(OnClearUserEvent());
   }

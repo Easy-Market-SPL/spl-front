@@ -8,7 +8,7 @@ abstract class UsersEvent extends Equatable {
 }
 
 class OnUpdateSessionUserEvent extends UsersEvent {
-  final User? user;
+  final UserModel? user;
   const OnUpdateSessionUserEvent(this.user);
 }
 

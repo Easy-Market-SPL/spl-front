@@ -1,23 +1,21 @@
-// To parse this JSON data, do
-//
-//     final user = userFromJson(jsonString);
-
 import 'dart:convert';
 
-List<User> userFromJson(String str) =>
-    List<User>.from(json.decode(str).map((x) => User.fromJson(x)));
+/// Parse a JSON string into a List of UserModel
+List<UserModel> userFromJson(String str) =>
+    List<UserModel>.from(json.decode(str).map((x) => UserModel.fromJsonMap(x)));
 
-String userToJson(List<User> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+/// Convert a List of UserModel into a JSON string
+String userToJson(List<UserModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJsonMap())));
 
-class User {
+class UserModel {
   String id;
   String username;
   String fullname;
   String email;
   String rol;
 
-  User({
+  UserModel({
     required this.id,
     required this.username,
     required this.fullname,
@@ -25,9 +23,10 @@ class User {
     required this.rol,
   });
 
-  factory User.fromJson(String jsonString) {
-    final json = jsonDecode(jsonString);
-    return User(
+  /// Factory constructor to parse a single JSON string (usado en getUser)
+  factory UserModel.fromJson(String jsonString) {
+    final Map<String, dynamic> json = jsonDecode(jsonString);
+    return UserModel(
       id: json["id"],
       username: json["username"],
       fullname: json["fullname"],
@@ -36,14 +35,26 @@ class User {
     );
   }
 
-  String toJson() {
-    final json = {
-      "id": id,
-      "username": username,
-      "fullname": fullname,
-      "email": email,
-      "rol": rol,
-    };
-    return jsonEncode(json);
+  /// Factory constructor to parse a Map (usado en userFromJson para la lista)
+  factory UserModel.fromJsonMap(Map<String, dynamic> json) {
+    return UserModel(
+      id: json["id"],
+      username: json["username"],
+      fullname: json["fullname"],
+      email: json["email"],
+      rol: json["rol"],
+    );
   }
+
+  /// Convert a UserModel instance into a JSON string
+  String toJson() => jsonEncode(toJsonMap());
+
+  /// Convert a UserModel instance into a Map (usado en userToJson)
+  Map<String, dynamic> toJsonMap() => {
+        "id": id,
+        "username": username,
+        "fullname": fullname,
+        "email": email,
+        "rol": rol,
+      };
 }

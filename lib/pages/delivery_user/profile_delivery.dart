@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/user.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
-
-import '../../widgets/buttons/log_out_button.dart';
 
 class DeliveryProfilePage extends StatefulWidget {
   const DeliveryProfilePage({super.key});
@@ -28,6 +29,9 @@ class DeliveryProfilePageState extends State<DeliveryProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final UserModel user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -39,13 +43,17 @@ class DeliveryProfilePageState extends State<DeliveryProfilePage> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 16),
                     child: Column(
                       children: [
                         // Header
                         ProfileHeader(
+                          userName: user.fullname,
                           userRoleTitle: ProfileStrings.deliveryTitle,
-                          userRoleDescription: ProfileStrings.roleDescription,
+                          userRoleDescription:
+                              ProfileStrings.roleDescriptionDelivery(
+                                  user.fullname),
                         ),
                         const SizedBox(height: 20),
 
@@ -53,21 +61,9 @@ class DeliveryProfilePageState extends State<DeliveryProfilePage> {
                         ProfileSection(
                           userNameController: userNameController,
                           nameController: nameController,
+                          userType: UserType.delivery,
                         ),
                         const SizedBox(height: 20),
-
-                        // Save Changes Button
-                        SaveChangesButton(
-                          onPressed: () {
-                            // TODO: Implement Save changes logic
-                            Navigator.pushReplacementNamed(
-                                context, 'delivery_user_orders');
-                          },
-                        ),
-                        const SizedBox(height: 15),
-
-                        // Logout Button
-                        const LogOutButton(),
                       ],
                     ),
                   ),

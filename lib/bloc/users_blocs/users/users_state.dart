@@ -1,7 +1,7 @@
 part of 'users_bloc.dart';
 
 class UsersState extends Equatable {
-  final User? sessionUser;
+  final UserModel? sessionUser;
 
   const UsersState({
     this.sessionUser,
@@ -9,7 +9,7 @@ class UsersState extends Equatable {
 
   // CopyWith method
   UsersState copyWith({
-    User? sessionUser,
+    UserModel? sessionUser,
   }) {
     return UsersState(
       sessionUser: sessionUser ?? this.sessionUser,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/pages/auth/login/register_link.dart';
 import 'package:spl_front/widgets/auth/social_auth.dart';
 import 'package:spl_front/widgets/login/custom_welcome.dart';

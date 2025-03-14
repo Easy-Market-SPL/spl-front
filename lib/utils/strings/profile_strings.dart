@@ -4,8 +4,14 @@ class ProfileStrings {
   static const customerTitle = "Perfil de Cliente";
   static const adminTitle = "Panel de Administración";
   static const adminRoleDescription = "Gestiona los usuarios de tu empresa";
-  static const roleDescription =
-      "Gestiona tu información personal y preferencias";
+  static roleDescriptionCustomer(String name) =>
+      "Bienvenido, $name Gestiona tu información personal, métodos de pago y direcciones de envío";
+  static roleDescriptionBusiness(String name) =>
+      "Bienvenido, $name Gestiona tu información personal";
+  static roleDescriptionDelivery(String name) =>
+      "Bienvenido, $name Gestiona tu información personal";
+  static roleDescriptionAdmin(String name) =>
+      "Bienvenido, $name Gestiona los usuarios de tu empresa";
   static const saveChanges = "Guardar Cambios";
   static const information = "Información";
   static const username = "Usuario de cuenta: ";
@@ -46,4 +52,7 @@ class ProfileStrings {
   static const saveCard = "Guardar Tarjeta";
   static const addresses = "Direcciones";
   static const logout = "Cerrar Sesión";
+  static const successFullProfileUpdate = 'Datos Actualizados';
+  static const successFullProfileUpdateDescription =
+      'Sus datos personales han sido actualizados correctamente';
 }
