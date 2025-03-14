@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
-import 'package:spl_front/widgets/products/grids/business_product_rated_grid.dart';
 
 class BusinessUserMainDashboard extends StatelessWidget {
   const BusinessUserMainDashboard({super.key});
@@ -77,9 +75,7 @@ class BusinessUserMainDashboard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   // Important: Change the widget according with the variability from the Product Line
-                  child: SPLVariables.isRated
-                      ? BusinessProductRatedGrid()
-                      : BusinessProductGrid(),
+                  child: BusinessProductGrid()
                 ),
               ),
             ),
