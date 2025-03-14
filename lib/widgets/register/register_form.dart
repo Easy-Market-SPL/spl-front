@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/utils/strings/register_strings.dart';
 import 'package:spl_front/widgets/buttons/custom_login_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../models/user.dart';
 import '../../services/supabase/auth/auth_service.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -21,8 +24,6 @@ class RegisterForm extends StatefulWidget {
     required this.verifyPasswordController,
   });
 
-
-
   @override
   State<RegisterForm> createState() => _LoginFormState();
 }
@@ -39,9 +40,31 @@ class _LoginFormState extends State<RegisterForm> {
       return;
     }
 
-    final response = await SupabaseAuth.signUp(email: email, password: password);
+    final AuthResponse response =
+        await SupabaseAuth.signUp(email: email, password: password);
     if (response.user != null) {
-      Navigator.pop(context);
+      /// Registration successful
+      final serviceResponse = await UserService.createUser(
+        UserModel(
+            id: response.user!.id,
+            email: email,
+            username: widget.usernameController.text,
+            fullname: widget.nameController.text,
+            rol: 'customer'),
+      );
+
+      if (serviceResponse) {
+        /// Close the registration form
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '', // Wrapper's route
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        // Handle registration error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed')),
+        );
+      }
     } else {
       // Handle registration error
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +81,11 @@ class _LoginFormState extends State<RegisterForm> {
     final name = widget.nameController.text;
 
     // Check no empty fields
-    if (email.isEmpty || password.isEmpty || verifyPassword.isEmpty || username.isEmpty || name.isEmpty) {
+    if (email.isEmpty ||
+        password.isEmpty ||
+        verifyPassword.isEmpty ||
+        username.isEmpty ||
+        name.isEmpty) {
       return false;
     }
 
@@ -75,7 +102,6 @@ class _LoginFormState extends State<RegisterForm> {
 
     return true;
   }
-
 
   @override
   Widget build(BuildContext context) {
