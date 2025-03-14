@@ -8,7 +8,7 @@ import 'package:spl_front/widgets/payment/methods/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 
 class CustomerProfilePage extends StatefulWidget {
@@ -19,7 +19,7 @@ class CustomerProfilePage extends StatefulWidget {
 }
 
 class _CustomerProfilePageState extends State<CustomerProfilePage> {
-  // Se declaran los controladores como variables de instancia
+  // The controllers for the username and name fields
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
 

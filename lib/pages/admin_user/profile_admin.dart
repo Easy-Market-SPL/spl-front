@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users_management/users_management_bloc.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/profile/add_user_admin_dialog.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/user_card.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 import '../../utils/strings/profile_strings.dart';
 
@@ -17,31 +19,36 @@ class AdminPanelPage extends StatefulWidget {
 
 class _AdminPanelPageState extends State<AdminPanelPage> {
   @override
-  Widget build(BuildContext context) {
-    // TODO: Load the users information from the DataBase and send it to the widget UserCard instead of the attributes
+  void initState() {
+    super.initState();
 
-    /// LOAD THE CURRENT USER INFORMATION
-    final UserModel user =
+    /// Load all users
+    final usersBlocManagement = BlocProvider.of<UsersManagementBloc>(context);
+    usersBlocManagement.loadUsers();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// Load the current User
+    final UserModel currentUser =
         BlocProvider.of<UsersBloc>(context).state.sessionUser!;
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
               ProfileHeader(
-                userName: user.fullname,
+                userName: currentUser.fullname,
                 userRoleTitle: ProfileStrings.adminTitle,
                 userRoleDescription:
-                    ProfileStrings.roleDescriptionAdmin(user.fullname),
+                    ProfileStrings.roleDescriptionAdmin(currentUser.fullname),
               ),
-
               const SizedBox(height: 20),
-
               // Users List Title
               const Text(
                 ProfileStrings.userList,
@@ -51,44 +58,55 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                   color: Colors.black,
                 ),
               ),
-
               const SizedBox(height: 10),
-
-              // TODO: Send the information and implement the methods (Use BLoC or Provider) and do the map of the users
-              // ListView of the users of the System
-              Expanded(
-                child: ListView(
-                  children: [
-                    UserCard(
-                      name: "Juan Francisco Ramírez",
-                      role: "Admin",
-                      initial: "JF",
-                      onEdit: null,
-                      onDelete: null,
-                    ),
-                    UserCard(
-                      name: "Camilo Mora",
-                      role: "Admin",
-                      initial: "C",
-                      onEdit: null,
-                      onDelete: null,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Add User Button
-              Center(
-                child: AddUserButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AddUserDialog();
-                      },
+              // BlocBuilder that manage the list of users, and if is empty or loading show a loading widget
+              BlocBuilder<UsersManagementBloc, UsersManagementState>(
+                builder: (context, state) {
+                  if (state.users.isEmpty) {
+                    return const SizedBox(
+                      height: 300,
+                      child: CustomLoading(),
                     );
-                  },
-                ),
+                  }
+                  return Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: state.users.length,
+                        itemBuilder: (context, index) {
+                          final user = state.users[index];
+                          return UserCard(
+                            name: user.fullname,
+                            role: user.rol,
+                            initial: user.username.isNotEmpty
+                                ? user.username[0].toUpperCase()
+                                : '',
+                            onEdit: () {
+                              // TODO: Implement onEdit
+                            },
+                            onDelete: () {
+                              // TODO: Implement onDelete
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: AddUserButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AddUserDialog();
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -119,10 +137,7 @@ class AddUserButton extends StatelessWidget {
         icon: const Icon(Icons.person_add, color: Colors.white),
         label: const Text(
           ProfileStrings.addUser,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.white),
         ),
       ),
     );

@@ -31,6 +31,23 @@ class UserService {
     }
   }
 
+  static Future<List<UserModel>> getUsers() async {
+    var url = '$_url/users';
+    var response = await _client.get(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      // Parse the response body as a list of users using userFromJson
+      print(response.body);
+      return userFromJson(response.body);
+    } else {
+      return [];
+    }
+  }
+
   static Future<bool> createUser(UserModel user) async {
     var url = '$_url/users';
     var response = await _client.post(Uri.parse(url),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';

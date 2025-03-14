@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/routes/routes.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../services/supabase/supabase_config.dart';
 
 class Wrapper extends StatefulWidget {

@@ -6,7 +6,7 @@ import 'package:spl_front/widgets/buttons/log_out_button.dart';
 import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 import '../../pages/business_user/profile_business_user.dart';
 

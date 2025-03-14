@@ -5,7 +5,7 @@ import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 
 class BusinessUserProfilePage extends StatelessWidget {

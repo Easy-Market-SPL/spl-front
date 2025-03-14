@@ -14,7 +14,8 @@ import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
-import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users_management/users_management_bloc.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
 
         // Provider for User Management
         BlocProvider(create: (context) => UsersBloc()),
+        BlocProvider(create: (context) => UsersManagementBloc()),
 
         // Change Notifier Providers
         ChangeNotifierProvider(create: (context) => ProductFormProvider()),

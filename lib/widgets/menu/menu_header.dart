@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
@@ -10,7 +10,7 @@ class MenuHeader extends StatelessWidget {
 
   const MenuHeader({super.key, required this.userType});
 
-  String initialsName (String userName){
+  String initialsName(String userName) {
     return userName.substring(0, 2).toUpperCase();
   }
 
