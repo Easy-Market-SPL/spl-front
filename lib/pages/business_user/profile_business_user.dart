@@ -22,35 +22,42 @@ class BusinessUserProfilePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Return to the previous page
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SafeArea(
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
               // Main content with Scroll
               Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ProfileHeader(
-                            userName: user.fullname,
-                            userRoleTitle: ProfileStrings.businessTitle,
-                            userRoleDescription:
-                                ProfileStrings.roleDescriptionBusiness(
-                                    user.fullname)),
-                        const SizedBox(height: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ProfileHeader(
+                          userName: user.fullname,
+                          userRoleTitle: ProfileStrings.businessTitle,
+                          userRoleDescription:
+                              ProfileStrings.roleDescriptionBusiness(
+                                  user.fullname)),
+                      const SizedBox(height: 20),
 
-                        // Profile Section for modify the information
-                        ProfileSection(
-                          nameController: nameController,
-                          userNameController: userNameController,
-                          userType: UserType.business,
-                        ),
-                      ],
-                    ),
+                      // Profile Section for modify the information
+                      ProfileSection(
+                        nameController: nameController,
+                        userNameController: userNameController,
+                        userType: UserType.business,
+                      ),
+                    ],
                   ),
                 ),
               ),
