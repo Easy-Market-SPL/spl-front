@@ -61,7 +61,7 @@ class Total extends StatelessWidget {
     );
   }
 
-  void _showSucessfullPaymentDialog(BuildContext context) {
+  void _showSuccessfullPaymentDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -262,7 +262,7 @@ class Total extends StatelessWidget {
 
     if (response.ok) {
       // Show success dialog and redirect to tracking order page
-      _showSucessfullPaymentDialog(context);
+      _showSuccessfullPaymentDialog(context);
 
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog

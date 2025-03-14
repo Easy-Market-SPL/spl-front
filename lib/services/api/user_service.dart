@@ -44,4 +44,18 @@ class UserService {
       return false;
     }
   }
+
+  static Future<bool> updateUser(UserModel user, String id) async {
+    var url = '$_url/users/$id';
+    var response = await _client.put(Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: user.toJson());
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/widgets/profile/add_user_admin_dialog.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/user_card.dart';
 
+import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../models/user.dart';
 import '../../utils/strings/profile_strings.dart';
 
 class AdminPanelPage extends StatefulWidget {
@@ -17,6 +20,10 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
   Widget build(BuildContext context) {
     // TODO: Load the users information from the DataBase and send it to the widget UserCard instead of the attributes
 
+    /// LOAD THE CURRENT USER INFORMATION
+    final UserModel user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser!;
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: SafeArea(
@@ -27,8 +34,10 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
             children: [
               // Header
               ProfileHeader(
+                userName: user.fullname,
                 userRoleTitle: ProfileStrings.adminTitle,
-                userRoleDescription: ProfileStrings.adminRoleDescription,
+                userRoleDescription:
+                    ProfileStrings.roleDescriptionAdmin(user.fullname),
               ),
 
               const SizedBox(height: 20),
