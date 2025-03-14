@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
 import 'package:spl_front/pages/auth/login/register_link.dart';
 import 'package:spl_front/widgets/auth/social_auth.dart';
 import 'package:spl_front/widgets/login/custom_welcome.dart';
@@ -15,6 +17,14 @@ class _LoginPageVariantState extends State<LoginPageVariant> {
   // Create the controllers for the email and password fields
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    // Call the clearUser method from usersBloc
+    final usersBloc = BlocProvider.of<UsersBloc>(context);
+    usersBloc.clearUser();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
