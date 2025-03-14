@@ -59,6 +59,7 @@ dependencies:
   font_awesome_flutter: ^10.8.0
   flutter_credit_card: ^4.1.0
   flutter_stripe: 11.4.0
+  loading_animation_widget: ^1.3.0
 
 dev_dependencies:
   flutter_test:

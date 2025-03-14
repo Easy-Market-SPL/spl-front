@@ -43,14 +43,15 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   /// Sign in method using Supabase
-  /// If the login is successful, the user is redirected to the home page according to his role
-  void login() async {
+  /// Si el login es exitoso, se limpia el estado anterior y se actualiza el bloc con el nuevo usuario
+  void login(BuildContext context) async {
     if (!_validate()) return;
 
     try {
       await SupabaseAuth.signIn(
-          email: widget.emailController.text,
-          password: widget.passwordController.text);
+        email: widget.emailController.text,
+        password: widget.passwordController.text,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +98,7 @@ class _LoginFormState extends State<LoginForm> {
 
               // Login Button
               SignButton(
-                eventHandler: () => login(),
+                eventHandler: () => login(context),
                 buttonText: LoginStrings.loginButton,
               ),
             ],

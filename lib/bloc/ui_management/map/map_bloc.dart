@@ -1,14 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/utils/map/helpers/custom_marker_helper.dart';
 import 'package:tuple/tuple.dart';
-
-import '../../../models/ui/general/route_destination.dart';
 
 part 'map_event.dart';
 part 'map_state.dart';
@@ -26,15 +24,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<OnStopFollowingUser>((event, emit) {
       emit(state.copyWith(isFollowingUser: false));
     });
-    on<UpdateUserPolyLineEvent>(_onPolyLineNewPoint);
     on<OnAddMarkerEvent>((event, emit) {
       final currentMarkers = Map<String, Marker>.from(state.markers);
       currentMarkers[event.markerId] = event.marker;
       emit(state.copyWith(markers: currentMarkers));
     });
-    on<DisplayPolylinesEvent>((event, emit) {
-      emit(state.copyWith(polyLines: event.polylines, markers: event.markers));
-    });
+    on<OnUpdateMarkersEvent>(_onUpdateMarkers);
 
     // FOLLOWING THE USER LOCATION
     locationStateSubscription = locationBloc.stream.listen((locationState) {
@@ -51,6 +46,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(state.copyWith(isMapInitialized: true));
   }
 
+  void _onUpdateMarkers(OnUpdateMarkersEvent event, Emitter<MapState> emit) {
+    emit(state.copyWith(markers: event.newMarkers));
+  }
+
   void _onStartFollowingUser(
       OnStartFollowingUser event, Emitter<MapState> emit) {
     emit(state.copyWith(isFollowingUser: true));
@@ -63,41 +62,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _mapController?.animateCamera(cameraUpdate);
   }
 
-  // Methods for routes:
-  void _onPolyLineNewPoint(
-      UpdateUserPolyLineEvent event, Emitter<MapState> emit) {
-    final myRoute = Polyline(
-      polylineId: const PolylineId('my_route'),
-      color: Colors.black,
-      width: 5,
-      startCap: Cap.roundCap,
-      endCap: Cap.roundCap,
-      points: event.userLocationHistory,
-    );
-
-    final currentPolylines = Map<String, Polyline>.from(state.polyLines);
-    currentPolylines['delivery_route'] = myRoute;
-
-    emit(state.copyWith(polyLines: currentPolylines));
-  }
-
-  Future<Tuple2<double, double>> drawMyRoutePolyLine(
-      RouteDestination destination) async {
-    final myRoute = Polyline(
-      polylineId: const PolylineId('delivery_route'),
-      color: Color(0xff111b75),
-      points: destination.points,
-      width: 5,
-      startCap: Cap.roundCap,
-      endCap: Cap.roundCap,
-    );
-
-    double kilometers = (destination.distance / 1000);
-    kilometers = (kilometers * 100).floorToDouble();
-    kilometers = kilometers / 100;
-
-    double tripDuration = (destination.duration / 60).floorToDouble();
-
+  Future<Tuple2<double, bool>> drawMarkersAndGetDistanceBetweenPoints(
+      LatLng begin, LatLng end) async {
     // Custom Markers
     final startMarkerIcon = await getCustomMarkerIcon('delivery-location.png');
     final endMarkerIcon = await getCustomMarkerIcon('delivery-destination.png');
@@ -105,28 +71,60 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     // Draw Markers
     final startMarker = Marker(
       icon: startMarkerIcon,
-      markerId: MarkerId('start'),
-      position: destination.points.first,
+      markerId: const MarkerId('start'),
+      position: begin,
     );
 
     final endMarker = Marker(
-      markerId: MarkerId('end'),
+      markerId: const MarkerId('end'),
       icon: endMarkerIcon,
-      position: destination.points.last,
+      position: end,
     );
 
-    final currentPolylines = Map<String, Polyline>.from(state.polyLines);
-    currentPolylines['delivery_route'] = myRoute;
+    final updatedMarkers = Map<String, Marker>.from(state.markers);
+    updatedMarkers['start'] = startMarker;
+    updatedMarkers['end'] = endMarker;
 
-    final currentMarkers = Map<String, Marker>.from(state.markers);
-    currentMarkers['start'] = startMarker;
-    currentMarkers['end'] = endMarker;
-
-    add(DisplayPolylinesEvent(currentPolylines, currentMarkers));
+    // En vez de emitir aquí, disparamos un evento
+    add(OnUpdateMarkersEvent(updatedMarkers));
 
     await Future.delayed(const Duration(milliseconds: 200));
 
-    return Tuple2(kilometers, tripDuration);
+    final distanceBetweenPoints = calculationByDistance(
+      begin.latitude,
+      begin.longitude,
+      end.latitude,
+      end.longitude,
+    );
+
+    if (distanceBetweenPoints < 1000) {
+      // Return distance in meters
+      return Tuple2(distanceBetweenPoints, true);
+    }
+
+    // Return distance in kilometers
+    return Tuple2(distanceBetweenPoints / 1000, false);
+  }
+
+  /// Extra Methods for handle events at BLoC:
+  // Calculate distance between two points on Earth
+  double calculationByDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    const int radius = 6371000; // Radio de la Tierra en metros
+
+    double dLat = (lat2 - lat1) * pi / 180;
+    double dLon = (lon2 - lon1) * pi / 180;
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * pi / 180) *
+            cos(lat2 * pi / 180) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = radius * c; // Distancia en metros
+
+    return distance;
   }
 
   @override

@@ -61,11 +61,15 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     if (start == null || widget.order?.location == null) return;
 
     final end = widget.order!.location;
-    final destination = await searchBloc.getCoorsStartToEnd(start, end!);
-    final travelAnswer = await mapBloc.drawMyRoutePolyLine(destination);
+    final travelAnswer =
+        await mapBloc.drawMarkersAndGetDistanceBetweenPoints(start, end!);
 
     infoTripProvider.setDistance(travelAnswer.item1);
-    infoTripProvider.setDuration(travelAnswer.item2);
+    infoTripProvider.setMeters(travelAnswer.item2);
+
+    // Calculate the minutes to arrive to the destination by a formula
+    infoTripProvider
+        .setDuration(calculateMinutes(travelAnswer.item1, travelAnswer.item2));
   }
 
   @override
@@ -77,8 +81,6 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
 
     return BlocBuilder<MapBloc, MapState>(
       builder: (context, mapState) {
-        Map<String, Polyline> polylines =
-            Map<String, Polyline>.from(mapState.polyLines);
         Map<String, Marker> markers = mapState.markers;
 
         return BlocBuilder<LocationBloc, LocationState>(
@@ -112,7 +114,6 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                   Positioned.fill(
                     child: MapViewAddress(
                       initialLocation: locationState.lastKnowLocation!,
-                      polyLines: polylines.values.toSet(),
                       markers: markers.values.toSet(),
                     ),
                   ),
@@ -195,8 +196,11 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                                 const Icon(Icons.route, color: Colors.blue),
                                 const SizedBox(width: 8),
                                 Text(
-                                  OrderStrings.estimatedDistanceKms(
-                                      infoTripProvider.distance),
+                                  infoTripProvider.metersDistance == true
+                                      ? OrderStrings.estimatedDistanceMeters(
+                                          infoTripProvider.distance)
+                                      : OrderStrings.estimatedDistanceKms(
+                                          infoTripProvider.distance),
                                   style: const TextStyle(
                                       fontSize: 16, color: Colors.black87),
                                 ),
@@ -208,6 +212,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                                 const Icon(Icons.timer, color: Colors.blue),
                                 const SizedBox(width: 8),
                                 Text(
+                                  overflow: TextOverflow.ellipsis,
                                   OrderStrings.estimatedDeliveryMinutes(
                                       infoTripProvider.duration),
                                   style: const TextStyle(
@@ -230,5 +235,10 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
         );
       },
     );
+  }
+
+  int calculateMinutes(double distance, bool isMeters) {
+    double timeInMinutes = isMeters ? (distance / 1000) * 3.5 : distance * 3.5;
+    return timeInMinutes.round();
   }
 }

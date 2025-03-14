@@ -14,10 +14,12 @@ import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
+import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/services/supabase/supabase_config.dart';
@@ -26,6 +28,7 @@ Future main() async {
   // Load the environment variables from the .env file for begin the app
   await dotenv.load(fileName: '.env');
   await SupabaseConfig.initializeSupabase();
+  await UserService.initializeUserService();
   runApp(MyApp());
 }
 
@@ -61,6 +64,9 @@ class MyApp extends StatelessWidget {
 
         // Provider for Payment Management
         BlocProvider(create: (context) => PaymentBloc()),
+
+        // Provider for User Management
+        BlocProvider(create: (context) => UsersBloc()),
 
         // Change Notifier Providers
         ChangeNotifierProvider(create: (context) => ProductFormProvider()),
