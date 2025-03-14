@@ -10,10 +10,10 @@ class DeliveryProfilePage extends StatefulWidget {
   const DeliveryProfilePage({super.key});
 
   @override
-  _DeliveryProfilePageState createState() => _DeliveryProfilePageState();
+  DeliveryProfilePageState createState() => DeliveryProfilePageState();
 }
 
-class _DeliveryProfilePageState extends State<DeliveryProfilePage> {
+class DeliveryProfilePageState extends State<DeliveryProfilePage> {
   // Create the controllers for the username and name fields
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
