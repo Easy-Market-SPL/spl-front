@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 import '../../bloc/ui_management/users/users_bloc.dart';
 import '../../services/supabase/supabase_config.dart';
@@ -27,7 +28,7 @@ class _WrapperState extends State<Wrapper> {
           return Center(child: Text("Error: ${snapshot.error}"));
         }
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CustomLoading());
         }
 
         final authState = snapshot.data;
@@ -51,7 +52,7 @@ class _WrapperState extends State<Wrapper> {
                   usersBloc.getUser(session.user.id);
                 });
               }
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CustomLoading());
             }
 
             // Once the user has been loaded, redirect according to their role.
@@ -63,8 +64,9 @@ class _WrapperState extends State<Wrapper> {
             } else if (userRole == 'customer') {
               return appRoutes['customer_dashboard']!(context);
             }
-            // If the role doesn't match any, show loading (or you could handle another case)
-            return const Center(child: CircularProgressIndicator());
+
+            // If the role doesn't match any, show loading or the appropiate handling
+            return appRoutes['login']!(context);
           },
         );
       },
