@@ -9,11 +9,6 @@ abstract class SearchPlacesEvent extends Equatable {
 
 class OnToggleManualMarkerEvent extends SearchPlacesEvent {}
 
-class OnNewMapBoxPlacesFoundEvent extends SearchPlacesEvent {
-  final List<Feature> places;
-  const OnNewMapBoxPlacesFoundEvent(this.places);
-}
-
 class OnNewGooglePlacesFoundEvent extends SearchPlacesEvent {
   final List<Result> places;
   const OnNewGooglePlacesFoundEvent(this.places);

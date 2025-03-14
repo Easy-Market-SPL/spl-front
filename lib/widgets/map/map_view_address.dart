@@ -10,14 +10,10 @@ import '../../utils/map/map_themes/blue_standard_map_style.dart';
 
 class MapViewAddress extends StatelessWidget {
   final LatLng initialLocation;
-  final Set<Polyline> polyLines;
   final Set<Marker> markers;
 
   const MapViewAddress(
-      {super.key,
-      required this.initialLocation,
-      required this.polyLines,
-      required this.markers});
+      {super.key, required this.initialLocation, required this.markers});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +54,6 @@ class MapViewAddress extends StatelessWidget {
               myLocationButtonEnabled: false,
               // style: jsonEncode(gtaMapStyle),
               style: jsonEncode(blueStandardMapStyle),
-              polylines: polyLines,
               markers: markers,
               onMapCreated: (controller) {
                 mapBloc.add(OnMapInitializedEvent(controller));

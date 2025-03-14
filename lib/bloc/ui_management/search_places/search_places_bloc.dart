@@ -1,14 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
-import 'package:spl_front/models/ui/general/route_destination.dart';
 import 'package:spl_front/models/ui/google/places_google_response.dart';
-import 'package:spl_front/models/ui/map_box/places_map_box_response.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../../models/ui/map_box/traffic_map_box_response.dart';
 
 part 'search_places_event.dart';
 part 'search_places_state.dart';
@@ -20,10 +15,6 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
 
   SearchPlacesBloc({required this.mapService})
       : super(const SearchPlacesState()) {
-    on<OnNewMapBoxPlacesFoundEvent>((event, emit) {
-      emit(state.copyWith(mapBoxPlaces: event.places));
-    });
-
     on<OnNewGooglePlacesFoundEvent>((event, emit) {
       emit(state.copyWith(googlePlaces: event.places));
     });
@@ -42,6 +33,7 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
   }
 
   // Extra methods
+  /*
   Future<RouteDestination> getCoorsStartToEnd(LatLng start, LatLng end) async {
     final TrafficResponse resp =
         await mapService.getCoorsStartToEnd(start, end);
@@ -68,12 +60,7 @@ class SearchPlacesBloc extends Bloc<SearchPlacesEvent, SearchPlacesState> {
       startPlace: startPlace,
     );
   }
-
-  Future getPlacesByQuery(LatLng proximity, String query) async {
-    final List<Feature> newPlaces =
-        await mapService.getResultsByMapBoxQuery(proximity, query);
-    add(OnNewMapBoxPlacesFoundEvent(newPlaces));
-  }
+  */
 
   Future getPlacesByGoogleQuery(String query) async {
     final List<Result> newPlaces =

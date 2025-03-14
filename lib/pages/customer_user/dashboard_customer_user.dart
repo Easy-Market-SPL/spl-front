@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
@@ -8,56 +10,83 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_card.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_rated_card.dart';
 
-class CustomerMainDashboard extends StatelessWidget {
+class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomerUserAppBar(
-        hintText: CustomerStrings.searchHint, // Pass custom hint text
-        onFilterPressed: () {
-          // TODO: Implement filters action
-        },
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Category Tabs
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                // TODO: Build category tabs according with the state and database info
-                children: [
-                  _buildCategoryTab("Todos", isSelected: true),
-                  const SizedBox(width: 10),
-                  _buildCategoryTab(ProductStrings.productCategory),
-                  const SizedBox(width: 10),
-                  _buildCategoryTab(ProductStrings.productCategory),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
+  State<CustomerMainDashboard> createState() => _CustomerMainDashboardState();
+}
 
-            // Product List
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  // Important: Change the widget according with the variability from the Product Line
-                  child: SPLVariables.isRated
-                      ? CustomerProductRatedGrid()
-                      : CustomerProductGrid(),
-                ),
-              ),
+class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
+  late UsersBloc usersBloc;
+
+  @override
+  void initState() {
+    usersBloc = BlocProvider.of<UsersBloc>(context);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<UsersBloc, UsersState>(
+      builder: (context, usersSstate) {
+        if (usersSstate.sessionUser == null) {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.customer, context: context,),
+          );
+        }
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: CustomerUserAppBar(
+            hintText: CustomerStrings.searchHint, // Pass custom hint text
+            onFilterPressed: () {
+              // TODO: Implement filters action
+            },
+          ),
+          body: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Category Tabs
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    // TODO: Build category tabs according with the state and database info
+                    children: [
+                      _buildCategoryTab("Todos", isSelected: true),
+                      const SizedBox(width: 10),
+                      _buildCategoryTab(ProductStrings.productCategory),
+                      const SizedBox(width: 10),
+                      _buildCategoryTab(ProductStrings.productCategory),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Product List
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      // Important: Change the widget according with the variability from the Product Line
+                      child: SPLVariables.isRated
+                          ? CustomerProductRatedGrid()
+                          : CustomerProductGrid(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: CustomBottomNavigationBar(
+            userType: UserType.customer,
+            context: context,
+          ),
+        );
+      },
     );
   }
 
