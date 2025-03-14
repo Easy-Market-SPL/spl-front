@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/user.dart';
+import 'package:spl_front/services/api/user_service.dart';
+import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/buttons/create_user_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddUserDialog extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
@@ -18,64 +22,64 @@ class AddUserDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              ProfileStrings.userTitle,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ProfileStrings.userTitle,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // Name
-            CustomInput(
+              const SizedBox(height: 16),
+              // Name
+              CustomInput(
                 hintText: ProfileStrings.nameHint,
                 textController: nameController,
                 labelText: ProfileStrings.nameLabel,
                 isPassword: false,
-                keyboardType: TextInputType.name),
-            const SizedBox(height: 16),
-
-            // Username
-            CustomInput(
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 16),
+              // Username
+              CustomInput(
                 hintText: ProfileStrings.userNameHint,
                 textController: userNameController,
                 labelText: ProfileStrings.userNameLabel,
                 isPassword: false,
-                keyboardType: TextInputType.text),
-            const SizedBox(height: 16),
-
-            // Email
-            CustomInput(
+                keyboardType: TextInputType.text,
+              ),
+              const SizedBox(height: 16),
+              // Email
+              CustomInput(
                 hintText: ProfileStrings.emailHint,
                 textController: emailController,
                 labelText: ProfileStrings.emailLabel,
                 isPassword: false,
-                keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: 16),
-
-            // Password
-            CustomInput(
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              // Password
+              CustomInput(
                 hintText: ProfileStrings.passwordHint,
                 textController: passwordController,
                 labelText: ProfileStrings.passwordLabel,
                 isPassword: true,
-                keyboardType: TextInputType.visiblePassword),
-            const SizedBox(height: 16),
-
-            // Select Role
-            //TODO: Change those values per the fetch from the database
-            buildRoleValueListenable(),
-            const SizedBox(height: 24),
-
-            // Save Changes Button
-            // TODO: Pass the method for save the user in the database
-            CreateUserButton(context: context),
-          ],
+                keyboardType: TextInputType.visiblePassword,
+              ),
+              const SizedBox(height: 16),
+              // Select Role
+              buildRoleValueListenable(),
+              const SizedBox(height: 24),
+              // Create User Button: se le pasa el handler que valida y crea el usuario
+              CreateUserButton(
+                onPress: () => handleCreateUser(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -107,10 +111,6 @@ class AddUserDialog extends StatelessWidget {
               value: ProfileStrings.deliveryProfile,
               child: Text(ProfileStrings.deliveryProfile),
             ),
-            DropdownMenuItem(
-              value: ProfileStrings.supportProfile,
-              child: Text(ProfileStrings.supportProfile),
-            ),
           ],
           onChanged: (value) {
             selectedRole.value = value;
@@ -118,5 +118,88 @@ class AddUserDialog extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> handleCreateUser(BuildContext context) async {
+    final name = nameController.text.trim();
+    final username = userNameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final role = selectedRole.value;
+
+    // Validate empty fields
+    if (name.isEmpty ||
+        username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        role == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    // Validate email format
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid email format")),
+      );
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
+      );
+      return;
+    }
+
+    try {
+      final UserResponse userResponse =
+          await SupabaseAuth.createUser(email: email, password: password);
+      final user = userResponse.user;
+      if (user != null) {
+        bool success = await UserService.createUser(
+          UserModel(
+            id: user.id,
+            username: username,
+            fullname: name,
+            email: email,
+            rol: role,
+          ),
+        );
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("User created successfully")),
+          );
+          Navigator.of(context).pop(); // Close dialog
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Error creating user in API")),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error creating user in Auth")),
+        );
+      }
+    } catch (e) {
+      if (e is AuthException) {
+        // Esto indica que la operación no está permitida (403), probablemente porque no se usa la clave de servicio adecuada.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error: ${e.message}. You might not have permission to create a user from the client side.",
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
+    }
   }
 }

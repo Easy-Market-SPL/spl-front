@@ -30,7 +30,7 @@ class ProfileStrings {
   static const passwordLabel = "Contraseña";
   static const passwordHint = "Tu contraseña";
   static const adminProfile = "Administrador";
-  static const productsManagerProfile = " Gestor de productos";
+  static const productsManagerProfile = "Gestor de productos";
   static const deliveryProfile = "Domiciliario";
   static const supportProfile = "Soporte";
   static const paymentMethods = "Pago";
