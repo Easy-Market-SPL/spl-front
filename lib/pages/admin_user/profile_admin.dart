@@ -9,6 +9,7 @@ import 'package:spl_front/widgets/profile/user_card.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 import '../../utils/strings/profile_strings.dart';
+import '../../widgets/profile/edit_user_admin_dialog.dart';
 
 class AdminPanelPage extends StatefulWidget {
   const AdminPanelPage({super.key});
@@ -93,7 +94,12 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                                 ? user.username[0].toUpperCase()
                                 : '',
                             onEdit: () {
-                              // TODO: Implement onEdit
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return EditUserDialog(user: user);
+                                },
+                              );
                             },
                             onDelete: () {
                               // TODO: Implement onDelete

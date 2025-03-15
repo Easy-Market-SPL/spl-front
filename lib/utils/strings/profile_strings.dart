@@ -34,6 +34,7 @@ class ProfileStrings {
   static const deliveryProfile = "Domiciliario";
   static const supportProfile = "Soporte";
   static const paymentMethods = "Pago";
+  static const customerProfile = 'Cliente';
   static const paymentCard = "Tarjeta de Crédito o Débito";
   static const paymentPlatform = "Plataforma";
   static const managePaymentMethods = "Administra tus métodos de pago aquí";
@@ -54,8 +55,9 @@ class ProfileStrings {
   static const logout = "Cerrar Sesión";
   static const successFullProfileUpdate = 'Datos Actualizados';
   static const successFullProfileUpdateDescription =
-      'Sus datos personales han sido actualizados correctamente';
+      'Los datos personales han sido actualizados correctamente';
   static const successFullUserCreated = 'Usuario Creado';
   static const successFullUserCreatedDescription =
       'El usuario ha sido creado correctamente';
+  static const editUserTitle = 'Editar Datos de Usuario';
 }
