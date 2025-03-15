@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/supabase/auth/auth_service.dart';
@@ -6,6 +7,8 @@ import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/buttons/create_user_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../bloc/users_blocs/users_management/users_management_bloc.dart';
 
 class AddUserDialog extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
@@ -100,21 +103,59 @@ class AddUserDialog extends StatelessWidget {
           ),
           items: const [
             DropdownMenuItem(
-              value: ProfileStrings.adminProfile,
+              value: 'admin',
               child: Text(ProfileStrings.adminProfile),
             ),
             DropdownMenuItem(
-              value: ProfileStrings.productsManagerProfile,
+              value: 'business',
               child: Text(ProfileStrings.productsManagerProfile),
             ),
             DropdownMenuItem(
-              value: ProfileStrings.deliveryProfile,
+              value: 'delivery',
               child: Text(ProfileStrings.deliveryProfile),
             ),
           ],
           onChanged: (value) {
             selectedRole.value = value;
           },
+        );
+      },
+    );
+  }
+
+  /// Show a dialog with a message of successful changes
+  void _showSuccessfulCreationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              ProfileStrings.successFullUserCreated,
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.blue, size: 50),
+              SizedBox(height: 10),
+              Text(
+                ProfileStrings.successFullUserCreatedDescription,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         );
       },
     );
@@ -160,21 +201,27 @@ class AddUserDialog extends StatelessWidget {
       final UserResponse userResponse =
           await SupabaseAuth.createUser(email: email, password: password);
       final user = userResponse.user;
+      late UserModel createdUser;
       if (user != null) {
-        bool success = await UserService.createUser(
-          UserModel(
-            id: user.id,
-            username: username,
-            fullname: name,
-            email: email,
-            rol: role,
-          ),
+        createdUser = UserModel(
+          id: user.id,
+          username: username,
+          fullname: name,
+          email: email,
+          rol: role,
         );
+        bool success = await UserService.createUser(createdUser);
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User created successfully")),
-          );
-          Navigator.of(context).pop(); // Close dialog
+          final usersManagementBloc =
+              BlocProvider.of<UsersManagementBloc>(context);
+          usersManagementBloc.add(OnAddUserEvent(createdUser));
+
+          // Show for 1.5 seconds the dialog of EveryThing OK
+          _showSuccessfulCreationDialog(context);
+          await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+          Navigator.pop(context); // Close the dialog
+
+          Navigator.of(context).pop(); // Close dialog of user creation
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Error creating user in API")),
@@ -187,7 +234,6 @@ class AddUserDialog extends StatelessWidget {
       }
     } catch (e) {
       if (e is AuthException) {
-        // Esto indica que la operación no está permitida (403), probablemente porque no se usa la clave de servicio adecuada.
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

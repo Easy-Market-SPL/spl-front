@@ -55,4 +55,7 @@ class ProfileStrings {
   static const successFullProfileUpdate = 'Datos Actualizados';
   static const successFullProfileUpdateDescription =
       'Sus datos personales han sido actualizados correctamente';
+  static const successFullUserCreated = 'Usuario Creado';
+  static const successFullUserCreatedDescription =
+      'El usuario ha sido creado correctamente';
 }

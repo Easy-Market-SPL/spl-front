@@ -114,6 +114,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                           },
                         ),
                       ),
+                      const SizedBox(height: 20),
                     ],
                   );
                 },

@@ -40,19 +40,21 @@ class SupabaseAuth {
   }) async {
     final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
     if (serviceRoleKey == null || serviceRoleKey.isEmpty) {
-      throw Exception("Service role key not found in .env");
+      throw Exception(
+          "No tienes permisos para realizar la creación de usuarios");
     }
-    // Se obtiene la URL de Supabase desde las .env
+
     final supabaseUrl = dotenv.env['SUPABASE_URL'];
     if (supabaseUrl == null || supabaseUrl.isEmpty) {
       throw Exception("Supabase URL not found in .env");
     }
-    // Se crea un cliente admin usando la service role key
+
     final supabaseAdminClient = SupabaseClient(supabaseUrl, serviceRoleKey);
     return await supabaseAdminClient.auth.admin.createUser(
       AdminUserAttributes(
         email: email,
         password: password,
+        emailConfirm: true,
       ),
     );
   }
