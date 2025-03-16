@@ -23,7 +23,7 @@ class BusinessProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => EditProductPage(productId: "",),
+                builder: (context) => ProductBusinessPage(product: product, isEditing: true,),
               ),
             );
           },

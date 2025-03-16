@@ -32,12 +32,19 @@ class ProductCard extends StatelessWidget {
             // Product Image
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                product.imagePath,
-                height: screenWidth * (1 / 3.5),
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: product.imagePath.isNotEmpty
+                  ? Image.network(
+                      product.imagePath,
+                      height: screenWidth * (1 / 3.5),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      "assets/images/empty_background.jpg",
+                      height: screenWidth * (1 / 3.5),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
             ),
             
             Expanded(

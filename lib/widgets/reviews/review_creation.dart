@@ -9,6 +9,7 @@ class WriteReviewWidget extends StatefulWidget {
 
 class _WriteReviewWidgetState extends State<WriteReviewWidget> {
   final TextEditingController _reviewController = TextEditingController();
+  final maxReviewLength = 250;
   double _selectedRating = 0.0;
 
   @override
@@ -41,7 +42,8 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
         // TextField for review
         TextField(
           controller: _reviewController,
-          maxLines: 3,
+          maxLines: null,
+          maxLength: maxReviewLength,
           decoration: InputDecoration(
             hintText: "Comparte tu experiencia con este producto",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

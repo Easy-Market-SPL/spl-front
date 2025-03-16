@@ -16,7 +16,7 @@ class CustomerProductGrid extends StatelessWidget {
             name: ProductStrings.productName,
             description: ProductStrings.productDescription,
             price: ProductStrings.productPrice,
-            imagePath: "assets/images/empty_background.jpg",
+            imagePath: "",
             rating: 4.5,
           ),
         );

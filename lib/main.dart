@@ -23,6 +23,7 @@ import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/services/supabase/supabase_config.dart';
+import 'package:spl_front/theme/theme.dart';
 
 Future main() async {
   // Load the environment variables from the .env file for begin the app
@@ -79,6 +80,7 @@ class MyApp extends StatelessWidget {
         home: appRoutes['']!(
             context), // Wrapper is a widget that manage the auth state
         routes: appRoutes,
+        theme: appTheme
       ),
     );
   }

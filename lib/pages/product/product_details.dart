@@ -1,55 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/data/label.dart';
+import 'package:spl_front/models/data/product.dart';
+import 'package:spl_front/models/data/product_color.dart';
+import 'package:spl_front/models/data/variant.dart';
+import 'package:spl_front/models/data/variant_option.dart';
+import 'package:spl_front/spl/spl_variables.dart';
+import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/products/product_add_to_cart.dart';
+import 'package:spl_front/utils/strings/business_user_strings.dart';
+import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
+import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
+import 'package:spl_front/widgets/products/view/details/product_details_info.dart';
+import 'package:spl_front/widgets/products/view/details/product_details_labels.dart';
+import 'package:spl_front/widgets/products/view/details/product_details_variants.dart';
 import 'package:spl_front/widgets/reviews/review_creation.dart';
 import 'package:spl_front/widgets/reviews/reviews_list.dart';
-import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/utils/strings/business_user_strings.dart';
-import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 
-// Replace these with your own model or remove them if you use real data
-class ProductVariant {
-  final String variantName;
-  final List<String> options;
+class ViewProductDetailsPage extends StatefulWidget {
+  final Product product;
 
-  ProductVariant(this.variantName, this.options);
-}
-
-/// Main screen that shows the product detail.
-class ProductDetailPage extends StatefulWidget {
-  const ProductDetailPage({super.key});
+  const ViewProductDetailsPage({super.key, required this.product});
 
   @override
-  State<ProductDetailPage> createState() => _ProductDetailPageState();
+  State<ViewProductDetailsPage> createState() => _ViewProductDetailsPageState();
 }
 
-class _ProductDetailPageState extends State<ProductDetailPage> {
-  void _handleAddToCart(int quantity) {
-    // TODO: Implement cart functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Agregado $quantity items al carrito')),
-    );
-  }
+class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
+  // Track selected color and variant options
+  ProductColor? selectedColor;
+  Map<String, String> selectedVariantOptions = {};
+  
+  // Demo data - in a real app these would come from the product
+  late List<ProductColor> availableColors;
+  late List<Variant> availableVariants;
+  late List<Label> availableLabels;
 
-  // Dummy data for variants
-  final List<ProductVariant> _variants = [
-    ProductVariant("Variante 1", ["Op 1", "Op 2", "Op 3"]),
-    ProductVariant("Variante 2", ["Op 1", "Op 2", "Op 3", "Op 4"]),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with sample data - this would come from API
+    availableColors = [
+      ProductColor(idColor: 1, name: 'Red', hexCode: '#F44336'),
+      ProductColor(idColor: 2, name: 'Blue', hexCode: '#2196F3'),
+      ProductColor(idColor: 3, name: 'Green', hexCode: '#4CAF50'),
+    ];
+
+    availableLabels = [
+      Label(idLabel: 1, name: 'Label 1', description: ''),
+      Label(idLabel: 3, name: 'Label 3', description: ''),
+      Label(idLabel: 2, name: 'Label 2', description: ''),
+    ];
+    
+    availableVariants = [
+      Variant(
+        name: "Size",
+        options: [
+          VariantOption(name: "Small"), 
+          VariantOption(name: "Medium"), 
+          VariantOption(name: "Large"),
+        ],
+      ),
+      Variant(
+        name: "Material",
+        options: [
+          VariantOption(name: "Cotton"), 
+          VariantOption(name: "Polyester"), 
+          VariantOption(name: "Blend"),
+        ],
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomerUserAppBar(
         hintText: BusinessStrings.searchHint,
-        onFilterPressed: () {
-          // TODO: Implement filters action
-        },
+        onFilterPressed: () {},
       ),
       backgroundColor: Colors.white,
-      // We'll use a Stack so we can float the bottom container
       body: Column(
         children: [
-          // Esta es la parte scrollable de la pantalla
+          // Scrollable part of the screen
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -57,86 +89,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Product Image
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Center(child: Text("Imagen del producto")),
+                  ProductImageDisplay(imagePath: widget.product.imagePath),
+                  
+                  // Color selection
+                  ProductColorSelector(
+                    colors: availableColors,
+                    selectedColor: selectedColor,
+                    onColorSelected: (color) {
+                      setState(() {
+                        selectedColor = color;
+                      });
+                    },
                   ),
                   const SizedBox(height: 16),
 
-                  // Product Name + Star Rating
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Nombre del producto",
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Reference code
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        "REF: 123456",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      )
-                    ],
-                  ),
-
-                  // Rating if enabled
-                  if (SPLVariables.isRated) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: const [
-                        Text("4.5", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 2),
-                        Icon(Icons.star, color: Colors.amber, size: 18),
-                        Icon(Icons.star, color: Colors.amber, size: 18),
-                        Icon(Icons.star, color: Colors.amber, size: 18),
-                        Icon(Icons.star, color: Colors.amber, size: 18),
-                        Icon(Icons.star_half, color: Colors.amber, size: 18),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-
-                  // Short description
-                  Text(
-                    "Descripción general del producto Lorem ipsum dolor sit amet, "
-                    "consectetur adipiscing elit, sed do eiusmod tempor incididunt "
-                    "ut labore et dolore magna aliqua.",
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
+                  // Product info header (name, code, rating, description)
+                  ProductDetailsInfo(product: widget.product),
 
                   // Tags
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _buildTagChip("Etiqueta 1"),
-                      _buildTagChip("Etiqueta 2"),
-                    ],
-                  ),
+                  ProductDetailsLabels(labels: availableLabels,),
                   const SizedBox(height: 16),
 
                   // Variants
-                  _buildVariantsSection(_variants),
+                  ProductDetailsVariants(
+                    variants: availableVariants,
+                    selectedOptions: selectedVariantOptions,
+                    onOptionSelected: (variantName, optionName) {
+                      setState(() {
+                        selectedVariantOptions[variantName] = optionName;
+                      });
+                    },
+                  ),
                   const SizedBox(height: 16),
 
-                  // Reviews section if enabled
+                  // Reviews section
                   if (SPLVariables.isRated) ...[
                     const ReviewsWidget(),
                     const SizedBox(height: 16),
@@ -149,78 +135,46 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
           // Add to cart bar
           AddToCartBar(
-            price: "\$25,000", 
-            onAddToCart: _handleAddToCart
+            price: widget.product.price,
+            onAddToCart: _handleAddToCart,
           ),
         ],
       ),
     );
   }
 
-  // Tag Chip
-  Widget _buildTagChip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blueAccent),
-      ),
-      child: Text(text, style: const TextStyle(color: Colors.blueAccent)),
-    );
-  }
-
-  // Variants Section
-  Widget _buildVariantsSection(List<ProductVariant> variants) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Variantes", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Column(
-          children: variants.map((variant) => _buildVariantRow(variant)).toList(),
+  void _handleAddToCart(int quantity) {
+    // Verify all required selections are made
+    if (selectedColor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Seleccione un color"),
+          backgroundColor: Colors.red,
         ),
-      ],
-    );
-  }
+      );
+      return;
+    }
 
-  Widget _buildVariantRow(ProductVariant variant) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          _buildVariantTitleChip(variant.variantName),
-          ...variant.options.map((opt) => _buildVariantOptionChip(opt)).toList(),
-        ],
-      ),
-    );
-  }
+    // Check if all variants have a selection
+    for (var variant in availableVariants) {
+      if (!selectedVariantOptions.containsKey(variant.name)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Seleccione una opción de ${variant.name}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
 
-  Widget _buildVariantTitleChip(String title) {
-    // e.g. "Variante" chip
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
+    // If we get here, all selections have been made
+    // This is where you would call the backend API to add to cart
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Producto añadido'),
+        backgroundColor: Colors.green,
       ),
-      child: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildVariantOptionChip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blueAccent),
-      ),
-      child: Text(text, style: const TextStyle(color: Colors.blueAccent)),
     );
   }
 }
