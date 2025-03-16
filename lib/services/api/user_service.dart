@@ -40,8 +40,6 @@ class UserService {
       },
     );
     if (response.statusCode == 200) {
-      // Parse the response body as a list of users using userFromJson
-      print(response.body);
       return userFromJson(response.body);
     } else {
       return [];
@@ -58,7 +56,7 @@ class UserService {
     if (response.statusCode == 200) {
       return true;
     } else {
-      return false;
+      throw Exception('Failed to create user');
     }
   }
 
@@ -70,7 +68,7 @@ class UserService {
     if (response.statusCode == 200) {
       return true;
     } else {
-      return false;
+      throw Exception('Failed to delete user');
     }
   }
 
@@ -84,7 +82,7 @@ class UserService {
     if (response.statusCode == 200) {
       return true;
     } else {
-      return false;
+      throw Exception('Failed to update user');
     }
   }
 }

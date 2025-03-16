@@ -8,11 +8,13 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 import 'package:spl_front/widgets/payment/process/payment_total.dart';
 
 class PaymentScreen extends StatelessWidget {
@@ -212,11 +214,15 @@ class PaymentPageState extends State<PaymentPage> {
           ),
         ),
         _buildPaymentMethodSelection(context),
-        Total(
-          total: subtotal,
-          card: selectedCard,
-          address: selectedAddress,
-        ),
+        const SizedBox(height: 16),
+        SPLVariables.hasCreditPayment
+            ? PaymentCreditTotal(
+                total: subtotal,
+                card: selectedCard,
+                address: selectedAddress,
+              )
+            : Total(
+                total: subtotal, card: selectedCard, address: selectedAddress),
       ],
     );
   }
