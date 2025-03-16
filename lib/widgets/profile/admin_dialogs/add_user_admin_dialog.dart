@@ -8,7 +8,7 @@ import 'package:spl_front/widgets/buttons/create_user_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../bloc/users_blocs/users_management/users_management_bloc.dart';
+import '../../../bloc/users_blocs/users_management/users_management_bloc.dart';
 
 class AddUserDialog extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();

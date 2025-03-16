@@ -6,7 +6,7 @@ import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/buttons/create_user_button.dart';
 import 'package:spl_front/widgets/inputs/custom_input.dart';
 
-import '../../bloc/users_blocs/users_management/users_management_bloc.dart';
+import '../../../bloc/users_blocs/users_management/users_management_bloc.dart';
 
 class EditUserDialog extends StatelessWidget {
   final UserModel user;
@@ -148,11 +148,10 @@ class EditUserDialog extends StatelessWidget {
             .add(OnUpdateUserEvent(updatedUser));
 
         /// Show the successful changes dialog
-        _showSuccessfulChangesDialog(context);
-        await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-        Navigator.pop(context); // Close the dialog
+        Navigator.pop(context); // Show back the dialog
 
-        // Close the edit user dialog
+        _showSuccessfulChangesDialog(context);
+        await Future.delayed(const Duration(seconds: 1));
         Navigator.of(context).pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

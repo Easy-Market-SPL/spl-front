@@ -30,3 +30,12 @@ class OnUpdateUserEvent extends UsersManagementEvent {
   @override
   List<Object> get props => [user];
 }
+
+class OnDeleteUserEvent extends UsersManagementEvent {
+  final UserModel user;
+
+  const OnDeleteUserEvent(this.user);
+
+  @override
+  List<Object> get props => [user];
+}

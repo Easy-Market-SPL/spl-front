@@ -25,6 +25,12 @@ class UsersManagementBloc
       final List<UserModel> newUsers = List.from(state.users)..add(event.user);
       emit(state.copyWith(users: newUsers));
     });
+
+    on<OnDeleteUserEvent>((event, emit) {
+      final List<UserModel> newUsers = List.from(state.users)
+        ..removeWhere((user) => user.id == event.user.id);
+      emit(state.copyWith(users: newUsers));
+    });
   }
 
   Future<void> loadUsers() async {
