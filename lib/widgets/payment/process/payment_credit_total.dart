@@ -3,6 +3,7 @@ import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
+import 'package:spl_front/widgets/payment/process/payment_credit_dialog.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
 
@@ -36,6 +37,54 @@ class PaymentCreditTotal extends StatelessWidget {
           ),
           content: const Text(
             PaymentStrings.selectAddressBeforePaymentDescription,
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Shows a dialog asking the user to select a card as payment method.
+  void _showSelectCardDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.selectCard,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: const Text(
+            PaymentStrings.selectCardBeforePayment,
             style: TextStyle(
               color: Colors.black54,
               fontSize: 14,
@@ -237,6 +286,22 @@ class PaymentCreditTotal extends StatelessWidget {
     );
   }
 
+  // Processes the credit payment
+  void _showCreditPaymentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => CreditPaymentDialog(
+        total: total,
+        address: address,
+        card: card,
+        onLoadingDialog: () => _showLoadingDialog(context),
+        onSuccessPaymentDialog: () => _showSuccessfullPaymentDialog(context),
+        onErrorPaymentDialog: (response) =>
+            _showErrorPaymentDialog(context, response),
+      ),
+    );
+  }
+
   // Processes the normal payment (with card)
   Future<void> _processPayment(BuildContext context) async {
     if (address == null) {
@@ -247,6 +312,7 @@ class PaymentCreditTotal extends StatelessWidget {
       _showSucessfullCashPaymentDialog(context);
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close dialog
+
       // TODO: Update order status in API/DB
       Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
       return;
@@ -270,22 +336,6 @@ class PaymentCreditTotal extends StatelessWidget {
     } else {
       _showErrorPaymentDialog(context, response);
     }
-  }
-
-  // Processes the credit payment
-  Future<void> _processCreditPayment(BuildContext context) async {
-    if (address == null) {
-      _showSelectAddressDialog(context);
-      return;
-    }
-    _showLoadingDialog(context);
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-    Navigator.pop(context); // Close loading dialog
-    _showSuccessfullPaymentDialog(context);
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-    Navigator.pop(context); // Close success dialog
-    // TODO: Update order status for credit payment in API/DB
-    Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
   }
 
   @override
@@ -332,12 +382,24 @@ class PaymentCreditTotal extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // Two buttons in a row: first "Pagar a Crédito", then "Pagar"
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => _processCreditPayment(context),
+                  onPressed: () {
+                    /// Show Message to request the user to select an address
+                    if (address == null) {
+                      _showSelectAddressDialog(context);
+                      return;
+                    }
+
+                    /// Show Message to request the user to select a card for the credit payment
+                    if (card == null) {
+                      _showSelectCardDialog(context);
+                      return;
+                    }
+                    _showCreditPaymentDialog(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 0, 93, 180),
                     shape: RoundedRectangleBorder(
@@ -346,7 +408,7 @@ class PaymentCreditTotal extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: const Text(
-                    "Pagar a Crédito",
+                    PaymentStrings.creditPayment,
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
@@ -363,7 +425,7 @@ class PaymentCreditTotal extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: const Text(
-                    "Pagar",
+                    PaymentStrings.payment,
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
