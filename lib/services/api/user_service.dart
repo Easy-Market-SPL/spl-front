@@ -62,6 +62,18 @@ class UserService {
     }
   }
 
+  static Future<bool> deleteUser(String id) async {
+    var url = '$_url/users/$id/delete';
+    var response = await _client.put(Uri.parse(url), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static Future<bool> updateUser(UserModel user, String id) async {
     var url = '$_url/users/$id';
     var response = await _client.put(Uri.parse(url),

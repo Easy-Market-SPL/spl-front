@@ -30,10 +30,11 @@ class ProfileStrings {
   static const passwordLabel = "Contraseña";
   static const passwordHint = "Tu contraseña";
   static const adminProfile = "Administrador";
-  static const productsManagerProfile = " Gestor de productos";
+  static const productsManagerProfile = "Gestor de productos";
   static const deliveryProfile = "Domiciliario";
   static const supportProfile = "Soporte";
   static const paymentMethods = "Pago";
+  static const customerProfile = 'Cliente';
   static const paymentCard = "Tarjeta de Crédito o Débito";
   static const paymentPlatform = "Plataforma";
   static const managePaymentMethods = "Administra tus métodos de pago aquí";
@@ -54,5 +55,17 @@ class ProfileStrings {
   static const logout = "Cerrar Sesión";
   static const successFullProfileUpdate = 'Datos Actualizados';
   static const successFullProfileUpdateDescription =
-      'Sus datos personales han sido actualizados correctamente';
+      'Los datos personales han sido actualizados correctamente';
+  static const successFullUserCreated = 'Usuario Creado';
+  static const successFullUserCreatedDescription =
+      'El usuario ha sido creado correctamente';
+  static const editUserTitle = 'Editar Datos de Usuario';
+  static const confirmDeleteTitle = 'Eliminar Usuario';
+  static const confirmDeleteDescription =
+      '¿Estás seguro de eliminar este usuario?';
+  static const cancel = 'Cancelar';
+  static const confirm = 'Confirmar';
+  static const deleteConfirmation = 'Usuario eliminado';
+  static const deleteConfirmationDescription =
+      'El usuario ha sido eliminado correctamente';
 }

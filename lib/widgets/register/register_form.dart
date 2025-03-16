@@ -42,15 +42,17 @@ class _LoginFormState extends State<RegisterForm> {
 
     final AuthResponse response =
         await SupabaseAuth.signUp(email: email, password: password);
+
     if (response.user != null) {
       /// Registration successful
       final serviceResponse = await UserService.createUser(
         UserModel(
-            id: response.user!.id,
-            email: email,
-            username: widget.usernameController.text,
-            fullname: widget.nameController.text,
-            rol: 'customer'),
+          id: response.user!.id,
+          email: email,
+          username: widget.usernameController.text,
+          fullname: widget.nameController.text,
+          rol: 'customer',
+        ),
       );
 
       if (serviceResponse) {
