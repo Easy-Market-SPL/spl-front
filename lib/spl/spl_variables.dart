@@ -3,4 +3,5 @@ class SPLVariables {
   static const hasThirdAuth = true;
   static const hasRealTimeTracking = true;
   static const isMobileUI = false;
+  static const hasCreditPayment = true;
 }
