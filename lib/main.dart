@@ -12,6 +12,8 @@ import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/bloc/ui_management/users/users_bloc.dart';
@@ -19,6 +21,7 @@ import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/services/api/product_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
@@ -30,6 +33,7 @@ Future main() async {
   await dotenv.load(fileName: '.env');
   await SupabaseConfig.initializeSupabase();
   await UserService.initializeUserService();
+  await ProductService.initializeProductService();
   runApp(MyApp());
 }
 
@@ -62,6 +66,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => OrderStatusBloc()),
         BlocProvider(create: (context) => ChatsBloc()),
         BlocProvider(create: (context) => OrderListBloc()),
+        BlocProvider(create: (context) => ProductBloc()),
+        BlocProvider(create: (context) => ProductFormBloc()),
 
         // Provider for Payment Management
         BlocProvider(create: (context) => PaymentBloc()),

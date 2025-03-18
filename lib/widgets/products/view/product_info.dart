@@ -15,7 +15,7 @@ class ProductInfoForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int maxNameLength = 45;
-    final int maxDescriptionLength = 200;
+    final int maxDescriptionLength = 250;
     final int nameLength = nameController.text.length;
 
     return Column(

@@ -135,7 +135,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
 
           // Add to cart bar
           AddToCartBar(
-            price: widget.product.price,
+            price: widget.product.price.toString(),
             onAddToCart: _handleAddToCart,
           ),
         ],

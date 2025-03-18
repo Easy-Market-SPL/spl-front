@@ -15,7 +15,7 @@ class CustomerProductGrid extends StatelessWidget {
             code: ProductStrings.productReference,
             name: ProductStrings.productName,
             description: ProductStrings.productDescription,
-            price: ProductStrings.productPrice,
+            price: 5000,
             imagePath: "",
             rating: 4.5,
           ),

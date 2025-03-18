@@ -40,7 +40,7 @@ class BusinessProductCard extends StatelessWidget {
             children: [
               // Price Text
               Text(
-                product.price,
+                product.price.toString(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
