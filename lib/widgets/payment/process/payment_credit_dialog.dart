@@ -1,0 +1,259 @@
+import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/payment_strings.dart';
+
+import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../models/ui/credit_card/credit_card_model.dart';
+import '../../../models/ui/stripe/stripe_custom_response.dart';
+import '../../../services/gui/stripe/stripe_service.dart';
+
+class CreditPaymentDialog extends StatefulWidget {
+  final double total;
+  final Address? address;
+  final PaymentCardModel? card;
+
+  // References to the dialog methods in the parent widget
+  final VoidCallback onLoadingDialog;
+  final VoidCallback onSuccessPaymentDialog;
+  final void Function(StripeCustomReponse) onErrorPaymentDialog;
+
+  const CreditPaymentDialog({
+    super.key,
+    required this.total,
+    required this.address,
+    required this.card,
+    required this.onLoadingDialog,
+    required this.onSuccessPaymentDialog,
+    required this.onErrorPaymentDialog,
+  });
+
+  @override
+  State<CreditPaymentDialog> createState() => _CreditPaymentDialogState();
+}
+
+class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
+  /// Minimum number of installments is 1. Increase or decrease with buttons.
+  int _installments = 1;
+
+  /// Monthly payment = total / installments
+  double _monthlyPayment = 0.0;
+
+  /// Remaining debt = total - first monthlyPayment
+  double _remainingDebt = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateInstallments();
+  }
+
+  /// Recalculate monthlyPayment and remainingDebt whenever installments change
+  void _calculateInstallments() {
+    if (_installments < 1) {
+      _installments = 1; // Ensure it never goes below 1
+    }
+    _monthlyPayment = widget.total / _installments;
+    _remainingDebt = widget.total - _monthlyPayment;
+    setState(() {});
+  }
+
+  /// Increase the number of installments
+  void _incrementInstallments() {
+    setState(() {
+      _installments++;
+      _calculateInstallments();
+    });
+  }
+
+  /// Decrease the number of installments, never going below 1
+  void _decrementInstallments() {
+    if (_installments > 1) {
+      setState(() {
+        _installments--;
+        _calculateInstallments();
+      });
+    }
+  }
+
+  /// Process payment for the first installment
+  Future<void> _payFirstInstallment() async {
+    // Show loading dialog
+    widget.onLoadingDialog();
+
+    // Payment amount = monthlyPayment (first installment)
+    final amount = (_monthlyPayment * 100).round().toString();
+
+    /// Always Pay with existing card
+    final stripeService = StripeService();
+    final response = await stripeService.payWithExistingCard(
+      amount: amount,
+      currency: 'usd',
+      card: widget.card!,
+    );
+
+    Navigator.pop(context); // Close loading
+
+    if (response.ok) {
+      widget.onSuccessPaymentDialog();
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+      Navigator.pop(context); // Close success dialog
+      Navigator.pop(context); // Close installments dialog
+
+      // TODO: Update order in the API/DB and update the total debt field
+      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+    } else {
+      widget.onErrorPaymentDialog(response);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paymentMethodLabel =
+        PaymentStrings.prefixCard(widget.card!.cardNumber);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ConstrainedBox(
+        /// Constrain the dialog size for a bigger layout
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              /// Align all content to the left
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  PaymentStrings.creditPayment,
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Show total
+                Text(
+                  "${PaymentStrings.totalPayment}\n\$${widget.total.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 4),
+
+                // Section: Difiere el Pago de tu Pedido
+                const Text(
+                  PaymentStrings.diferePayment,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
+                ),
+                const Divider(),
+                const SizedBox(height: 4),
+
+                // Row for installments +/- buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      PaymentStrings.installments,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: _decrementInstallments,
+                          icon: const Icon(Icons.remove_circle_outline),
+                          color: Colors.blue,
+                        ),
+                        Text(
+                          "$_installments",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _incrementInstallments,
+                          icon: const Icon(Icons.add_circle_outline),
+                          color: Colors.blue,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Monthly Payment
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      PaymentStrings.monthlyInstallment,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text("\$${_monthlyPayment.toStringAsFixed(2)}"),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Remaining Debt
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      PaymentStrings.debt,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text("\$${_remainingDebt.toStringAsFixed(2)}"),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Payment method
+                const Text(
+                  PaymentStrings.paymentMethod,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  paymentMethodLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+
+                // Pay button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _payFirstInstallment,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      PaymentStrings.doPayment,
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

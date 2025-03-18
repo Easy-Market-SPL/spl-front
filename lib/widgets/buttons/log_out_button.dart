@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 
-import '../../bloc/ui_management/users/users_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 
 class LogOutButton extends StatelessWidget {
   const LogOutButton({super.key});

@@ -22,9 +22,21 @@ class PaymentStrings {
   static const errorInPayment = 'Error en el pago';
   static const unknownError = 'Ocurrió un error inesperado';
   static const selectCardBeforePayment =
-      'Por favor, seleccione una tarjeta antes de proceder con el pago.';
+      'Por favor, seleccione una tarjeta antes de proceder con el pago a crédito.';
+  static const selectCreditCard = 'Seleccionar Tarjeta de Crédito';
   static const selectAddressBeforePaymentDescription =
-      'Por favor, seleccione una dirección antes de proceder con el pago';
+      'Por favor, seleccione una dirección antes de proceder con el pago.';
   static deleteAnnouncement(String lastFourDigits) =>
       '¿Está seguro de eliminar la tarjeta de pago que finaliza en $lastFourDigits?';
+  static const creditPayment = 'Paga a Crédito';
+  static const payment = 'Pagar';
+  static const totalPayment = 'Total a Pagar';
+  static prefixCard(String cardNumber) =>
+      'Tarjeta *** ${cardNumber.substring(12)}';
+  static const diferePayment = 'Difiere el Pago de tu Pedido';
+  static const installments = 'Número de Cuotas';
+  static const monthlyInstallment = 'Importe Mensual';
+  static const debt = 'Deuda Restante';
+  static const paymentMethod = 'Método de Pago';
+  static const doPayment = 'Realizar Pago';
 }

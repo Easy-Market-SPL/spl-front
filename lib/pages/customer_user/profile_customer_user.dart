@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/addresses/address_section.dart';
-import 'package:spl_front/widgets/buttons/log_out_button.dart';
-import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
 import 'package:spl_front/widgets/payment/methods/payment_list_section.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
 import 'package:spl_front/widgets/profile/profile_section.dart';
+
+import '../../bloc/users_blocs/users/users_bloc.dart';
+import '../../models/user.dart';
 
 class CustomerProfilePage extends StatefulWidget {
   const CustomerProfilePage({super.key});
@@ -17,16 +19,21 @@ class CustomerProfilePage extends StatefulWidget {
 }
 
 class _CustomerProfilePageState extends State<CustomerProfilePage> {
+  // The controllers for the username and name fields
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    userNameController.dispose();
+    nameController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Controllers for the profile information
-    final TextEditingController userNameController = TextEditingController();
-    final TextEditingController nameController = TextEditingController();
+    final UserModel user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser!;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -45,42 +52,36 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
           child: Column(
             children: [
               // Profile Header
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 4.0),
                 child: ProfileHeader(
+                  userName: user.fullname,
                   userRoleTitle: ProfileStrings.customerTitle,
-                  userRoleDescription: ProfileStrings.roleDescription,
+                  userRoleDescription:
+                      ProfileStrings.roleDescriptionCustomer(user.fullname),
                 ),
               ),
-
+              SizedBox(
+                height: 20,
+              ),
               // Row of buttons
               buildSectionButtons(),
-
               const SizedBox(height: 20),
-
-              // Main content based on selected tab, according with the state
+              // Main content based on selected tab, según el estado
               Expanded(
                 child: BlocBuilder<ProfileTabBloc, ProfileTabState>(
                   builder: (context, state) {
                     if (state.showedTab == 0) {
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: ProfileSection(
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            ProfileSection(
                               userNameController: userNameController,
                               nameController: nameController,
-                            ),
-                          ),
-                          SaveChangesButton(
-                            onPressed: () {
-                              // TODO: Implement Save changes logic
-                              Navigator.pushReplacementNamed(
-                                  context, 'customer_dashboard');
-                            },
-                          ),
-                          SizedBox(height: 15),
-                          LogOutButton(),
-                        ],
+                              userType: UserType.customer,
+                            )
+                          ],
+                        ),
                       );
                     } else if (state.showedTab == 1) {
                       return const PaymentMethodsSection();
@@ -119,9 +120,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                 ),
                 child: const Text(
                   ProfileStrings.information,
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(fontSize: 12),
                 ),
               ),
             ),
@@ -142,9 +141,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                 ),
                 child: const Text(
                   ProfileStrings.paymentMethods,
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(fontSize: 12),
                 ),
               ),
             ),
@@ -165,9 +162,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                 ),
                 child: const Text(
                   ProfileStrings.addresses,
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(fontSize: 12),
                 ),
               ),
             ),

@@ -9,6 +9,12 @@ class UIUserTypeHelper {
         return 'UE';
       case UserType.delivery:
         return 'UD';
+      case UserType.admin:
+        return 'AD';
     }
+  }
+
+  static String getAvatarTextFromUserName(String userName) {
+    return userName.substring(0, 2);
   }
 }
