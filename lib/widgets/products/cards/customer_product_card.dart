@@ -23,7 +23,7 @@ class CustomerProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductDetailPage(),
+                builder: (context) => ViewProductDetailsPage(product: product,),
               ),
             );
           },
@@ -36,7 +36,7 @@ class CustomerProductCard extends StatelessWidget {
             ),
           ),
           child: Text(
-            product.price,
+            '\$ ${product.price}',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

@@ -16,6 +16,7 @@ class BusinessUserBackAppBar extends StatelessWidget
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      forceMaterialTransparency: true,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () {

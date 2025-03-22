@@ -1,19 +1,40 @@
 class ProductStrings {
   static const productName = 'Nombre del producto';
   static const productReference = 'REF';
-  static const productDescription =
-      'Descripción general del producto Lorem ipsum dolor sit amet.';
-  static const productPrice = '\$0.00';
+  static const productPrice = 'Precio';
   static const productCategory = 'Categoría';
-
   static const creationName = "Nombre del Producto";
   static const creationReference = "REF";
   static const creationDescription = "Descripción";
+  static const productDescription = 'Descripción';
   static const save = "Guardar";
   static const delete = "Eliminar";
-
-  static const nameExample = "Camiseta de algodón";
-  static const referenceExample = "C-123";
-  static const descriptionExample =
-      "Camiseta de algodón 100% con cuello redondo.";
+  static const labels = "Etiquetas";
+  static const createLabel = "Crear Etiqueta";
+  static const addToCart = "Agregar al Carrito";
+  static const productLoadingError = "Error al obtener los productos";
+  static const retry = "Reintentar";
+  static const noProductsAvailable = "No hay productos disponibles";
+  static const initializingForm = "Inicializando formulario...";
+  static const editProduct = "Editar Producto";
+  static const createProduct = "Crear Producto";
+  static const productSaved = "Producto guardado correctamente";
+  static const productDeleted = "Producto eliminado correctamente";
+  static const productSaveError = "Error al guardar el producto";
+  static const productDeleteError = "Error al eliminar el producto";
+  static const confirmDelete = "¿Está seguro que desea eliminar este producto?";
+  static const cancel = "Cancelar";
+  static const descriptionHint = "Descripción general del producto...";
+  static const requiredProductName = "El nombre del producto es requerido";
+  static const invalidPrice = "Ingrese un precio válido";
+  static const deleteProduct = "Eliminar Producto";
+  static const productLoadError = "No se pudo cargar el producto";
+  static const productImageUploadError = "Error al subir la imagen";
+  static const productUpdateError = "Error al actualizar el producto";
+  static const productCreateError = "Error al crear el producto";
+  static const fetchProductsError = "Error al obtener los productos";
+  static const fetchProductError = "Error al obtener el producto";
+  static const createProductError = "Error al crear el producto";
+  static const updateProductError = "Error al actualizar el producto";
+  static const deleteProductError = "Error al eliminar el producto";
 }

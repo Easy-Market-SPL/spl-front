@@ -4,9 +4,9 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/auth/wrapper.dart';
-import 'package:spl_front/pages/business_user/add_product.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
+import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
 import 'package:spl_front/pages/chat/chats_web.dart';
 import 'package:spl_front/pages/customer_user/cart.dart';
@@ -24,6 +24,7 @@ import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 import 'package:spl_front/pages/order/web/order_tracking_web.dart';
 import 'package:spl_front/pages/order/web/orders_list_web.dart';
+import 'package:spl_front/pages/splash/splash_screen.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 import '../pages/auth/login/login_page.dart';
@@ -35,6 +36,8 @@ import '../pages/customer_user/payment/payment.dart';
 import '../pages/delivery_user/delivery_user_tracking.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
+  /// Initialization
+  '/splash': (context) => const SplashScreen(),
   /// AUTH RELATED
   '': (_) => Wrapper(),
   // auth forms
@@ -73,7 +76,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       ChatScreen(userType: UserType.business, userName: "customerName"),
 
   /// PRODUCTS PAGES
-  'add_product': (_) => AddProductPage(),
+  'add_product': (_) => ProductFormPage(),
   
   /// ORDER PAGES
   'business_user_orders': (_) => !kIsWeb
