@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 
 class AddToCartBar extends StatefulWidget {
   final String price;
@@ -88,37 +89,52 @@ class _AddToCartBarState extends State<AddToCartBar> {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-
-            // Price
-            Text(
-              widget.price,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            const SizedBox(width: 12),
+  
+            // Price (ajustado para mejor manejo de espacio)
+            Expanded(
+              flex: 2,
+              child: Container(
+                alignment: Alignment.centerLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.price,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
-
-            const Spacer(),
-
+  
+            const SizedBox(width: 8),
+  
             // Add to cart button
-            ElevatedButton(
-              onPressed: () => widget.onAddToCart(_quantity),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+            Expanded(
+              flex: 3,
+              child: ElevatedButton(
+                onPressed: () => widget.onAddToCart(_quantity),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                "Agregar al Carrito",
-                style: TextStyle(
-                  color: Colors.white, 
-                  fontWeight: FontWeight.bold,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: const Text(
+                    ProductStrings.addToCart,
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),

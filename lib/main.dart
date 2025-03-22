@@ -33,8 +33,8 @@ Future main() async {
   // Load the environment variables from the .env file for begin the app
   await dotenv.load(fileName: '.env');
   await SupabaseConfig.initializeSupabase();
-  await UserService.initializeUserService();
   await ProductService.initializeProductService();
+  await UserService.initializeUserService();
   runApp(MyApp());
 }
 

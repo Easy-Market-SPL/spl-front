@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/services/api/product_service.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ProductBloc() : super(ProductInitial()) {
@@ -11,21 +12,26 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<RefreshProducts>(_onRefreshProducts);
   }
 
+  // Handle loading products
   Future<void> _onLoadProducts(LoadProducts event, Emitter<ProductState> emit) async {
     emit(ProductLoading());
     try {
+      await ProductService.initializeProductService();
+
       final products = await ProductService.getProducts();
-      if (products != null) {
-        emit(ProductLoaded(products));
+
+      if (products == null || products.isEmpty) {
+        emit(ProductError(ProductStrings.productLoadingError));
       } else {
-        emit(const ProductLoaded([]));
+        emit(ProductLoaded(products));
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('❌ Error loading products: $e');
       emit(ProductError(e.toString()));
     }
   }
 
+  // Handle filtering products by category
   Future<void> _onFilterProductsByCategory(
     FilterProductsByCategory event, 
     Emitter<ProductState> emit
@@ -42,9 +48,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       try {
         emit(ProductLoading());
         final products = await ProductService.getProducts();
-        // final filteredProducts = products?.where(
-        //   //(product) => product.category == event.category
-        // ).toList() ?? [];
         final filteredProducts = products?.where(
           (product) => product.code.isNotEmpty
         ).toList() ?? [];
@@ -57,6 +60,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
+  // Handle refreshing products
   Future<void> _onRefreshProducts(RefreshProducts event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       final currentState = state as ProductLoaded;
@@ -69,7 +73,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           emit(ProductLoaded([], activeCategory: currentState.activeCategory));
         }
       } catch (e) {
-        debugPrint(e.toString());
         emit(ProductError(e.toString()));
       }
     } else {

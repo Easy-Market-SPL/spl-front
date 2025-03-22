@@ -36,7 +36,7 @@ class CustomerProductCard extends StatelessWidget {
             ),
           ),
           child: Text(
-            product.price.toString(),
+            '\$ ${product.price}',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

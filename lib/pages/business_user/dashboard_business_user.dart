@@ -4,8 +4,9 @@ import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart'
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/pages/business_user/edit_product.dart';
+import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/utils/strings/business_user_strings.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
@@ -23,7 +24,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
   @override
   void initState() {
     super.initState();
-    // Cargar productos al iniciar
+    // Load products on initialization
     context.read<ProductBloc>().add(LoadProducts());
   }
 
@@ -58,11 +59,12 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ProductBusinessPage(isEditing: false),
+                            builder: (context) => const ProductFormPage(isEditing: false),
                           ),
-                        ).then((_) {
-                          // Refresh products when returning
-                          context.read<ProductBloc>().add(RefreshProducts());
+                        ).then((result) {
+                          if (result == true) {
+                            context.read<ProductBloc>().add(RefreshProducts());
+                          }
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -137,14 +139,14 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Error al obtener los productos',
+              ProductStrings.productLoadingError,
               style: const TextStyle(fontSize: 16),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.read<ProductBloc>().add(LoadProducts()),
-              child: const Text('Reintentar'),
+              child: const Text(ProductStrings.retry),
             ),
           ],
         ),
@@ -153,7 +155,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
       if (state.products.isEmpty) {
         return const Center(
           child: Text(
-            'No hay productos disponibles',
+            ProductStrings.noProductsAvailable,
             style: TextStyle(fontSize: 16),
           ),
         );
@@ -170,7 +172,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
     }
     
     // Fallback
-    return const Center(child: Text('Algo salió mal'));
+    return const Center(child: Text(ProductStrings.productLoadingError));
   }
 
   Widget _buildCategoryTab(String text, {bool isSelected = false, VoidCallback? onPressed}) {

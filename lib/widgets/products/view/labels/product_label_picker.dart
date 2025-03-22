@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/products/view/labels/product_labels_dialog.dart';
 
 class LabelPicker extends StatefulWidget {
@@ -56,7 +57,7 @@ class _LabelPickerState extends State<LabelPicker> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Tags',
+          ProductStrings.labels,
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -90,7 +91,7 @@ class _LabelPickerState extends State<LabelPicker> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Text(
-                  "Añadir etiqueta",
+                  ProductStrings.createLabel,
                   style: TextStyle(color: Colors.blue),
                 ),
               ),

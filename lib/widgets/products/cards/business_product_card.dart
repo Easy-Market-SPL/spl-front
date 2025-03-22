@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
-import 'package:spl_front/pages/business_user/edit_product.dart';
+import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/widgets/products/cards/product_card.dart';
 
 class BusinessProductCard extends StatelessWidget {
@@ -23,7 +23,7 @@ class BusinessProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductBusinessPage(product: product, isEditing: true,),
+                builder: (context) => ProductFormPage(product: product, isEditing: true,),
               ),
             );
           },
@@ -40,7 +40,7 @@ class BusinessProductCard extends StatelessWidget {
             children: [
               // Price Text
               Text(
-                product.price.toString(),
+                '\$ ${product.price}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

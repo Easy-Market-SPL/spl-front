@@ -1,137 +1,138 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 
 class ProductInfoForm extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController codeController;
   final TextEditingController descriptionController;
+  final TextEditingController priceController;
+  final bool isEditing;
 
   const ProductInfoForm({
     super.key,
     required this.nameController,
     required this.codeController,
     required this.descriptionController,
+    required this.priceController,
+    this.isEditing = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final int maxNameLength = 45;
     final int maxDescriptionLength = 250;
-    final int nameLength = nameController.text.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Nombre del producto con contador personalizado
+        // Product name field
+        TextField(
+          controller: nameController,
+          maxLength: maxNameLength,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+          decoration: InputDecoration(
+            labelText: ProductStrings.productName,
+            labelStyle: TextStyle(color: Colors.grey[700]),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.blue.shade200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.blue, width: 2),
+            ),
+            counterText: '', // Hide default counter
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Row for REF and PRICE fields
         Row(
           children: [
+            // REF field
             Expanded(
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    maxLength: maxNameLength,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre del producto',
-                      border: InputBorder.none,
-                      counterText: '', // Oculta el contador por defecto
-                      // 
-                    ),
-                    cursorColor: Colors.blue,
-                    onChanged: (_) {},
-                    onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+              child: TextField(
+                controller: codeController,
+                style: const TextStyle(fontSize: 14, color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: ProductStrings.productReference,
+                  labelStyle: TextStyle(color: Colors.grey[700]),
+                  enabled: !isEditing,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
-                  // Posicionado un poco más abajo para evitar superposición
-                  Positioned(
-                    bottom: 0,
-                    right: 4,
-                    child: Text(
-                      '$nameLength/$maxNameLength',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+
+            // Price field
+            Expanded(
+              child: TextField(
+                controller: priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(fontSize: 14, color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: ProductStrings.productPrice,
+                  labelStyle: TextStyle(color: Colors.grey[700]),
+                  prefixText: '\$ ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+                inputFormatters: <TextInputFormatter>[
+                  CurrencyTextInputFormatter.currency(
+                    decimalDigits: 0,
+                    symbol: '',
                   ),
                 ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => FocusScope.of(context).requestFocus(FocusNode()),
-            ),
           ],
         ),
-        // REF (code)
-        TextField(
-          controller: codeController,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-          decoration: const InputDecoration(
-            labelText: 'REF',
-            border: InputBorder.none,
-            enabled: false,
-          ),
-        ),
         const SizedBox(height: 12),
-        // Descripción
+
+        // Description section
         const Text(
-          'Descripción',
-          style: TextStyle(fontSize: 12),
+          ProductStrings.productDescription,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
+
+        // Description field with border
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.grey.shade50,
           ),
-          child: Stack(
-            children: [
-              TextField(
-                controller: descriptionController,
-                maxLines: null,
-                maxLength: maxDescriptionLength,
-                decoration: const InputDecoration.collapsed(
-                  hintText: 'Descripción general del producto...',
-                ),
-                buildCounter: (
-                  BuildContext context, {
-                  required int currentLength,
-                  required int? maxLength,
-                  required bool isFocused,
-                }) {
-                  return null;
-                },
-                onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: descriptionController,
-                  builder: (context, value, child) {
-                    final descriptionLength = value.text.length;
-                    return Text(
-                      '$descriptionLength/$maxDescriptionLength',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+          child: TextField(
+            controller: descriptionController,
+            maxLines: null,
+            maxLength: maxDescriptionLength,
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            decoration: InputDecoration.collapsed(
+              hintText: ProductStrings.descriptionHint,
+              hintStyle: TextStyle(color: Colors.grey[500]),
+            ),
+            onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
           ),
         ),
+        const SizedBox(height: 8),
       ],
     );
   }

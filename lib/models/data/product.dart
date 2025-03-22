@@ -39,4 +39,20 @@ class Product {
     final List<dynamic> list = jsonDecode(json);
     return list.map((e) => Product.fromMap(e)).toList();
   }
+
+  // Factory method to convert a Product to a Map
+  Map<String, dynamic> toMap(Product product) {
+    return {
+      'code': product.code,
+      'name': product.name,
+      'description': product.description,
+      'price': product.price,
+      'imgUrl': product.imagePath,
+    };
+  }
+
+  // Method to convert a Product to JSON
+  String toJson(){
+    return jsonEncode(toMap(this));
+  }
 }

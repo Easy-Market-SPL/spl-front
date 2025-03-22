@@ -7,6 +7,8 @@ import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/data/variant.dart';
 import 'package:spl_front/models/data/variant_option.dart';
 import 'package:spl_front/services/api/product_service.dart';
+import 'package:spl_front/services/supabase/storage/storage_service.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 
 class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
   ProductFormBloc() : super(ProductFormInitial()) {
@@ -23,7 +25,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     on<AddVariantOption>(_onAddVariantOption);
     on<RemoveVariantOption>(_onRemoveVariantOption);
   }
-  
+
+  // Handle form initialization
   Future<void> _onInitProductForm(
     InitProductForm event,
     Emitter<ProductFormState> emit,
@@ -31,11 +34,10 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     emit(ProductFormLoading());
     try {
       if (event.productCode != null) {
-        // Cargar producto existente
         final product = await ProductService.getProduct(event.productCode!);
         if (product != null) {
-          // En un caso real, cargarías colores, variantes y etiquetas del producto
-          // Por ahora, usamos datos de prueba
+          // In a real case, you would load colors, variants, and tags from the product
+          // For now, we use test data
           emit(ProductFormLoaded(
             productCode: product.code,
             name: product.name,
@@ -58,65 +60,89 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
             isEditing: true,
           ));
         } else {
-          emit(const ProductFormError('No se pudo cargar el producto'));
+          emit(const ProductFormError(ProductStrings.productLoadError));
         }
       } else {
-        // Nuevo producto
+        // New product
         emit(const ProductFormLoaded(isEditing: false));
       }
     } catch (e) {
-      debugPrint('Error inicializando form: $e');
-      emit(ProductFormLoaded(isEditing: event.productCode != null));
+      debugPrint('Error initializing form: $e');
+      emit(ProductFormError(ProductStrings.productLoadError));
     }
   }
-  
+
+  // Handle saving a product
   Future<void> _onSaveProductForm(
     SaveProductForm event,
     Emitter<ProductFormState> emit,
   ) async {
+    final previousState = state;
+    final imageChanged = StorageService.isLocalImage(event.imagePath);
     emit(ProductFormSaving());
     try {
-      // Aquí iría la lógica para guardar en la API
-      await Future.delayed(const Duration(seconds: 1)); // Simulación
-      
+      String? imageUrl = event.imagePath;
+      if (imageChanged) {
+        imageUrl = await StorageService().uploadImage(event.imagePath!, event.code);
+        if (imageUrl == null) {
+          emit(ProductFormError(ProductStrings.productImageUploadError));
+          return;
+        }
+      }
+
       final product = Product(
         code: event.code,
         name: event.name,
         description: event.description,
         price: event.price,
-        imagePath: event.imagePath ?? '',
+        imagePath: imageUrl ?? '',
       );
+
+      // Update product
+      if (previousState is ProductFormLoaded && previousState.isEditing) {
+        final updatedProduct = await ProductService.updateProduct(product);
+        if (updatedProduct != null) {
+          emit(ProductFormSuccess(ProductStrings.productSaved, product: updatedProduct));
+        } else {
+          emit(ProductFormError(ProductStrings.productUpdateError));
+        }
+      } 
       
-      if (state is ProductFormLoaded && (state as ProductFormLoaded).isEditing) {
-        // Actualizar producto existente
-        // await _productService.updateProduct(product);
-        emit(ProductFormSuccess('Producto actualizado correctamente', product: product));
-      } else {
-        // Crear nuevo producto
-        // await _productService.createProduct(product);
-        emit(ProductFormSuccess('Producto creado correctamente', product: product));
+      // Create product
+      else {
+        final newProduct = await ProductService.createProduct(product);
+        if (newProduct != null) {
+          emit(ProductFormSuccess(ProductStrings.productSaved, product: newProduct));
+        } else {
+          emit(ProductFormError(ProductStrings.productCreateError));
+        }
       }
     } catch (e) {
-      debugPrint('Error al guardar: $e');
-      emit(ProductFormError('Error al guardar: ${e.toString()}'));
+      debugPrint('Error saving product: $e');
+      emit(ProductFormError(ProductStrings.productSaveError));
     }
   }
-  
+
+  // Handle deleting a product
   Future<void> _onDeleteProductForm(
     DeleteProductForm event,
     Emitter<ProductFormState> emit,
   ) async {
     emit(ProductFormSaving());
     try {
-      // await _productService.deleteProduct(event.productCode);
-      await Future.delayed(const Duration(seconds: 1)); // Simulación
-      emit(const ProductFormDeleted('Producto eliminado correctamente'));
+      bool deleted = await ProductService.deleteProduct(event.productCode);
+      if (!deleted) {
+        emit(ProductFormError(ProductStrings.productDeleteError));
+        return;
+      }
+      emit(const ProductFormDeleted(ProductStrings.productDeleted));
     } catch (e) {
-      debugPrint('Error al eliminar: $e');
-      emit(ProductFormError('Error al eliminar: ${e.toString()}'));
+      debugPrint('Error deleting product: $e');
+      emit(ProductFormError(ProductStrings.productDeleteError));
     }
   }
-  
+
+  // Handle updating the product image
   void _onUpdateProductImage(
     UpdateProductImage event,
     Emitter<ProductFormState> emit,
@@ -128,7 +154,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       ));
     }
   }
-  
+
+  // Handle adding a product color
   void _onAddProductColor(
     AddProductColor event,
     Emitter<ProductFormState> emit,
@@ -140,7 +167,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       ));
     }
   }
-  
+
+  // Handle removing a product color
   void _onRemoveProductColor(
     RemoveProductColor event,
     Emitter<ProductFormState> emit,
@@ -154,7 +182,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       }
     }
   }
-  
+
+  // Handle adding a product tag
   void _onAddProductTag(
     AddProductTag event,
     Emitter<ProductFormState> emit,
@@ -166,7 +195,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       ));
     }
   }
-  
+
+  // Handle removing a product tag
   void _onRemoveProductTag(
     RemoveProductTag event,
     Emitter<ProductFormState> emit,
