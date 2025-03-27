@@ -68,7 +68,6 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // The container ensures the Wrap spans the full width and aligns its children to the right.
         SizedBox(
           width: double.infinity,
           child: Wrap(

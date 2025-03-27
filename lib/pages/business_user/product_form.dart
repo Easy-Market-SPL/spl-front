@@ -136,7 +136,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.message)),
       );
-      Navigator.pushNamed(context, 'business_dashboard');
+      Navigator.pop(context, true);
     } else if (state is ProductFormLoaded && !_formInitialized) {
       // Initialize form fields
       nameController.text = state.name;
@@ -177,7 +177,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         price: price,
         imagePath: currentState.imagePath,
         colors: currentState.colors,
-        tags: currentState.tags,
+        labels: currentState.labels,
         variants: currentState.variants,
       ));
     }

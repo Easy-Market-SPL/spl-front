@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/data/label.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/products/view/labels/product_labels_dialog.dart';
 
 class LabelPicker extends StatefulWidget {
-  final List<String> tags;
-  final ValueChanged<List<String>> onTagsChanged;
+  final List<Label> labels;
+  final ValueChanged<List<Label>> onLabelsChanged;
 
   const LabelPicker({
     super.key,
-    required this.tags,
-    required this.onTagsChanged,
+    required this.labels,
+    required this.onLabelsChanged,
   });
 
   @override
@@ -17,38 +18,24 @@ class LabelPicker extends StatefulWidget {
 }
 
 class _LabelPickerState extends State<LabelPicker> {
-  // For now, availableTags will be fetched via the dialog.
-  // In the future, this could be maintained globally or via a provider.
 
-  // void _addCustomTag() async {
-  //   final newTag = await showLabelDialog(context);
-  //   if (newTag != null && newTag.trim().isNotEmpty) {
-  //     setState(() {
-  //       if (!widget.tags.contains(newTag.trim())) {
-  //         widget.tags.add(newTag.trim());
-  //       }
-  //     });
-  //     widget.onTagsChanged(widget.tags);
-  //   }
-  // }
-
-  void _selectExistingTag() async {
-    final selectedTag = await showLabelDialog(context);
-    if (selectedTag != null && selectedTag.trim().isNotEmpty) {
+  void _selectExistingLabel() async {
+    final selectedLabel = await showLabelDialog(context);
+    if (selectedLabel != null) {
       setState(() {
-        if (!widget.tags.contains(selectedTag.trim())) {
-          widget.tags.add(selectedTag.trim());
+        if (!widget.labels.any((label) => label.idLabel == selectedLabel.idLabel)) {
+          widget.labels.add(selectedLabel);
         }
       });
-      widget.onTagsChanged(widget.tags);
+      widget.onLabelsChanged(widget.labels);
     }
   }
 
-  void _removeTag(String tag) {
+  void _removeLabel(Label label) {
     setState(() {
-      widget.tags.remove(tag);
+      widget.labels.remove(label);
     });
-    widget.onTagsChanged(widget.tags);
+    widget.onLabelsChanged(widget.labels);
   }
 
   @override
@@ -66,22 +53,22 @@ class _LabelPickerState extends State<LabelPicker> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final tag in widget.tags)
+            for (final label in widget.labels)
               Chip(
                 // Using a fixed padding and style to mimic current design.
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                label: Text(tag, style: const TextStyle(color: Colors.blue)),
+                label: Text(label.name, style: const TextStyle(color: Colors.blue)),
                 backgroundColor: Colors.white,
                 deleteIconColor: Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                   side: const BorderSide(color: Colors.blue),
                 ),
-                onDeleted: () => _removeTag(tag),
+                onDeleted: () => _removeLabel(label),
               ),
             // Button to select an existing tag.
             InkWell(
-              onTap: _selectExistingTag,
+              onTap: _selectExistingLabel,
               borderRadius: BorderRadius.circular(4),
               child: Container(
                 padding:

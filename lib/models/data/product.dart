@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:spl_front/models/data/label.dart';
+
 class Product {
   final String code;
   final String name;
   final String description;
   final double price;
   final String imagePath;
+  final List<Label>? labels;
   final double? rating;
 
   Product({
@@ -14,6 +17,7 @@ class Product {
     required this.description,
     required this.price,
     required this.imagePath,
+    this.labels,
     this.rating,
   });
   
@@ -25,6 +29,7 @@ class Product {
       description: map['description'] ?? '',
       price: map['price'] ?? '',
       imagePath: map['imgUrl'] ?? '',
+      labels: map['labels'] != null ? Label.fromMapList(map['labels']) : [],
       rating: map['rating'] != null ? (map['rating'] as num).toDouble() : null,
     );
   }

@@ -21,6 +21,11 @@ class ProductStrings {
   static const productSaved = "Producto guardado correctamente";
   static const productDeleted = "Producto eliminado correctamente";
   static const productSaveError = "Error al guardar el producto";
+  static const productColorsError = "Error al obtener los colores del producto";
+  static const productVariantsError = "Error al obtener las variantes del producto";
+  static const productLabelsSaveError = "Error al guardar las etiquetas del producto";
+  static const productColorsSaveError = "Error al guardar los colores del producto";
+  static const productVariantsSaveError = "Error al guardar las variantes del producto";
   static const productDeleteError = "Error al eliminar el producto";
   static const confirmDelete = "¿Está seguro que desea eliminar este producto?";
   static const cancel = "Cancelar";
