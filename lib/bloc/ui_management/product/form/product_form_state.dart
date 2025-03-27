@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:spl_front/models/data/label.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/data/variant.dart';
@@ -22,7 +23,7 @@ class ProductFormLoaded extends ProductFormState {
   final double price;
   final String? imagePath;
   final List<ProductColor> colors;
-  final List<String> tags;
+  final List<Label> labels;
   final List<Variant> variants;
   final bool isEditing;
   
@@ -34,7 +35,7 @@ class ProductFormLoaded extends ProductFormState {
     this.price = 0.0,
     this.imagePath,
     this.colors = const [],
-    this.tags = const [],
+    this.labels = const [],
     this.variants = const [],
     this.isEditing = false,
   });
@@ -46,7 +47,7 @@ class ProductFormLoaded extends ProductFormState {
     double? price,
     String? imagePath,
     List<ProductColor>? colors,
-    List<String>? tags,
+    List<Label>? labels,
     List<Variant>? variants,
   }) {
     return ProductFormLoaded(
@@ -57,7 +58,7 @@ class ProductFormLoaded extends ProductFormState {
       price: price ?? this.price,
       imagePath: imagePath ?? this.imagePath,
       colors: colors ?? this.colors,
-      tags: tags ?? this.tags,
+      labels: labels ?? this.labels,
       variants: variants ?? this.variants,
       isEditing: isEditing,
     );
@@ -72,7 +73,7 @@ class ProductFormLoaded extends ProductFormState {
     price, 
     imagePath, 
     colors, 
-    tags, 
+    labels, 
     variants,
     isEditing,
   ];

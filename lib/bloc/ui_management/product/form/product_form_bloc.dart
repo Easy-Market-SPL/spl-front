@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_event.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_state.dart';
+import 'package:spl_front/models/data/label.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/data/variant.dart';
@@ -11,19 +12,15 @@ import 'package:spl_front/services/supabase/storage/storage_service.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 
 class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
+  List<Label>? _originalLabels;
+  List<ProductColor>? _originalColors;
+  List<Variant>? _originalVariants;
+
   ProductFormBloc() : super(ProductFormInitial()) {
     on<InitProductForm>(_onInitProductForm);
     on<SaveProductForm>(_onSaveProductForm);
     on<DeleteProductForm>(_onDeleteProductForm);
     on<UpdateProductImage>(_onUpdateProductImage);
-    on<AddProductColor>(_onAddProductColor);
-    on<RemoveProductColor>(_onRemoveProductColor);
-    on<AddProductTag>(_onAddProductTag);
-    on<RemoveProductTag>(_onRemoveProductTag);
-    on<AddProductVariant>(_onAddProductVariant);
-    on<RemoveProductVariant>(_onRemoveProductVariant);
-    on<AddVariantOption>(_onAddVariantOption);
-    on<RemoveVariantOption>(_onRemoveVariantOption);
   }
 
   // Handle form initialization
@@ -34,10 +31,17 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     emit(ProductFormLoading());
     try {
       if (event.productCode != null) {
+        // Load existing product
         final product = await ProductService.getProduct(event.productCode!);
         if (product != null) {
-          // In a real case, you would load colors, variants, and tags from the product
-          // For now, we use test data
+          // Load related entities
+          final colors = await ProductService.getProductColors(event.productCode!);
+          final variants = await ProductService.getProductVariants(event.productCode!);
+          // Save originals entities relations
+          _originalLabels = List.from(product.labels ?? []);
+          _originalColors = List.from(colors ?? []);
+          _originalVariants = List.from(variants ?? []);
+          // Emit loaded state
           emit(ProductFormLoaded(
             productCode: product.code,
             name: product.name,
@@ -45,12 +49,13 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
             description: product.description,
             price: double.tryParse(product.price.toString()) ?? 0.0,
             imagePath: product.imagePath,
-            colors: [
+            // TODO: Load colors, labels and variants
+            colors: colors ?? [
               ProductColor(idColor: 1, name: 'Rojo', hexCode: '#F44336'),
               ProductColor(idColor: 2, name: 'Verde', hexCode: '#4CAF50'),
             ],
-            tags: ['Etiqueta 1', 'Etiqueta 2'],
-            variants: [
+            labels: product.labels ?? [],
+            variants: variants ?? [
               Variant(name: 'Talla', options: [
                 VariantOption(name: 'S'),
                 VariantOption(name: 'M'),
@@ -78,18 +83,21 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     Emitter<ProductFormState> emit,
   ) async {
     final previousState = state;
-    final imageChanged = StorageService.isLocalImage(event.imagePath);
+    if (previousState is! ProductFormLoaded) {
+      emit(ProductFormError(ProductStrings.productSaveError));
+      return;
+    }
+
     emit(ProductFormSaving());
     try {
+      // Handle image upload if needed
       String? imageUrl = event.imagePath;
-      if (imageChanged) {
-        imageUrl = await StorageService().uploadImage(event.imagePath!, event.code);
-        if (imageUrl == null) {
-          emit(ProductFormError(ProductStrings.productImageUploadError));
-          return;
-        }
+      if (StorageService.isLocalImage(imageUrl)) {
+        imageUrl = await _uploadProductImage(event.imagePath!, event.code, emit);
+        if (imageUrl == null) return; // Error already emitted
       }
 
+      // Create product object
       final product = Product(
         code: event.code,
         name: event.name,
@@ -98,25 +106,23 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         imagePath: imageUrl ?? '',
       );
 
-      // Update product
-      if (previousState is ProductFormLoaded && previousState.isEditing) {
-        final updatedProduct = await ProductService.updateProduct(product);
-        if (updatedProduct != null) {
-          emit(ProductFormSuccess(ProductStrings.productSaved, product: updatedProduct));
-        } else {
-          emit(ProductFormError(ProductStrings.productUpdateError));
-        }
-      } 
-      
-      // Create product
-      else {
-        final newProduct = await ProductService.createProduct(product);
-        if (newProduct != null) {
-          emit(ProductFormSuccess(ProductStrings.productSaved, product: newProduct));
-        } else {
-          emit(ProductFormError(ProductStrings.productCreateError));
-        }
+      // Save product (update or create)
+      final savedProduct = previousState.isEditing 
+          ? await ProductService.updateProduct(product)
+          : await ProductService.createProduct(product);
+
+      if (savedProduct == null) {
+        emit(ProductFormError(previousState.isEditing 
+            ? ProductStrings.productUpdateError 
+            : ProductStrings.productCreateError));
+        return;
       }
+
+      // Update related entities if needed
+      await _updateRelatedEntities(savedProduct, previousState);
+
+      // Emit success
+      emit(ProductFormSuccess(ProductStrings.productSaved, product: savedProduct));
     } catch (e) {
       debugPrint('Error saving product: $e');
       emit(ProductFormError(ProductStrings.productSaveError));
@@ -155,126 +161,75 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     }
   }
 
-  // Handle adding a product color
-  void _onAddProductColor(
-    AddProductColor event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      emit(currentState.copyWith(
-        colors: List.from(currentState.colors)..add(event.color),
-      ));
+  Future<String?> _uploadProductImage(String localPath, String code, Emitter<ProductFormState> emit) async {
+    try {
+      final imageUrl = await StorageService().uploadImage(localPath, code);
+      if (imageUrl == null) {
+        emit(ProductFormError(ProductStrings.productImageUploadError));
+      }
+      return imageUrl;
+    } catch (e) {
+      emit(ProductFormError(ProductStrings.productImageUploadError));
+      return null;
     }
   }
 
-  // Handle removing a product color
-  void _onRemoveProductColor(
-    RemoveProductColor event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      final colors = List<ProductColor>.from(currentState.colors);
-      if (event.colorIndex >= 0 && event.colorIndex < colors.length) {
-        colors.removeAt(event.colorIndex);
-        emit(currentState.copyWith(colors: colors));
-      }
+  Future<void> _updateRelatedEntities(Product product, ProductFormLoaded state) async {
+    // Handle labels
+    final bool labelsChanged = !_areLabelsEqual(_originalLabels ?? [], state.labels);
+    if (labelsChanged) {
+      await ProductService.updateProductLabels(product.code, state.labels);
+    }
+
+    // Hanlde colors
+    final bool colorsChanged = !_areColorsEqual(_originalColors ?? [], state.colors);
+    if (colorsChanged) {
+      await ProductService.updateProductColors(product.code, state.colors);
+    }
+
+    // Handle variants
+    final bool variantsChanged = !_areVariantsEqual(_originalVariants ?? [], state.variants);
+    if (variantsChanged) {
+      await ProductService.updateProductVariants(product.code, state.variants);
     }
   }
 
-  // Handle adding a product tag
-  void _onAddProductTag(
-    AddProductTag event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      emit(currentState.copyWith(
-        tags: List.from(currentState.tags)..add(event.tag),
-      ));
-    }
+  // Helper method for label comparison
+  bool _areLabelsEqual(List<Label> original, List<Label> current) {
+    return _areEntitiesListsEqual(original, current, (label) => label.idLabel);
   }
 
-  // Handle removing a product tag
-  void _onRemoveProductTag(
-    RemoveProductTag event,
-    Emitter<ProductFormState> emit,
+  // Helper method for color comparison
+  bool _areColorsEqual(List<ProductColor> original, List<ProductColor> current) {
+    return _areEntitiesListsEqual(original, current, (color) => color.idColor);
+  }
+
+  // Helper method for variant comparison
+  bool _areVariantsEqual(List<Variant> original, List<Variant> current) {
+    return _areEntitiesListsEqual(original, current, (variant) => variant.name);
+  }
+
+  bool _areEntitiesListsEqual<T, K extends Comparable>(
+    List<T> original, 
+    List<T> current, 
+    K Function(T item) keySelector
   ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      final tags = List<String>.from(currentState.tags);
-      if (event.tagIndex >= 0 && event.tagIndex < tags.length) {
-        tags.removeAt(event.tagIndex);
-        emit(currentState.copyWith(tags: tags));
+    if (original.length != current.length) return false;
+
+    // Sort both lists by the key selector for proper comparison
+    final sortedOriginal = List<T>.from(original)
+      ..sort((a, b) => keySelector(a).compareTo(keySelector(b)));
+
+    final sortedCurrent = List<T>.from(current)
+      ..sort((a, b) => keySelector(a).compareTo(keySelector(b)));
+
+    // Compare each item by the selected key
+    for (int i = 0; i < sortedOriginal.length; i++) {
+      if (keySelector(sortedOriginal[i]) != keySelector(sortedCurrent[i])) {
+        return false;
       }
     }
-  }
-  
-  void _onAddProductVariant(
-    AddProductVariant event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      emit(currentState.copyWith(
-        variants: List.from(currentState.variants)..add(event.variant),
-      ));
-    }
-  }
-  
-  void _onRemoveProductVariant(
-    RemoveProductVariant event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      final variants = List<Variant>.from(currentState.variants);
-      if (event.variantIndex >= 0 && event.variantIndex < variants.length) {
-        variants.removeAt(event.variantIndex);
-        emit(currentState.copyWith(variants: variants));
-      }
-    }
-  }
-  
-  void _onAddVariantOption(
-    AddVariantOption event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      final variants = List<Variant>.from(currentState.variants);
-      if (event.variantIndex >= 0 && event.variantIndex < variants.length) {
-        final variant = variants[event.variantIndex];
-        final List<VariantOption> options = List.from(variant.options)..add(event.option);
-        variants[event.variantIndex] = Variant(
-          name: variant.name,
-          options: options,
-        );
-        emit(currentState.copyWith(variants: variants));
-      }
-    }
-  }
-  
-  void _onRemoveVariantOption(
-    RemoveVariantOption event,
-    Emitter<ProductFormState> emit,
-  ) {
-    if (state is ProductFormLoaded) {
-      final currentState = state as ProductFormLoaded;
-      final variants = List<Variant>.from(currentState.variants);
-      if (event.variantIndex >= 0 && event.variantIndex < variants.length) {
-        final variant = variants[event.variantIndex];
-        if (event.optionIndex >= 0 && event.optionIndex < variant.options.length) {
-          final List<VariantOption> options = List.from(variant.options);
-          options.removeAt(event.optionIndex);
-          variants[event.variantIndex] = Variant(
-            name: variant.name,
-            options: options,
-          );
-          emit(currentState.copyWith(variants: variants));
-        }
-      }
-    }
+
+    return true;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:spl_front/models/data/label.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/data/variant.dart';
 import 'package:spl_front/models/data/variant_option.dart';
@@ -10,9 +11,8 @@ abstract class ProductFormEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-// Iniciar el formulario (nuevo producto o carga para edición)
 class InitProductForm extends ProductFormEvent {
-  final String? productCode; // Null si es nuevo producto
+  final String? productCode; // Null for new products
   
   const InitProductForm({this.productCode});
   
@@ -20,7 +20,6 @@ class InitProductForm extends ProductFormEvent {
   List<Object?> get props => [productCode];
 }
 
-// Guardar el producto (crear o actualizar)
 class SaveProductForm extends ProductFormEvent {
   final String name;
   final String code;
@@ -28,7 +27,7 @@ class SaveProductForm extends ProductFormEvent {
   final double price;
   final String? imagePath;
   final List<ProductColor> colors;
-  final List<String> tags;
+  final List<Label> labels;
   final List<Variant> variants;
   
   const SaveProductForm({
@@ -38,15 +37,14 @@ class SaveProductForm extends ProductFormEvent {
     required this.price,
     this.imagePath,
     required this.colors,
-    required this.tags,
+    required this.labels,
     required this.variants,
   });
   
   @override
-  List<Object?> get props => [name, code, description, price, imagePath, colors, tags, variants];
+  List<Object?> get props => [name, code, description, price, imagePath, colors, labels, variants];
 }
 
-// Eliminar un producto existente
 class DeleteProductForm extends ProductFormEvent {
   final String productCode;
   
@@ -56,7 +54,6 @@ class DeleteProductForm extends ProductFormEvent {
   List<Object?> get props => [productCode];
 }
 
-// Eventos para manipulaciones específicas del formulario
 class UpdateProductImage extends ProductFormEvent {
   final String imagePath;
   
@@ -84,22 +81,22 @@ class RemoveProductColor extends ProductFormEvent {
   List<Object?> get props => [colorIndex];
 }
 
-class AddProductTag extends ProductFormEvent {
-  final String tag;
+class AddProductLabel extends ProductFormEvent {
+  final Label label;
   
-  const AddProductTag(this.tag);
+  const AddProductLabel(this.label);
   
   @override
-  List<Object?> get props => [tag];
+  List<Object?> get props => [label];
 }
 
-class RemoveProductTag extends ProductFormEvent {
-  final int tagIndex;
+class RemoveProductLabel extends ProductFormEvent {
+  final int labelIndex;
   
-  const RemoveProductTag(this.tagIndex);
+  const RemoveProductLabel(this.labelIndex);
   
   @override
-  List<Object?> get props => [tagIndex];
+  List<Object?> get props => [labelIndex];
 }
 
 class AddProductVariant extends ProductFormEvent {

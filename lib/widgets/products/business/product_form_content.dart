@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/product_form_event.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_state.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/products/pickers/product_image_picker.dart';
@@ -37,7 +36,7 @@ class ProductFormContent extends StatelessWidget {
 
         // Retrieve data from the Bloc state
         final colors = state.colors;
-        final tags = state.tags;
+        final tags = state.labels;
         final variants = state.variants;
 
         final int maxNameLength = 45;
@@ -58,28 +57,7 @@ class ProductFormContent extends StatelessWidget {
                   // Color Picker
                   ColorPickerWidget(
                     initialColors: colors,
-                    onColorsChanged: (newColors) {
-                      if (newColors.length > state.colors.length) {
-                        final newColor = newColors.last;
-                        context.read<ProductFormBloc>().add(AddProductColor(newColor));
-                      } else if (newColors.length < state.colors.length) {
-                        // Find the removed color
-                        for (int i = 0; i < state.colors.length; i++) {
-                          bool found = false;
-                          for (var newColor in newColors) {
-                            if (newColor.idColor == state.colors[i].idColor &&
-                                newColor.name == state.colors[i].name) {
-                              found = true;
-                              break;
-                            }
-                          }
-                          if (!found) {
-                            context.read<ProductFormBloc>().add(RemoveProductColor(i));
-                            break;
-                          }
-                        }
-                      }
-                    },
+                    onColorsChanged: (newColors) {},
                   ),
                   const SizedBox(height: 20),
 
@@ -169,21 +147,8 @@ class ProductFormContent extends StatelessWidget {
 
                   // Tags
                   LabelPicker(
-                    tags: tags,
-                    onTagsChanged: (newTags) {
-                      if (newTags.length > state.tags.length) {
-                        final newTag = newTags.last;
-                        context.read<ProductFormBloc>().add(AddProductTag(newTag));
-                      } else if (newTags.length < state.tags.length) {
-                        // Find the removed tag
-                        for (int i = 0; i < state.tags.length; i++) {
-                          if (!newTags.contains(state.tags[i])) {
-                            context.read<ProductFormBloc>().add(RemoveProductTag(i));
-                            break;
-                          }
-                        }
-                      }
-                    },
+                    labels: tags,
+                    onLabelsChanged: (newTags) {},
                   ),
                   const SizedBox(height: 20),
 
