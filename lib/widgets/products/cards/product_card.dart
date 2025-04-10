@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/product/product_details.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 class ProductCard extends StatelessWidget {
+  final UserType userType;
   final Product product;
   final Widget? priceButton;
   
   const ProductCard({
     super.key,
+    required this.userType,
     required this.product,
     this.priceButton,
   });
@@ -23,7 +26,7 @@ class ProductCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ViewProductDetailsPage(product: product),
+            builder: (context) => ViewProductDetailsPage(product: product, userType: userType,),
           ),
         );
       },

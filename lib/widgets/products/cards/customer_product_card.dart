@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/product/product_details.dart';
 import 'package:spl_front/widgets/products/cards/product_card.dart';
 
@@ -14,6 +15,7 @@ class CustomerProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProductCard(
+      userType: UserType.customer,
       product: product,
       priceButton: SizedBox(
         width: double.infinity,
@@ -23,7 +25,7 @@ class CustomerProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ViewProductDetailsPage(product: product,),
+                builder: (context) => ViewProductDetailsPage(product: product, userType: UserType.customer,),
               ),
             );
           },

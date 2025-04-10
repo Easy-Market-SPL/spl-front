@@ -11,7 +11,7 @@ class ProductColor {
     return ProductColor(
       idColor: map['idColor'] ?? 0,
       name: map['name'] ?? '',
-      hexCode: map['hexCode'] ?? '',
+      hexCode: '#${map['hexaCode'] ?? ''}',
     );
   }
 
@@ -28,7 +28,7 @@ class ProductColor {
     return {
       'idColor': color.idColor,
       'name': color.name,
-      'hexCode': color.hexCode,
+      'hexaCode': color.hexCode.replaceFirst('#', ''),
     };
   }
 

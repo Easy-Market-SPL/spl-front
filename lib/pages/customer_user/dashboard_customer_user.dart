@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/products/grids/customer_product_card.dart';
+import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
@@ -20,8 +23,9 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
 
   @override
   void initState() {
-    usersBloc = BlocProvider.of<UsersBloc>(context);
     super.initState();
+    usersBloc = BlocProvider.of<UsersBloc>(context);
+    context.read<ProductBloc>().add(LoadProducts());
   }
 
   @override
@@ -44,37 +48,35 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
             },
           ),
           body: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category Tabs
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    // TODO: Build category tabs according with the state and database info
-                    children: [
-                      _buildCategoryTab("Todos", isSelected: true),
-                      const SizedBox(width: 10),
-                      _buildCategoryTab(ProductStrings.productCategory),
-                      const SizedBox(width: 10),
-                      _buildCategoryTab(ProductStrings.productCategory),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Product List
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      // Important: Change the widget according with the variability from the Product Line
-                      child: CustomerProductGrid(),
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, productState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category Tabs
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        // TODO: Build category tabs according with the state and database info
+                        children: [
+                          _buildCategoryTab("Todos", isSelected: true),
+                          const SizedBox(width: 10),
+                          _buildCategoryTab(ProductStrings.productCategory),
+                          const SizedBox(width: 10),
+                          _buildCategoryTab(ProductStrings.productCategory),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                    const SizedBox(height: 8),
+
+                    // Product List with different states
+                    Expanded(
+                      child: _buildProductContent(productState),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           bottomNavigationBar: CustomBottomNavigationBar(
@@ -105,5 +107,50 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
         ),
       ),
     );
+  }
+
+  Widget _buildProductContent(ProductState state) {
+    if (state is ProductInitial || state is ProductLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is ProductError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              ProductStrings.productLoadingError,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.read<ProductBloc>().add(LoadProducts()),
+              child: const Text(ProductStrings.retry),
+            ),
+          ],
+        ),
+      );
+    } else if (state is ProductLoaded) {
+      if (state.products.isEmpty) {
+        return const Center(
+          child: Text(
+            ProductStrings.noProductsAvailable,
+            style: TextStyle(fontSize: 16),
+          ),
+        );
+      }
+      
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: CustomerProductGrid(
+            productsList: state.products,
+          ),
+        ),
+      );
+    }
+    
+    // Fallback
+    return const Center(child: Text(ProductStrings.productLoadingError));
   }
 }

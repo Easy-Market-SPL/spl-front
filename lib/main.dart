@@ -12,6 +12,7 @@ import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
@@ -23,6 +24,7 @@ import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/services/api/color_service.dart';
 import 'package:spl_front/services/api/label_service.dart';
 import 'package:spl_front/services/api/product_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
@@ -37,6 +39,7 @@ Future main() async {
   await SupabaseConfig.initializeSupabase();
   await ProductService.initializeProductService();
   await LabelService.initializeLabelService(); 
+  await ColorService.initializeProductService();
   await UserService.initializeUserService();
   runApp(MyApp());
 }
@@ -72,6 +75,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => OrderListBloc()),
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
+        BlocProvider(create: (context) => ProductDetailsBloc()),
         BlocProvider(create: (context) => LabelBloc()),
 
         // Provider for Payment Management
