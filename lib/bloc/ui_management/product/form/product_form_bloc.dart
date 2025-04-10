@@ -6,7 +6,6 @@ import 'package:spl_front/models/data/label.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/data/variant.dart';
-import 'package:spl_front/models/data/variant_option.dart';
 import 'package:spl_front/services/api/product_service.dart';
 import 'package:spl_front/services/supabase/storage/storage_service.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
@@ -49,19 +48,9 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
             description: product.description,
             price: double.tryParse(product.price.toString()) ?? 0.0,
             imagePath: product.imagePath,
-            // TODO: Load colors, labels and variants
-            colors: colors ?? [
-              ProductColor(idColor: 1, name: 'Rojo', hexCode: '#F44336'),
-              ProductColor(idColor: 2, name: 'Verde', hexCode: '#4CAF50'),
-            ],
+            colors: colors ?? [],
             labels: product.labels ?? [],
-            variants: variants ?? [
-              Variant(name: 'Talla', options: [
-                VariantOption(name: 'S'),
-                VariantOption(name: 'M'),
-                VariantOption(name: 'L'),
-              ]),
-            ],
+            variants: variants ?? [],
             isEditing: true,
           ));
         } else {

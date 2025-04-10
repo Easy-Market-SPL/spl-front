@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/models/data/product.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/widgets/products/cards/product_card.dart';
 
@@ -17,6 +18,7 @@ class BusinessProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProductCard(
+      userType: UserType.business,
       product: product,
       priceButton: SizedBox(
         width: double.infinity,

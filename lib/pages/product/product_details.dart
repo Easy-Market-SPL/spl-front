@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/models/data/label.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/details/product_details_event.dart';
+import 'package:spl_front/bloc/ui_management/product/details/product_details_state.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
-import 'package:spl_front/models/data/variant.dart';
-import 'package:spl_front/models/data/variant_option.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
+import 'package:spl_front/utils/strings/business_user_strings.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/products/product_add_to_cart.dart';
-import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_info.dart';
@@ -17,9 +20,11 @@ import 'package:spl_front/widgets/reviews/review_creation.dart';
 import 'package:spl_front/widgets/reviews/reviews_list.dart';
 
 class ViewProductDetailsPage extends StatefulWidget {
+  final UserType userType;
   final Product product;
 
-  const ViewProductDetailsPage({super.key, required this.product});
+  const ViewProductDetailsPage(
+      {super.key, required this.product, required this.userType});
 
   @override
   State<ViewProductDetailsPage> createState() => _ViewProductDetailsPageState();
@@ -29,71 +34,66 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
   // Track selected color and variant options
   ProductColor? selectedColor;
   Map<String, String> selectedVariantOptions = {};
-  
-  // Demo data - in a real app these would come from the product
-  late List<ProductColor> availableColors;
-  late List<Variant> availableVariants;
-  late List<Label> availableLabels;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with sample data - this would come from API
-    availableColors = [
-      ProductColor(idColor: 1, name: 'Red', hexCode: '#F44336'),
-      ProductColor(idColor: 2, name: 'Blue', hexCode: '#2196F3'),
-      ProductColor(idColor: 3, name: 'Green', hexCode: '#4CAF50'),
-    ];
+    // Load product details when page initializes
+    context.read<ProductDetailsBloc>().add(LoadProductDetails(widget.product.code));
+  }
 
-    availableLabels = [
-      Label(idLabel: 1, name: 'Label 1', description: ''),
-      Label(idLabel: 3, name: 'Label 3', description: ''),
-      Label(idLabel: 2, name: 'Label 2', description: ''),
-    ];
-    
-    availableVariants = [
-      Variant(
-        name: "Size",
-        options: [
-          VariantOption(name: "Small"), 
-          VariantOption(name: "Medium"), 
-          VariantOption(name: "Large"),
-        ],
-      ),
-      Variant(
-        name: "Material",
-        options: [
-          VariantOption(name: "Cotton"), 
-          VariantOption(name: "Polyester"), 
-          VariantOption(name: "Blend"),
-        ],
-      ),
-    ];
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is a customer to determine if cart functionality should be shown
+    final bool isCustomer = widget.userType == UserType.customer;
+
     return Scaffold(
       appBar: CustomerUserAppBar(
         hintText: BusinessStrings.searchHint,
         onFilterPressed: () {},
       ),
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Scrollable part of the screen
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Image
-                  ProductImageDisplay(imagePath: widget.product.imagePath),
-                  
-                  // Color selection
+      body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+        builder: (context, state) {
+          if (state is ProductDetailsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ProductDetailsError) {
+            return Center(child: Text(state.message));
+          } else if (state is ProductDetailsLoaded) {
+            return _buildProductDetails(context, state, isCustomer);
+          } else {
+            // Fallback or initial state
+            return const Center(
+                child: Text(ProductStrings.productLoadingError));
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductDetails(
+      BuildContext context, ProductDetailsLoaded state, bool isCustomer) {
+    return Column(
+      children: [
+        // Scrollable part of the screen
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                ProductImageDisplay(imagePath: state.product.imagePath),
+
+                // Color selection (only show if colors are available)
+                if (state.colors.isNotEmpty) ...[
                   ProductColorSelector(
-                    colors: availableColors,
+                    colors: state.colors,
                     selectedColor: selectedColor,
                     onColorSelected: (color) {
                       setState(() {
@@ -101,18 +101,23 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                       });
                     },
                   ),
+                ],
+
+                const SizedBox(height: 16),
+
+                // Product info header (name, code, rating, description)
+                ProductDetailsInfo(product: state.product),
+
+                // Tags (only show if labels are available)
+                if (state.labels.isNotEmpty) ...[
+                  ProductDetailsLabels(labels: state.labels),
                   const SizedBox(height: 16),
+                ],
 
-                  // Product info header (name, code, rating, description)
-                  ProductDetailsInfo(product: widget.product),
-
-                  // Tags
-                  ProductDetailsLabels(labels: availableLabels,),
-                  const SizedBox(height: 16),
-
-                  // Variants
+                // Variants (only show if variants are available)
+                if (state.variants.isNotEmpty) ...[
                   ProductDetailsVariants(
-                    variants: availableVariants,
+                    variants: state.variants,
                     selectedOptions: selectedVariantOptions,
                     onOptionSelected: (variantName, optionName) {
                       setState(() {
@@ -121,31 +126,33 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Reviews section
-                  if (SPLVariables.isRated) ...[
-                    const ReviewsWidget(),
-                    const SizedBox(height: 16),
-                    const WriteReviewWidget(),
-                  ],
                 ],
-              ),
+
+                // Reviews section
+                if (SPLVariables.isRated) ...[
+                  const ReviewsWidget(),
+                  const SizedBox(height: 16),
+                  
+                  if (isCustomer) const WriteReviewWidget(),
+                ],
+              ],
             ),
           ),
+        ),
 
-          // Add to cart bar
+        // Add to cart bar - only show for customers
+        if (isCustomer)
           AddToCartBar(
-            price: widget.product.price.toString(),
-            onAddToCart: _handleAddToCart,
+            price: state.product.price.toString(),
+            onAddToCart: (quantity) => _handleAddToCart(quantity, state),
           ),
-        ],
-      ),
+      ],
     );
   }
 
-  void _handleAddToCart(int quantity) {
+  void _handleAddToCart(int quantity, ProductDetailsLoaded state) {
     // Verify all required selections are made
-    if (selectedColor == null) {
+    if (state.colors.isNotEmpty && selectedColor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Seleccione un color"),
@@ -156,7 +163,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
     }
 
     // Check if all variants have a selection
-    for (var variant in availableVariants) {
+    for (var variant in state.variants) {
       if (!selectedVariantOptions.containsKey(variant.name)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

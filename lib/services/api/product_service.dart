@@ -63,11 +63,9 @@ class ProductService {
   static Future<List<ProductColor>?> getProductColors(String code) async {
     var url = '$_url/products/$code/colors';
     try {
-      // final response = await fetchWithRetry(url);
-      // final decodedBody = utf8.decode(response.bodyBytes);
-      // return ProductColor.fromJsonList(decodedBody);
-      debugPrint('⚠️ Endpoint no implementado: getProductColors');
-      return null;
+      final response = await fetchWithRetry(url);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      return ProductColor.fromJsonList(decodedBody);
     } catch (e) {
       debugPrint('❌ ${ProductStrings.productColorsError}: $e');
       return null;
@@ -78,11 +76,9 @@ class ProductService {
   static Future<List<Variant>?> getProductVariants(String code) async {
     var url = '$_url/products/$code/variants';
     try {
-      // final response = await fetchWithRetry(url);
-      // final decodedBody = utf8.decode(response.bodyBytes);
-      // return Variant.fromJsonList(decodedBody);
-      debugPrint('⚠️ Endpoint no implementado: getProductVariants');
-      return null;
+      final response = await fetchWithRetry(url);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      return Variant.fromJsonList(decodedBody);
     } catch (e) {
       debugPrint('❌ ${ProductStrings.productVariantsError}: $e');
       return null;
@@ -165,22 +161,20 @@ class ProductService {
   static Future<ProductColor?> updateProductColors(String code, List<ProductColor> colors) async {
     var url = '$_url/products/$code/colors';
     try {
-      // final response = await _client.put(
-      //   Uri.parse(url),
-      //   headers: <String, String>{
-      //     'Content-Type': 'application/json; charset=UTF-8',
-      //   },
-      //   body: ProductColor.toJsonList(colors),
-      // );
-      // if (response.statusCode == 200) {
-      //   final decodedBody = utf8.decode(response.bodyBytes);
-      //   return ProductColor.fromJson(decodedBody);
-      // } else {
-      //   debugPrint('❌ ${ProductStrings.productColorsSaveError}: ${response.body}');
-      //   return null;
-      // }
-      debugPrint('⚠️ Endpoint no implementado: updateProductColors');
-      return null;
+      final response = await _client.put(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: ProductColor.toJsonList(colors),
+      );
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        return ProductColor.fromJson(decodedBody);
+      } else {
+        debugPrint('❌ ${ProductStrings.productColorsSaveError}: ${response.body}');
+        return null;
+      }
     } catch (e) {
       debugPrint('❌ ${ProductStrings.productColorsSaveError}: $e');
       return null;
@@ -191,22 +185,20 @@ class ProductService {
   static Future<Variant?> updateProductVariants(String code, List<Variant> variants) async {
     var url = '$_url/products/$code/variants';
     try {
-      // final response = await _client.put(
-      //   Uri.parse(url),
-      //   headers: <String, String>{
-      //     'Content-Type': 'application/json; charset=UTF-8',
-      //   },
-      //   body: Variant.toJsonList(variants),
-      // );
-      // if (response.statusCode == 200) {
-      //   final decodedBody = utf8.decode(response.bodyBytes);
-      //   return Variant.fromJson(decodedBody);
-      // } else {
-      //   debugPrint('❌ ${ProductStrings.productVariantsSaveError}: ${response.body}');
-      //   return null;
-      // }
-      debugPrint('⚠️ Endpoint no implementado: updateProductVariants');
-      return null;
+      final response = await _client.put(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: Variant.toJsonList(variants),
+      );
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        return Variant.fromJson(decodedBody);
+      } else {
+        debugPrint('❌ ${ProductStrings.productVariantsSaveError}: ${response.body}');
+        return null;
+      }
     } catch (e) {
       debugPrint('❌ ${ProductStrings.productVariantsSaveError}: $e');
       return null;
