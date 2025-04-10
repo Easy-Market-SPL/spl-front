@@ -7,6 +7,7 @@ import 'package:spl_front/services/api/label_service.dart';
 class LabelBloc extends Bloc<LabelEvent, LabelState> {
   LabelBloc() : super(LabelInitial()) {
     on<LoadLabels>(_onLoadLabels);
+    on<LoadDashboardLabels>(_onLoadDashboardLabels);
     on<CreateLabel>(_onCreateLabel);
   }
 
@@ -16,6 +17,18 @@ class LabelBloc extends Bloc<LabelEvent, LabelState> {
       await LabelService.initializeLabelService();
       final labels = await LabelService.getLabels();
       emit(LabelsLoaded(labels ?? []));
+    } catch (e) {
+      emit(LabelError("Error cargando etiquetas"));
+    }
+  }
+
+  Future<void> _onLoadDashboardLabels(LoadDashboardLabels event, Emitter<LabelState> emit) async {
+    emit(LabelLoading());
+    try {
+      await LabelService.initializeLabelService();
+      final labels = [Label(idLabel: -1, name: "Todos", description: "")];
+      labels.addAll(await LabelService.getLabels() ?? []);
+      emit(LabelDashboardLoaded(labels));
     } catch (e) {
       emit(LabelError("Error cargando etiquetas"));
     }

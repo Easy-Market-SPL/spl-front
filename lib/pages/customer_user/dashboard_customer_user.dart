@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
@@ -9,6 +11,7 @@ import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
@@ -20,12 +23,14 @@ class CustomerMainDashboard extends StatefulWidget {
 
 class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   late UsersBloc usersBloc;
+  String activeLabel = "Todos";
 
   @override
   void initState() {
     super.initState();
     usersBloc = BlocProvider.of<UsersBloc>(context);
     context.read<ProductBloc>().add(LoadProducts());
+    context.read<LabelBloc>().add(LoadDashboardLabels());
   }
 
   @override
@@ -48,35 +53,30 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
             },
           ),
           body: SafeArea(
-            child: BlocBuilder<ProductBloc, ProductState>(
-              builder: (context, productState) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category Tabs
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Row(
-                        // TODO: Build category tabs according with the state and database info
-                        children: [
-                          _buildCategoryTab("Todos", isSelected: true),
-                          const SizedBox(width: 10),
-                          _buildCategoryTab(ProductStrings.productCategory),
-                          const SizedBox(width: 10),
-                          _buildCategoryTab(ProductStrings.productCategory),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Product List with different states
-                    Expanded(
-                      child: _buildProductContent(productState),
-                    ),
-                  ],
-                );
-              },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Mostrar etiquetas reales
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: LabelsWidget(
+                    activeLabel: activeLabel,
+                    onLabelSelected: (labelName) {
+                      setState(() {
+                        activeLabel = labelName;
+                      });
+                      context.read<ProductBloc>().add(FilterProductsByCategory(labelName));
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, productState) {
+                      return _buildProductContent(productState);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           bottomNavigationBar: CustomBottomNavigationBar(
@@ -85,27 +85,6 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCategoryTab(String text, {bool isSelected = false}) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Handle category tab selection
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.blue : Colors.white,
-          foregroundColor: isSelected ? Colors.white : Colors.black,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ),
     );
   }
 
