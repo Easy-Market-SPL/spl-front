@@ -24,6 +24,7 @@ import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/services/api/color_service.dart';
 import 'package:spl_front/services/api/label_service.dart';
 import 'package:spl_front/services/api/product_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
@@ -38,6 +39,7 @@ Future main() async {
   await SupabaseConfig.initializeSupabase();
   await ProductService.initializeProductService();
   await LabelService.initializeLabelService(); 
+  await ColorService.initializeProductService();
   await UserService.initializeUserService();
   runApp(MyApp());
 }

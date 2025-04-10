@@ -1,35 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product_color.dart';
+import 'package:spl_front/services/api/color_service.dart';
 import 'package:spl_front/widgets/products/view/color/product_custom_color_dialog.dart';
 
-/// Simulates fetching default colors from the backend.
-/// // TODO: Replace this with a real API call.
+
 Future<List<ProductColor>> fetchDefaultColors() async {
-  await Future.delayed(const Duration(seconds: 1));
-  return [
-    ProductColor(idColor: 0, name: 'Red', hexCode: '#F44336'),
-    ProductColor(idColor: 0, name: 'Pink', hexCode: '#E91E63'),
-    ProductColor(idColor: 0, name: 'Purple', hexCode: '#9C27B0'),
-    ProductColor(idColor: 0, name: 'Deep Purple', hexCode: '#673AB7'),
-    ProductColor(idColor: 0, name: 'Indigo', hexCode: '#3F51B5'),
-    ProductColor(idColor: 0, name: 'Blue', hexCode: '#2196F3'),
-    ProductColor(idColor: 0, name: 'Cyan', hexCode: '#00BCD4'),
-    ProductColor(idColor: 0, name: 'Green', hexCode: '#4CAF50'),
-    ProductColor(idColor: 0, name: 'Lime', hexCode: '#CDDC39'),
-    ProductColor(idColor: 0, name: 'Yellow', hexCode: '#FFEB3B'),
-    ProductColor(idColor: 0, name: 'Amber', hexCode: '#FFC107'),
-    ProductColor(idColor: 0, name: 'Orange', hexCode: '#FF9800'),
-    ProductColor(idColor: 0, name: 'Brown', hexCode: '#795548'),
-    ProductColor(idColor: 0, name: 'Grey', hexCode: '#9E9E9E'),
-    ProductColor(idColor: 0, name: 'Blue Grey', hexCode: '#607D8B'),
-    ProductColor(idColor: 0, name: 'Black', hexCode: '#000000'),
-    ProductColor(idColor: 0, name: 'White', hexCode: '#FFFFFF'),
-  ];
+  return await ColorService.getColors() ?? [];
 }
 
-/// Shows the default color selection dialog.
-/// The dialog displays colors fetched from the backend.
-/// If the user does not choose one, they can opt for a custom color.
 Future<ProductColor?> showDefaultColorDialog(BuildContext context) async {
   return await showDialog<ProductColor>(
     context: context,

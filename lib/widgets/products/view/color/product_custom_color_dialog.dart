@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:spl_front/models/data/product_color.dart';
+import 'package:spl_front/services/api/color_service.dart';
 
 /// Shows the custom color dialog using the flutter_colorpicker plugin.
 Future<ProductColor?> showCustomColorDialog(BuildContext context) async {
@@ -78,14 +79,7 @@ Future<ProductColor?> showCustomColorDialog(BuildContext context) async {
   );
 }
 
-/// Simulates creating a custom color by integrating with the backend.
-/// // TODO: Replace this with your own backend integration.
+
 Future<ProductColor?> createCustomColor(ProductColor color) async {
-  await Future.delayed(const Duration(seconds: 1));
-  // For example, assign an id using the current timestamp.
-  return ProductColor(
-    idColor: DateTime.now().millisecondsSinceEpoch,
-    name: color.name,
-    hexCode: color.hexCode,
-  );
+  return await ColorService.createColor(color);
 }
