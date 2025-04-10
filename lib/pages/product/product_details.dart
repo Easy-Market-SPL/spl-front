@@ -127,7 +127,8 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
+                
+                // TODO: (PELADO) Implementar reseñas
                 // Reviews section
                 if (SPLVariables.isRated) ...[
                   const ReviewsWidget(),
@@ -149,7 +150,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       ],
     );
   }
-
+ // TODO: (PELADO) Implementar añadir al carrito
   void _handleAddToCart(int quantity, ProductDetailsLoaded state) {
     // Verify all required selections are made
     if (state.colors.isNotEmpty && selectedColor == null) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
@@ -9,6 +11,7 @@ import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
 
 class BusinessUserMainDashboard extends StatefulWidget {
@@ -19,13 +22,14 @@ class BusinessUserMainDashboard extends StatefulWidget {
 }
 
 class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
-  final List<String> categories = ["Todos", "Ropa", "Accesorios", "Electrónicos"];
+  String activeLabel = "Todos"; 
   
   @override
   void initState() {
     super.initState();
     // Load products on initialization
     context.read<ProductBloc>().add(LoadProducts());
+    context.read<LabelBloc>().add(LoadDashboardLabels());
   }
 
   @override
@@ -44,18 +48,27 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Category Tabs
-                _buildCategoryTabs(state),
-                const SizedBox(height: 8),
+                // Labels 
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: LabelsWidget(
+                    activeLabel: activeLabel,
+                    onLabelSelected: (labelName) {
+                      setState(() {
+                        activeLabel = labelName;
+                      });
+                      context.read<ProductBloc>().add(FilterProductsByCategory(labelName));
+                    },
+                  ),
+                ),
 
-                // Button for add new product
+                // Add new Product button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 4.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigate to add product screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -84,8 +97,6 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
                     ),
                   ),
                 ),
-
-                // Product List with different states
                 Expanded(
                   child: _buildProductContent(state),
                 ),
@@ -95,38 +106,6 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business, context: context),
-    );
-  }
-
-  Widget _buildCategoryTabs(ProductState state) {
-    String activeCategory = "Todos";
-    
-    if (state is ProductLoaded) {
-      activeCategory = state.activeCategory;
-    }
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: categories.map((category) {
-            final isSelected = category == activeCategory;
-            return Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: _buildCategoryTab(
-                category, 
-                isSelected: isSelected,
-                onPressed: () {
-                  context.read<ProductBloc>().add(
-                    FilterProductsByCategory(category)
-                  );
-                }
-              ),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 
@@ -173,23 +152,5 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
     
     // Fallback
     return const Center(child: Text(ProductStrings.productLoadingError));
-  }
-
-  Widget _buildCategoryTab(String text, {bool isSelected = false, VoidCallback? onPressed}) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.blue : Colors.white,
-        foregroundColor: isSelected ? Colors.white : Colors.black,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12),
-      ),
-    );
   }
 }
