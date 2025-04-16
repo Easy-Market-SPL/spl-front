@@ -17,8 +17,8 @@ class OrderModel {
   final double? lng;
   final double? debt;
 
-  final List<OrderProduct>? orderProducts;
-  final List<OrderStatus>? orderStatuses;
+  final List<OrderProduct> orderProducts;
+  final List<OrderStatus> orderStatuses;
 
   OrderModel({
     this.id,
@@ -33,12 +33,13 @@ class OrderModel {
     this.lat,
     this.lng,
     this.debt,
-    this.orderProducts,
-    this.orderStatuses,
-  });
+    List<OrderProduct>? orderProducts,
+    List<OrderStatus>? orderStatuses,
+  })  : orderProducts = orderProducts ?? [],
+        orderStatuses = orderStatuses ?? [];
 
   /// CopyWith Method
-   copyWith({
+  copyWith({
     int? id,
     String? idUser,
     DateTime? creationDate,
@@ -94,13 +95,13 @@ class OrderModel {
       lng: json["lng"]?.toDouble(),
       debt: json["debt"]?.toDouble(),
 
-      // Convert the JSON object \"products\" to List<OrderProduct>
+      // Convert the JSON object "products" to List<OrderProduct>
       orderProducts: _parseOrderProducts(
         json["products"],
         idOrder: json["id"],
       ),
 
-      // Covert the JSON object \"status\" to List<OrderStatus>
+      // Convert the JSON object "status" to List<OrderStatus>
       orderStatuses: _parseOrderStatuses(json["status"]),
     );
   }
@@ -112,10 +113,10 @@ class OrderModel {
   }
 
   /// Parse the object to a list of List of OrderProduct objects.
-  static List<OrderProduct>? _parseOrderProducts(
+  static List<OrderProduct> _parseOrderProducts(
       Map<String, dynamic>? productsJson,
       {required int? idOrder}) {
-    if (productsJson == null || idOrder == null) return null;
+    if (productsJson == null || idOrder == null) return [];
 
     final List<OrderProduct> products = [];
     productsJson.forEach((productCode, quantity) {
@@ -129,9 +130,9 @@ class OrderModel {
   }
 
   /// Parse the object to a list of List of OrderStatus objects.
-  static List<OrderStatus>? _parseOrderStatuses(
+  static List<OrderStatus> _parseOrderStatuses(
       Map<String, dynamic>? statusJson) {
-    if (statusJson == null) return null;
+    if (statusJson == null) return [];
     final List<OrderStatus> statuses = [];
     statusJson.forEach((statusKey, startDateString) {
       statuses.add(OrderStatus(
@@ -161,8 +162,8 @@ class OrderModel {
       };
 
   static Map<String, dynamic>? _orderProductsToMap(
-      List<OrderProduct>? products) {
-    if (products == null) return null;
+      List<OrderProduct> products) {
+    if (products.isEmpty) return {};
     final Map<String, dynamic> map = {};
     for (var op in products) {
       map[op.idProduct] = op.quantity;
@@ -170,9 +171,8 @@ class OrderModel {
     return map;
   }
 
-  static Map<String, dynamic>? _orderStatusesToMap(
-      List<OrderStatus>? statuses) {
-    if (statuses == null) return null;
+  static Map<String, dynamic>? _orderStatusesToMap(List<OrderStatus> statuses) {
+    if (statuses.isEmpty) return {};
     final Map<String, dynamic> map = {};
     for (var st in statuses) {
       map[st.status] = st.startDate.toIso8601String();
@@ -182,8 +182,8 @@ class OrderModel {
 
   /// Full fetch of all products in the order.
   Future<void> fetchAllProducts() async {
-    if (orderProducts == null) return;
-    for (var op in orderProducts!) {
+    if (orderProducts.isEmpty) return;
+    for (var op in orderProducts) {
       await op.fetchProduct();
     }
   }

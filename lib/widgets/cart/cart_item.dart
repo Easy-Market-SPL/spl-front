@@ -19,7 +19,6 @@ class CartItem extends StatelessWidget {
     if (item.product == null) {
       debugPrint(
           'Error: CartItem recibió un item sin producto cargado: ${item.idProduct}');
-
       return const SizedBox.shrink();
     }
 

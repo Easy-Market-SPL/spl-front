@@ -10,7 +10,8 @@ import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/logic/user_type.dart';
 import '../../models/order_models/order_product.dart';
 import '../../utils/strings/cart_strings.dart';
-import '../../widgets/cart/cart_subtotal.dart'; // Assuming Subtotal widget is here
+import '../../widgets/cart/cart_subtotal.dart';
+import '../../widgets/helpers/custom_loading.dart'; // Assuming Subtotal widget is here
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -51,26 +52,28 @@ class _CartPageState extends State<CartPage> {
         child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
             // Determine loading status for overlay
-            bool showLoadingOverlay = (state is OrdersLoaded && state.isLoading);
+            bool showLoadingOverlay =
+                (state is OrdersLoaded && state.isLoading);
             // Determine content based on non-loading states
             Widget content;
 
             if (state is OrdersInitial || state is OrdersLoading) {
               // Show full loader only for initial load or explicit full loading state
-              content = const Center(child: CircularProgressIndicator(color: Colors.blue));
+              content = const Center(child: CustomLoading());
             } else if (state is OrdersLoaded) {
               // Check for items within the loaded state
               final bool hasItems = state.currentCartOrder != null &&
-                  state.currentCartOrder!.orderProducts != null &&
-                  state.currentCartOrder!.orderProducts!.isNotEmpty;
+                  state.currentCartOrder!.orderProducts.isNotEmpty;
               content = hasItems
-                  ? _buildCartWithItems(state.currentCartOrder!.orderProducts!, context)
+                  ? _buildCartWithItems(
+                      state.currentCartOrder!.orderProducts, context)
                   : _buildEmptyCart(context);
             } else if (state is OrdersError) {
               debugPrint("OrdersError state in CartPage: ${state.message}");
               content = _buildEmptyCart(context); // Fallback for errors
             } else {
-              content = _buildEmptyCart(context); // Fallback for any other state
+              content =
+                  _buildEmptyCart(context); // Fallback for any other state
             }
 
             // Use a Stack to potentially overlay a loading indicator
@@ -83,8 +86,8 @@ class _CartPageState extends State<CartPage> {
                 if (showLoadingOverlay)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(0.1), // Semi-transparent background
-                      child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                      color: Colors.black, // Semi-transparent background
+                      child: Center(child: CustomLoading()),
                     ),
                   ),
               ],
@@ -160,7 +163,7 @@ class _CartPageState extends State<CartPage> {
           ),
         ),
         // Subtotal will correctly show 0.00 and disabled button via its own BlocBuilder.
-        const Subtotal(),
+        const Subtotal(isEmpty: true),
       ],
     );
   }

@@ -8,7 +8,6 @@ class CustomLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
         child: Center(
           child: LoadingAnimationWidget.flickr(
             leftDotColor: Colors.blue,

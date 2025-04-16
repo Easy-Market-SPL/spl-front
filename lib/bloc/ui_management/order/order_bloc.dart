@@ -46,10 +46,11 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   //
   // 1) Loading orders
   //
+  //
+
   Future<void> _onLoadOrders(
       LoadOrdersEvent event, Emitter<OrdersState> emit) async {
-    // Use OrdersLoading for initial full load
-    emit(OrdersLoading());
+    emit(OrdersLoading()); // Full loading state for initial fetch
     try {
       final (orderList, error) = (event.userRole == 'customer')
           ? await OrderService.getOrdersByUser(event.userId)
@@ -60,51 +61,44 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         return;
       }
 
-      final safeOrders = orderList ?? [];
+      final List<OrderModel> safeOrders =
+          List.from(orderList ?? []); // Mutable copy
       OrderModel? currentCartOrder;
 
       if (event.userRole == 'customer') {
-        // Find or create cart order
         int cartIndex = safeOrders.indexWhere((order) =>
-            order.idUser == event.userId &&
-            (order.orderStatuses?.isEmpty ?? true));
+            order.idUser == event.userId && (order.orderStatuses.isEmpty));
 
         if (cartIndex != -1) {
           currentCartOrder = safeOrders[cartIndex];
-          // Ensure products for existing cart are fetched
           await currentCartOrder.fetchAllProducts();
         } else {
+          // Create cart immediately if not found
           final (newOrder, createError) = await OrderService.createOrder(
             idUser: event.userId,
-            address: '', // Provide default address if needed
+            address: ' ',
           );
-          if (createError != null) {
-            emit(OrdersError(createError));
+          if (createError != null || newOrder == null) {
+            emit(OrdersError(
+                createError ?? "No se pudo crear el carrito inicial."));
             return;
           }
-          currentCartOrder = newOrder; // May still be null
-          if (newOrder != null) {
-            safeOrders.add(newOrder); // Add newly created order
-            // Products for new order likely empty, fetchAll unnecessary yet
-          }
+          currentCartOrder = newOrder;
+          safeOrders.add(newOrder); // Add to the list shown
         }
-      }
-      // Consider if fetching products for ALL orders is always needed here
-      for (var order in safeOrders.where((o) => o.id != currentCartOrder?.id)) {
-        await order.fetchAllProducts();
       }
 
       emit(OrdersLoaded(
         allOrders: safeOrders,
-        filteredOrders: safeOrders,
+        filteredOrders: safeOrders, // Start with all orders shown
         selectedFilters: [],
         additionalFilters: [],
         dateRange: null,
         currentCartOrder: currentCartOrder,
-        isLoading: false, // Initial load finished
+        isLoading: false, // Explicitly false after load completes
       ));
     } catch (e) {
-      emit(OrdersError(e.toString()));
+      emit(OrdersError('${e.toString()}'));
     }
   }
 
@@ -455,7 +449,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   // 17) Add or update a product in the order (cart approach if user is costumer).
   // If there's no currentCartOrder, we create it with the given userId/address.
   //
-  Future<void> _onAddProduct(AddProductToOrderEvent event, Emitter<OrdersState> emit) async {
+  Future<void> _onAddProduct(
+      AddProductToOrderEvent event, Emitter<OrdersState> emit) async {
     // Only proceed if current state is Loaded
     if (state is! OrdersLoaded) return;
     final previousState = state as OrdersLoaded;
@@ -469,7 +464,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       // Create order if it doesn't exist
       if (cartOrder == null || cartOrder.id == null) {
         final (newOrder, createError) = await OrderService.createOrder(
-          idUser: event.userId, address: event.address, // Ensure address logic is correct
+          idUser: event.userId,
+          address: event.address, // Ensure address logic is correct
         );
         if (createError != null || newOrder == null) {
           emit(OrdersError(createError ?? "No se pudo crear la orden."));
@@ -488,7 +484,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       }
 
       final (updatedOrderData, error) = await OrderService.addProductToOrder(
-        orderId: orderId, productCode: event.productCode, quantity: event.quantity,
+        orderId: orderId,
+        productCode: event.productCode,
+        quantity: event.quantity,
       );
 
       if (error != null || updatedOrderData == null) {
@@ -505,28 +503,29 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(previousState.copyWith(
         // Make sure copyWith handles the internal list correctly for immutability
         currentCartOrder: finalCartData.copyWith(
-            orderProducts: List<OrderProduct>.from(finalCartData.orderProducts ?? [])
-        ),
+            orderProducts:
+                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
         isLoading: false, // Stop loading indicator
       ));
-
     } catch (e) {
       emit(OrdersError(e.toString()));
       emit(previousState.copyWith(isLoading: false)); // Revert loading on error
     }
   }
 
-
-  Future<void> _onRemoveProduct(RemoveProductFromOrderEvent event, Emitter<OrdersState> emit) async {
+  Future<void> _onRemoveProduct(
+      RemoveProductFromOrderEvent event, Emitter<OrdersState> emit) async {
     if (state is! OrdersLoaded) {
       emit(const OrdersError("Estado inválido para remover."));
       return;
     }
     final OrdersLoaded previousState = state as OrdersLoaded;
-    final orderIdToRemoveFrom = event.orderId; // Event MUST provide the correct order ID
+    final orderIdToRemoveFrom =
+        event.orderId; // Event MUST provide the correct order ID
 
     if (orderIdToRemoveFrom == null) {
-      emit(const OrdersError("ID de orden no especificado en el evento RemoveProduct."));
+      emit(const OrdersError(
+          "ID de orden no especificado en el evento RemoveProduct."));
       // Do not revert loading here as it wasn't set yet
       return;
     }
@@ -536,7 +535,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
     try {
       final (success, err) = await OrderService.deleteProductFromOrder(
-        orderId: orderIdToRemoveFrom, productCode: event.productCode,
+        orderId: orderIdToRemoveFrom,
+        productCode: event.productCode,
       );
 
       if (err != null || !success) {
@@ -545,7 +545,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         return;
       }
 
-      final (refetchedOrderData, refetchErr) = await OrderService.getOrderById(orderIdToRemoveFrom);
+      final (refetchedOrderData, refetchErr) =
+          await OrderService.getOrderById(orderIdToRemoveFrom);
 
       if (refetchErr != null) {
         emit(OrdersError(refetchErr));
@@ -564,20 +565,20 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(previousState.copyWith(
         // Ensure internal list is new, handle null cart
         currentCartOrder: finalCartData?.copyWith(
-            orderProducts: List<OrderProduct>.from(finalCartData.orderProducts ?? [])
-        ),
+            orderProducts:
+                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
         isLoading: false, // Stop loading indicator
-        forceCartNull: finalCartData == null, // Set cart null if order doesn't exist anymore
+        forceCartNull: finalCartData ==
+            null, // Set cart null if order doesn't exist anymore
       ));
-
     } catch (e) {
       emit(OrdersError(e.toString()));
       emit(previousState.copyWith(isLoading: false)); // Revert loading on error
     }
   }
 
-
-  Future<void> _onClearCart(ClearCartEvent event, Emitter<OrdersState> emit) async {
+  Future<void> _onClearCart(
+      ClearCartEvent event, Emitter<OrdersState> emit) async {
     if (state is! OrdersLoaded) {
       emit(OrdersInitial());
       return;
@@ -601,10 +602,11 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(current.copyWith(
           forceCartNull: true, // Use flag to set cart to null
           isLoading: false // Stop loading indicator
-      ));
+          ));
     } catch (e) {
       emit(OrdersError(e.toString()));
-      emit(current.copyWith(isLoading: false)); // Revert loading on generic error
+      emit(current.copyWith(
+          isLoading: false)); // Revert loading on generic error
     }
   }
 
