@@ -42,10 +42,12 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: _buildCartHeader(context),
         automaticallyImplyLeading: false,
         surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),

@@ -13,9 +13,11 @@ import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 
+import '../../../bloc/users_blocs/users/users_bloc.dart';
 import '../../../models/order_models/order_product.dart';
 
 class PaymentScreen extends StatelessWidget {
@@ -23,12 +25,7 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => OrdersBloc()
-        ..add(LoadOrdersEvent(
-            userId: 'userId', userRole: 'customer')), // Load orders (cart)
-      child: const PaymentPage(),
-    );
+    return PaymentPage();
   }
 }
 
@@ -44,7 +41,22 @@ class PaymentPageState extends State<PaymentPage> {
   PaymentCardModel? selectedCard;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ordersBloc = context.read<OrdersBloc>();
+    final usersBloc = context.read<UsersBloc>();
+
+    final userId = usersBloc.state.sessionUser?.id;
+    if (userId != null) {
+      ordersBloc.add(LoadOrdersEvent(userId: userId, userRole: 'customer'));
+    } else {
+      debugPrint("Error: User ID not found in initState of PaymentPage.");
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -57,16 +69,25 @@ class PaymentPageState extends State<PaymentPage> {
         child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
             if (state is OrdersLoading) {
-              return const Center(
-                  child: CircularProgressIndicator(color: Colors.blue));
+              return const Center(child: CustomLoading());
             }
 
             if (state is OrdersLoaded && state.currentCartOrder != null) {
-              final cartItems = state.currentCartOrder!.orderProducts!;
+              final cartItems = state.currentCartOrder!.orderProducts;
+              if (cartItems.isEmpty) {
+                return _buildEmptyCart(); // Si el carrito está vacío, muestra un mensaje.
+              }
               return _buildCartWithItems(cartItems, context);
             }
-
-            return _buildEmptyCart();
+            if (state is OrdersError) {
+              return Center(
+                child: Text(
+                  'Error: ${state.message}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            }
+            return const Center(child: CustomLoading());
           },
         ),
       ),
@@ -111,6 +132,7 @@ class PaymentPageState extends State<PaymentPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 10),
         const Text(
           "Método de Pago",
           style: TextStyle(
@@ -192,7 +214,7 @@ class PaymentPageState extends State<PaymentPage> {
 
   Widget _buildCartWithItems(List<OrderProduct> items, BuildContext context) {
     double subtotal = items.fold(0, (sum, item) {
-      item.fetchProduct(); // Load product details
+      item.fetchProduct(); // Cargar detalles del producto
       return sum + (item.price ?? 0) * item.quantity;
     });
 
@@ -255,6 +277,12 @@ class PaymentPageState extends State<PaymentPage> {
             if (selected != null) {
               setState(() {
                 selectedAddress = selected;
+                // Update the address in the OrderBloc
+                final ordersBloc = context.read<OrdersBloc>();
+                ordersBloc.add(UpdateOrderAddressEvent(
+                  address: selectedAddress!.address,
+                  orderId: ordersBloc.state.currentCartOrder!.id!,
+                ));
               });
             }
           },
