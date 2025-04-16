@@ -27,29 +27,14 @@ class BusinessUserMainDashboard extends StatefulWidget {
 }
 
 class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
-  String activeLabel = "Todos";
-
+  String activeLabel = "Todos"; 
+  
   @override
   void initState() {
     super.initState();
     // Load products on initialization
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());
-
-    // Fetch products and labels
-    context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
-
-    // Fetch the current user's orders, passing role=business
-    final userId = context.read<UsersBloc>().state.sessionUser!.id;
-    if (userId.isNotEmpty) {
-      context.read<OrdersBloc>().add(
-            LoadOrdersEvent(
-              userId: userId,
-              userRole: 'business',
-            ),
-          );
-    }
   }
 
   @override
@@ -68,19 +53,16 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Labels
+                // Labels 
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: LabelsWidget(
                     activeLabel: activeLabel,
                     onLabelSelected: (labelName) {
                       setState(() {
                         activeLabel = labelName;
                       });
-                      context
-                          .read<ProductBloc>()
-                          .add(FilterProductsByCategory(labelName));
+                      context.read<ProductBloc>().add(FilterProductsByCategory(labelName));
                     },
                   ),
                 ),

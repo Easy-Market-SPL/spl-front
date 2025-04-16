@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 
+import '../../utils/ui/format_currency.dart';
+
 class AddToCartBar extends StatefulWidget {
-  final String price;
   final Function(int quantity) onAddToCart;
   final int initialQuantity;
+  final double productPrice;
 
   const AddToCartBar({
     super.key,
-    required this.price,
     required this.onAddToCart,
+    required this.productPrice,
     this.initialQuantity = 1,
   });
 
@@ -26,14 +28,25 @@ class _AddToCartBarState extends State<AddToCartBar> {
     _quantity = widget.initialQuantity;
   }
 
+  void _updateQuantity(int newQuantity) {
+    // Ensure quantity doesn't go below 1
+    if (newQuantity >= 1) {
+      setState(() {
+        _quantity = newQuantity;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final double totalPrice = widget.productPrice * _quantity;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(25, 0, 0, 0),
+            color: Colors.white70,
             blurRadius: 5,
             offset: const Offset(0, -2),
           ),
@@ -47,95 +60,83 @@ class _AddToCartBarState extends State<AddToCartBar> {
             // Quantity selector
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
+                mainAxisSize:
+                    MainAxisSize.min, // Take only needed horizontal space
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove),
-                    onPressed: () {
-                      if (_quantity > 1) {
-                        setState(() {
-                          _quantity--;
-                        });
-                      }
-                    },
-                    iconSize: 20,
+                    onPressed: () => _updateQuantity(_quantity - 1),
+                    iconSize: 15,
                     padding: const EdgeInsets.all(4),
                     constraints: const BoxConstraints(),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
                       '$_quantity',
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () {
-                      setState(() {
-                        _quantity++;
-                      });
-                    },
-                    iconSize: 20,
+                    onPressed: () => _updateQuantity(_quantity + 1),
+                    iconSize: 15,
                     padding: const EdgeInsets.all(4),
                     constraints: const BoxConstraints(),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-  
-            // Price (ajustado para mejor manejo de espacio)
+            const SizedBox(width: 8),
+
+            // Price display - Expanded to take available space
             Expanded(
-              flex: 2,
-              child: Container(
+              child: Align(
                 alignment: Alignment.centerLeft,
+                // FittedBox scales down the text if needed to prevent overflow/ellipsis
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    widget.price,
+                    formatCurrency(totalPrice),
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 25,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
                 ),
               ),
             ),
-  
-            const SizedBox(width: 8),
-  
-            // Add to cart button
-            Expanded(
-              flex: 3,
-              child: ElevatedButton(
-                onPressed: () => widget.onAddToCart(_quantity),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            const SizedBox(width: 12),
+
+            // Add to cart button - Takes its required width
+            ElevatedButton(
+              onPressed: () => widget.onAddToCart(_quantity),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16, // Adjust horizontal padding as needed
+                  vertical: 12,
                 ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: const Text(
-                    ProductStrings.addToCart,
-                    style: TextStyle(
-                      color: Colors.white, 
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              child: Text(
+                ProductStrings.addToCart, // Assuming this is defined elsewhere
+                maxLines: 1, // Prevent button text wrapping if too long
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

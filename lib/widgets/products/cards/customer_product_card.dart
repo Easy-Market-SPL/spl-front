@@ -25,7 +25,10 @@ class CustomerProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ViewProductDetailsPage(product: product, userType: UserType.customer,),
+                builder: (context) => ViewProductDetailsPage(
+                  product: product,
+                  userType: UserType.customer,
+                ),
               ),
             );
           },

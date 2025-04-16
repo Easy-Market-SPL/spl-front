@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart'; // <-- Asegúrate de apuntar a tu archivo con OrdersBloc
-import 'package:spl_front/bloc/ui_management/order/order_event.dart'; // <-- Necesario para LoadOrdersEvent
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
@@ -15,6 +13,9 @@ import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
+
+import '../../bloc/ui_management/order/order_bloc.dart';
+import '../../bloc/ui_management/order/order_event.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
@@ -30,10 +31,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   @override
   void initState() {
     super.initState();
-
     usersBloc = BlocProvider.of<UsersBloc>(context);
-
-    // Fetch products and labels
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());
 
@@ -52,47 +50,42 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UsersBloc, UsersState>(
-      builder: (context, usersState) {
-        if (usersState.sessionUser == null) {
-          return const Scaffold(
+      builder: (context, usersSstate) {
+        if (usersSstate.sessionUser == null) {
+          return Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
             ),
           );
         }
-
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: CustomerUserAppBar(
-            hintText: CustomerStrings.searchHint,
+            hintText: CustomerStrings.searchHint, // Pass custom hint text
             onFilterPressed: () {
-              // TODO: Implement additional filter action if needed
+              // TODO: Implement filters action
             },
           ),
           body: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Display real labels
+                // Mostrar etiquetas reales
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
+                      horizontal: 16.0, vertical: 8.0),
                   child: LabelsWidget(
                     activeLabel: activeLabel,
                     onLabelSelected: (labelName) {
                       setState(() {
                         activeLabel = labelName;
                       });
-                      context.read<ProductBloc>().add(
-                            FilterProductsByCategory(labelName),
-                          );
+                      context
+                          .read<ProductBloc>()
+                          .add(FilterProductsByCategory(labelName));
                     },
                   ),
                 ),
-
-                // Display products
                 Expanded(
                   child: BlocBuilder<ProductBloc, ProductState>(
                     builder: (context, productState) {
@@ -112,7 +105,6 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
     );
   }
 
-  /// Builds the product grid or errors/loading accordingly.
   Widget _buildProductContent(ProductState state) {
     if (state is ProductInitial || state is ProductLoading) {
       return const Center(child: CircularProgressIndicator());

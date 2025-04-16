@@ -123,7 +123,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
         ),
         if (isCustomer)
           AddToCartBar(
-            price: state.product.price.toString(),
+            productPrice: state.product.price,
             onAddToCart: (quantity) => _handleAddToCart(quantity, state),
           ),
       ],

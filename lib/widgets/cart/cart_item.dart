@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_event.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
@@ -8,7 +9,6 @@ import 'package:spl_front/models/order_models/order_product.dart';
 import '../../bloc/ui_management/order/order_state.dart';
 
 class CartItem extends StatelessWidget {
-  // Convertido a StatelessWidget
   final OrderProduct item;
 
   const CartItem({super.key, required this.item});
@@ -63,14 +63,13 @@ class CartItem extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween, // Ajusta según necesites
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       product.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
-                      maxLines: 2, // Evita overflow si el nombre es muy largo
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4), // Espacio
@@ -85,27 +84,21 @@ class CartItem extends StatelessWidget {
                       // Formateo de precio podría ser mejorado (ej. con intl package)
                       '\$${product.price.toStringAsFixed(2)}',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14), // Tamaño un poco más grande
+                          fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                    // Alineación de controles al final
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _buildIconButton(context, Icons.remove, () {
-                            // Lógica para decrementar cantidad
                             if (item.quantity > 1) {
-                              // Solo actualiza si es > 1
                               _updateProductQuantity(
                                   context, item.quantity - 1);
                             } else {
-                              // Si la cantidad es 1, el botón de remover debería actuar como eliminar
                               _removeProduct(context);
                             }
                           }),
-                          // Padding para que el número no esté pegado a los botones
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
@@ -139,49 +132,32 @@ class CartItem extends StatelessWidget {
     );
   }
 
-  // Función para actualizar la cantidad (simplificada)
   void _updateProductQuantity(BuildContext context, int newQuantity) {
-    // Ya no necesitamos AddressBloc aquí si la dirección se maneja al crear/confirmar la orden
-    final userId = context.read<UsersBloc>().state.sessionUser?.id;
-    if (userId == null) {
-      debugPrint("Error: Usuario no encontrado para actualizar cantidad.");
-      // Manejar el caso de usuario no logueado si es posible
-      return;
-    }
-    // La dirección debería estar en la orden principal (currentCartOrder)
-    // No es necesario pasarla explícitamente aquí si el BLoC ya la conoce
-    // o si la orden ya existe.
+    final userId = context.read<UsersBloc>().state.sessionUser!.id;
 
-    context.read<OrdersBloc>().add(AddProductToOrderEvent(
-          // Probablemente no necesites pasar el 'item' completo,
-          // solo los identificadores y la nueva cantidad.
-          // Verifica tu evento AddProductToOrderEvent. Asumiendo que necesita el item:
-          item, // O crea un nuevo OrderProduct si es necesario por el evento
-          productCode: item.idProduct,
-          quantity: newQuantity,
-          userId: userId,
-          address:
-              '', // Dejar vacío o obtener del estado de OrdersBloc si es necesario
-          // para *crear* una nueva orden si no existe.
-          // Si la orden (carrito) ya existe, el BLoC debería usar su ID.
-        ));
+    final address = context.read<AddressBloc>().state.addresses.first.address;
 
-    // ---- ¡NO LLAMAR A LoadOrdersEvent AQUÍ! ----
-    // El BLoC se encargará de emitir el nuevo estado OrdersLoaded
-    // con la información actualizada después de procesar AddProductToOrderEvent.
+    context.read<OrdersBloc>().add(AddProductToOrderEvent(item,
+        productCode: item.idProduct,
+        quantity: newQuantity,
+        userId: userId,
+        address: address));
   }
 
-  // Función para remover el producto
   void _removeProduct(BuildContext context) {
     final orderState = context.read<OrdersBloc>().state;
     if (orderState is OrdersLoaded && orderState.currentCartOrder?.id != null) {
       context.read<OrdersBloc>().add(RemoveProductFromOrderEvent(
-          orderId: orderState
-              .currentCartOrder!.id!, // Usa el ID del carrito del BLoC
+          orderId: orderState.currentCartOrder!.id!,
           productCode: item.idProduct));
     } else {
-      debugPrint(
-          "Error: No se pudo obtener un ID de orden válido para remover el producto.");
+      // Show error message by a popup:
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: No se pudo eliminar el producto.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
 
     context.read<OrdersBloc>().add(RemoveProductFromOrderEvent(
