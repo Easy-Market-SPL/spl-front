@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/models/order_models/order_product.dart';
+import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/products_popup.dart';
 
-import '../../../bloc/ui_management/orders_list/orders_list_bloc.dart';
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../bloc/ui_management/order/order_state.dart';
 
 class OrderDetailsDeliveryScreen extends StatelessWidget {
   final UserType userType;
-  final Order? order;
+  final OrderModel order;
 
-  const OrderDetailsDeliveryScreen(
-      {super.key, required this.userType, this.order});
+  const OrderDetailsDeliveryScreen({
+    super.key,
+    required this.userType,
+    required this.order,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +31,13 @@ class OrderDetailsDeliveryScreen extends StatelessWidget {
 
 class OrderDetailsDeliveryPage extends StatefulWidget {
   final UserType userType;
-  final Order? order;
+  final OrderModel order;
 
-  const OrderDetailsDeliveryPage(
-      {super.key, required this.userType, this.order});
+  const OrderDetailsDeliveryPage({
+    super.key,
+    required this.userType,
+    required this.order,
+  });
 
   @override
   State<OrderDetailsDeliveryPage> createState() =>
@@ -38,15 +46,15 @@ class OrderDetailsDeliveryPage extends StatefulWidget {
 
 class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
   UserType get userType => widget.userType;
-  String selectedShippingCompany = "Sin seleccionar";
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrdersBloc>().add(LoadSingleOrderEvent(widget.order.id!));
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Simulated order and customer data
-    final orderData = _getOrderData();
-    final customerData = _getCustomerData();
-    context.read<OrderStatusBloc>().add(LoadOrderStatusEvent());
-
     return Scaffold(
       body: Column(
         children: [
@@ -54,56 +62,75 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: BlocBuilder<OrderStatusBloc, OrderStatusState>(
+              child: BlocBuilder<OrdersBloc, OrdersState>(
                 builder: (context, state) {
-                  if (state is OrderStatusLoading) {
+                  if (state is OrdersLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is OrderStatusLoaded) {
+                  } else if (state is OrdersLoaded) {
+                    final currentOrder = state.filteredOrders.isNotEmpty
+                        ? state.filteredOrders.first
+                        : widget.order;
+                    final totalItems = _calculateProductCount(
+                        currentOrder.orderProducts ?? []);
+                    final totalOrder =
+                        _calculateOrderTotal(currentOrder.orderProducts ?? []);
+                    final lastStatus =
+                        _extractLastStatus(currentOrder.orderStatuses ?? []);
+                    final domiciliaryName =
+                        (currentOrder.idDomiciliary?.isNotEmpty == true)
+                            ? currentOrder.idDomiciliary!
+                            : 'Sin Domiciliario';
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Order modification options
                         if (SPLVariables.hasRealTimeTracking &&
                             userType == UserType.delivery) ...[
-                          const SizedBox(height: 24.0),
-
-                          // Order details content
+                          const SizedBox(height: 24),
                           _buildSectionTitle(OrderStrings.orderDetailsTitle),
-                          _buildInfoRow(OrderStrings.orderNumber,
-                              orderData['numeroOrden']),
                           _buildInfoRow(
-                              OrderStrings.orderDate, orderData['fecha']),
-                          _buildInfoRow(OrderStrings.orderProductCount,
-                              "${orderData['numProductos']}",
-                              actionText: OrderStrings.viewProducts,
-                              onActionTap: () {
-                            _showProductPopup(
-                                context); // Open the product popup
-                          }),
-                          _buildInfoRow(OrderStrings.orderTotal,
-                              "\$${orderData['total'].toStringAsFixed(0)}"),
+                            OrderStrings.orderNumber,
+                            '${currentOrder.id!}',
+                          ),
+                          _buildInfoRow(
+                            OrderStrings.orderDate,
+                            currentOrder.creationDate!.toIso8601String(),
+                          ),
+                          _buildInfoRow(
+                            OrderStrings.orderProductCount,
+                            '$totalItems',
+                            actionText: OrderStrings.viewProducts,
+                            onActionTap: () => _showProductPopup(context),
+                          ),
+                          _buildInfoRow(
+                            OrderStrings.orderTotal,
+                            '\$${totalOrder.toStringAsFixed(2)}',
+                          ),
+                          _buildSectionTitle('Último estado'),
+                          _buildInfoRow('Estado actual', lastStatus),
                           const SizedBox(height: 20),
-
-                          // Customer details content
                           _buildSectionTitle(OrderStrings.customerDetailsTitle),
-                          _buildInfoRow(OrderStrings.customerName,
-                              customerData['cliente']),
-                          _buildInfoRow(OrderStrings.deliveryAddress,
-                              customerData['direccion']),
-
-                          // Real-time tracking or company selection
+                          _buildInfoRow(
+                            OrderStrings.customerName,
+                            currentOrder.idUser!,
+                          ),
+                          _buildInfoRow(
+                            OrderStrings.deliveryAddress,
+                            currentOrder.address!,
+                          ),
                           const SizedBox(height: 20),
                           _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
                           _buildInfoRow(
-                              OrderStrings.deliveryPersonName,
-                              widget.order?.deliveryName ??
-                                  OrderStrings.noDeliveryPersonAssigned),
+                            OrderStrings.deliveryPersonName,
+                            domiciliaryName,
+                          ),
                         ],
                       ],
                     );
+                  } else if (state is OrdersError) {
+                    return Center(child: Text(state.message));
                   } else {
-                    return const Center(
-                        child: Text(OrderStrings.errorLoadingOrderStatus));
+                    return const SizedBox();
                   }
                 },
               ),
@@ -111,33 +138,16 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        userType: userType,
+        context: context,
+      ),
     );
   }
 
-  // Helper function to get simulated order data
-  Map<String, dynamic> _getOrderData() {
-    return {
-      'numeroOrden': widget.order?.id ?? "123456",
-      'fecha': widget.order?.date.toString() ?? "2025-02-17",
-      'numProductos': 5,
-      'total': 150.0,
-    };
-  }
-
-// Helper function to get simulated customer data
-  Map<String, dynamic> _getCustomerData() {
-    return {
-      'cliente': widget.order?.clientName ?? "Juan Ramirez",
-      'direccion': widget.order?.address ?? "Calle Falsa 123",
-    };
-  }
-
-  // Header of the order details page
   Widget _headerOrderDetails(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double topPadding = screenHeight * 0.05;
-
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.05;
     return Container(
       padding: EdgeInsets.only(top: topPadding, left: 10.0, right: 10.0),
       height: 80.0,
@@ -148,9 +158,7 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
             left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ],
@@ -158,10 +166,9 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
     );
   }
 
-  // Helper to build section titles
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -169,9 +176,12 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
     );
   }
 
-  // Helper to build a row with action (e.g. "Ver productos")
-  Widget _buildInfoRow(String label, String value,
-      {String? actionText, VoidCallback? onActionTap}) {
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    String? actionText,
+    VoidCallback? onActionTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -180,17 +190,23 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
+                ),
+              ),
             ],
           ),
           if (actionText != null)
@@ -198,13 +214,16 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
               onTap: onActionTap,
               child: Row(
                 children: [
-                  Text(actionText,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
-                          decoration: TextDecoration.underline)),
+                  Text(
+                    actionText,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                   const Icon(Icons.chevron_right, color: Colors.grey),
                 ],
               ),
@@ -214,14 +233,26 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
     );
   }
 
-  // Show the products in a popup when the user taps "Ver productos"
   void _showProductPopup(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
-        return const ProductPopup(); // Open the product popup dialog
-      },
+      builder: (_) => const ProductPopup(),
     );
+  }
+
+  int _calculateProductCount(List<OrderProduct> products) {
+    return products.fold(0, (sum, p) => sum + p.quantity);
+  }
+
+  double _calculateOrderTotal(List<OrderProduct> products) {
+    // Supongo que p.price ya es precio total por item
+    // Si es precio unitario, haz * p.quantity
+    return products.fold(0.0, (sum, p) => sum + (p.price ?? 0.0));
+  }
+
+  String _extractLastStatus(List<OrderStatus> statuses) {
+    if (statuses.isEmpty) return 'Sin estado';
+    return statuses.last.status;
   }
 }

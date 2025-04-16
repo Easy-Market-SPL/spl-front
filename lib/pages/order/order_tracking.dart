@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/tracking/horizontal_order_status.dart';
-import 'package:spl_front/widgets/order/tracking/modify_order_status_options.dart';
-import 'package:spl_front/widgets/order/tracking/order_action_buttons.dart';
-import 'package:spl_front/widgets/order/tracking/order_tracking_header.dart';
-import 'package:spl_front/widgets/order/tracking/shipping_guide.dart';
-import 'package:spl_front/widgets/order/tracking/vertical_order_status.dart';
+
+import '../../../models/logic/user_type.dart';
+import '../../../spl/spl_variables.dart';
+import '../../../widgets/navigation_bars/nav_bar.dart';
+import '../../bloc/ui_management/order/order_bloc.dart';
+import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/ui_management/order/order_state.dart';
+import '../../widgets/order/tracking/horizontal_order_status.dart';
+import '../../widgets/order/tracking/modify_order_status_options.dart';
+import '../../widgets/order/tracking/order_action_buttons.dart';
+import '../../widgets/order/tracking/order_tracking_header.dart';
+import '../../widgets/order/tracking/shipping_guide.dart';
+import '../../widgets/order/tracking/vertical_order_status.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
@@ -19,7 +20,9 @@ class OrderTrackingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.read<OrderStatusBloc>().add(LoadOrderStatusEvent());
+    context.read<OrdersBloc>().add(
+          LoadSingleOrderEvent(12),
+        );
     return OrderTrackingPage(userType: userType);
   }
 }
@@ -34,6 +37,7 @@ class OrderTrackingPage extends StatefulWidget {
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
   UserType get userType => widget.userType;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,94 +47,90 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
             children: [
               const OrderTrackingHeader(),
               Expanded(
-                child: BlocBuilder<OrderStatusBloc, OrderStatusState>(
+                child: BlocBuilder<OrdersBloc, OrdersState>(
                   builder: (context, state) {
-                    if (state is OrderStatusLoading) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (state is OrderStatusLoaded) {
+                    if (state is OrdersLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is OrdersLoaded &&
+                        state.filteredOrders.isNotEmpty) {
+                      final order = state.filteredOrders.first;
+                      final lastStatus = _extractLastStatus(order);
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Business Screen
                               if (userType == UserType.business) ...[
-                                HorizontalOrderStatus(),
+                                const HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 400,
                                     color: Colors.grey[300],
-                                    child: Center(child: Text('Mapa aquí')),
+                                    child:
+                                        const Center(child: Text('Mapa aquí')),
                                   ),
                                 ] else ...[
                                   const SizedBox(height: 24.0),
                                   ModifyOrderStatusOptions(
-                                    selectedStatus: state.selectedStatus,
+                                    selectedStatus: lastStatus,
                                     onStatusChanged: (status) {
-                                      context.read<OrderStatusBloc>().add(
-                                          ChangeSelectedStatusEvent(status));
+                                      // e.g. context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
                                     },
                                   ),
                                   const SizedBox(height: 24.0),
                                   OrderActionButtons(
-                                    selectedStatus: state.selectedStatus,
+                                    selectedStatus: lastStatus,
                                     userType: userType,
                                   ),
                                 ],
-                              ]
-
-                              // Costumer Screen
-                              else if (userType == UserType.customer) ...[
+                              ] else if (userType == UserType.customer) ...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
-                                  HorizontalOrderStatus(),
+                                  const HorizontalOrderStatus(),
                                   Container(
                                     height: 500,
                                     color: Colors.grey[300],
-                                    child: Center(child: Text('Mapa aquí')),
+                                    child:
+                                        const Center(child: Text('Mapa aquí')),
                                   ),
                                 ] else ...[
                                   const VerticalOrderStatus(),
                                   const SizedBox(height: 24.0),
                                   ShippingGuide(
-                                      orderNumber: "123456",
-                                      estimatedDeliveryDate: "2025-02-20"),
+                                    orderNumber: '${order.id!}',
+                                    estimatedDeliveryDate: "2025-02-20",
+                                  ),
                                   const SizedBox(height: 10.0),
                                   OrderActionButtons(
-                                    selectedStatus: state.selectedStatus,
+                                    selectedStatus: lastStatus,
                                     showConfirmButton: false,
                                     userType: userType,
                                   ),
                                 ],
-                              ]
-
-                              // Delivery Screen
-                              else if (userType == UserType.delivery) ...[
-                                HorizontalOrderStatus(),
+                              ] else if (userType == UserType.delivery) ...[
+                                const HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 400,
                                     color: Colors.grey[300],
-                                    child: Center(child: Text('Mapa aquí')),
+                                    child:
+                                        const Center(child: Text('Mapa aquí')),
                                   ),
                                 ] else ...[
                                   const SizedBox(height: 24.0),
                                   ModifyOrderStatusOptions(
-                                    selectedStatus: state.selectedStatus,
+                                    selectedStatus: lastStatus,
                                     onStatusChanged: (status) {
-                                      context.read<OrderStatusBloc>().add(
-                                          ChangeSelectedStatusEvent(status));
+                                      // e.g. context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
                                     },
                                   ),
                                   const SizedBox(height: 24.0),
                                   OrderActionButtons(
-                                    selectedStatus: state.selectedStatus,
+                                    selectedStatus: lastStatus,
                                     userType: userType,
                                   ),
                                 ],
-                              ] 
-                              
-                              else ...[
+                              ] else ...[
                                 const Text(
                                     'Error al cargar el estado de la orden')
                               ]
@@ -138,10 +138,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                           ),
                         ),
                       );
+                    } else if (state is OrdersError) {
+                      return Center(child: Text(state.message));
                     } else {
-                      return 
-                      Center(
-                        child: Text('Error al cargar el estado de la orden')
+                      return const Center(
+                        child: Text('Error al cargar el estado de la orden'),
                       );
                     }
                   },
@@ -149,52 +150,51 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
               ),
             ],
           ),
-
-          // Buttons that have to be at the bottom of the screen
           if (userType == UserType.business &&
               SPLVariables.hasRealTimeTracking) ...[
-            if (userType == UserType.business &&
-                SPLVariables.hasRealTimeTracking) ...[
-              Positioned(
-                bottom: 0.0,
-                left: 16.0,
-                right: 16.0,
-                child: OrderActionButtons(
-                  selectedStatus: "",
-                  showConfirmButton: false,
-                  userType: userType,
-                ),
+            Positioned(
+              bottom: 0.0,
+              left: 16.0,
+              right: 16.0,
+              child: OrderActionButtons(
+                selectedStatus: "",
+                showConfirmButton: false,
+                userType: userType,
               ),
-            ],
-
-            // Shipping guide for costumers
-            if (userType == UserType.customer &&
-                SPLVariables.hasRealTimeTracking) ...[
-              if (userType == UserType.customer &&
-                  SPLVariables.hasRealTimeTracking) ...[
-                Positioned(
-                  bottom: 0.0,
-                  left: 16.0,
-                  right: 16.0,
-                  child: Column(
-                    children: [
-                      ShippingGuide(
-                          orderNumber: "123456",
-                          estimatedDeliveryDate: "2025-02-20"),
-                      const SizedBox(height: 10.0),
-                      OrderActionButtons(
-                          selectedStatus: "",
-                          showConfirmButton: false,
-                          userType: userType),
-                    ],
+            ),
+          ],
+          if (userType == UserType.customer &&
+              SPLVariables.hasRealTimeTracking) ...[
+            Positioned(
+              bottom: 0.0,
+              left: 16.0,
+              right: 16.0,
+              child: Column(
+                children: [
+                  ShippingGuide(
+                    orderNumber: "???",
+                    estimatedDeliveryDate: "???",
                   ),
-                ),
-              ]
-            ],
+                  const SizedBox(height: 10.0),
+                  OrderActionButtons(
+                    selectedStatus: "",
+                    showConfirmButton: false,
+                    userType: userType,
+                  ),
+                ],
+              ),
+            ),
           ],
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
+      bottomNavigationBar:
+          CustomBottomNavigationBar(userType: userType, context: context),
     );
+  }
+
+  String _extractLastStatus(order) {
+    final statuses = order.orderStatuses;
+    if (statuses == null || statuses.isEmpty) return '';
+    return statuses.last.status;
   }
 }

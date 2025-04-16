@@ -38,6 +38,7 @@ import '../pages/delivery_user/delivery_user_tracking.dart';
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   /// Initialization
   '/splash': (context) => const SplashScreen(),
+
   /// AUTH RELATED
   '': (_) => Wrapper(),
   // auth forms
@@ -77,7 +78,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// PRODUCTS PAGES
   'add_product': (_) => ProductFormPage(),
-  
+
   /// ORDER PAGES
   'business_user_orders': (_) => !kIsWeb
       ? OrdersScreen(userType: UserType.business)
@@ -105,7 +106,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'add_address': (_) => AddAddressPage(),
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),
-  'customer_user_cart': (_) => CartScreen(),
+  'customer_user_cart': (_) => CartPage(),
 
   /// NOTIFICATIONS
   'customer_notifications': (_) => NotificationsScreen(

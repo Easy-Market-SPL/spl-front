@@ -37,19 +37,18 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit
   ) async {
     if (state is ProductLoaded) {
-      final currentState = state as ProductLoaded;
-      
-      if (event.category == "Todos") {
-        // No need to reload, just change category
-        emit(ProductLoaded(currentState.products, activeCategory: event.category));
-        return;
-      }
-      
       try {
         emit(ProductLoading());
         final products = await ProductService.getProducts();
+        
+        if (event.category == "Todos") {
+          // No need to filter, just change category
+          emit(ProductLoaded(products ?? [], activeCategory: event.category));
+          return;
+        }
+
         final filteredProducts = products?.where(
-          (product) => product.code.isNotEmpty
+          (product) => product.labels?.any((category) => category.name == event.category) ?? false
         ).toList() ?? [];
         
         emit(ProductLoaded(filteredProducts, activeCategory: event.category));

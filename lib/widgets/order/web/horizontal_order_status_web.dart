@@ -1,29 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_state.dart';
 
 class CustomHorizontalOrderStatus extends StatelessWidget {
   const CustomHorizontalOrderStatus({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OrderStatusBloc, OrderStatusState>(
+    return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (state is OrderStatusLoaded) {
-          final bool step1Active = state.currentStatus == OrderStrings.orderConfirmed ||
-              state.currentStatus == OrderStrings.preparingOrder ||
-              state.currentStatus == OrderStrings.onTheWay ||
-              state.currentStatus == OrderStrings.delivered;
-          final bool step2Active = state.currentStatus == OrderStrings.preparingOrder ||
-              state.currentStatus == OrderStrings.onTheWay ||
-              state.currentStatus == OrderStrings.delivered;
-          final bool step3Active = state.currentStatus == OrderStrings.onTheWay ||
-              state.currentStatus == OrderStrings.delivered;
-          final bool step4Active = state.currentStatus == OrderStrings.delivered;
+        if (state is OrdersLoaded && state.filteredOrders.isNotEmpty) {
+          final order = state.filteredOrders.first;
+          final currentStatus = _extractLastStatus(order.orderStatuses);
+          final step1Active = _isActive(
+            currentStatus,
+            [
+              OrderStrings.orderConfirmed,
+              OrderStrings.preparingOrder,
+              OrderStrings.onTheWay,
+              OrderStrings.delivered
+            ],
+          );
+          final step2Active = _isActive(
+            currentStatus,
+            [
+              OrderStrings.preparingOrder,
+              OrderStrings.onTheWay,
+              OrderStrings.delivered
+            ],
+          );
+          final step3Active = _isActive(
+            currentStatus,
+            [OrderStrings.onTheWay, OrderStrings.delivered],
+          );
+          final step4Active = (currentStatus == OrderStrings.delivered);
 
-          final List<OrderStep> steps = [
+          final steps = [
             OrderStep(
               activeTitle: OrderStrings.orderConfirmed,
               activeDescription: OrderStrings.orderConfirmedDescription,
@@ -58,25 +73,22 @@ class CustomHorizontalOrderStatus extends StatelessWidget {
             ),
           ];
 
-          // Calculates the progress fraction based on the active step
-          int lastActiveIndex = steps.lastIndexWhere((step) => step.isActive);
-          double progressFraction = (steps.isNotEmpty)
-              ? (lastActiveIndex + 1) / steps.length
-              : 0.0;
+          final lastActiveIndex = steps.lastIndexWhere((step) => step.isActive);
+          final progressFraction =
+              (steps.isNotEmpty) ? (lastActiveIndex + 1) / steps.length : 0.0;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Progress bar
               LinearProgressIndicator(
                 value: progressFraction,
                 backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D4F94)),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFF0D4F94)),
               ),
               const SizedBox(height: 16),
-              // Steps
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // Aligns the icons to the top
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: steps.map((step) {
                   return Expanded(
@@ -88,19 +100,20 @@ class CustomHorizontalOrderStatus extends StatelessWidget {
                           child: _buildStatusIcon(step.icon, step.isActive),
                         ),
                         const SizedBox(height: 8),
-                        // Tittle
                         Text(
                           step.isActive ? step.activeTitle : step.inactiveTitle,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: step.isActive ? Colors.black : Colors.grey[600],
+                            color:
+                                step.isActive ? Colors.black : Colors.grey[600],
                           ),
                         ),
                         const SizedBox(height: 4),
-                        // Description
                         Text(
-                          step.isActive ? step.activeDescription : step.inactiveDescription,
+                          step.isActive
+                              ? step.activeDescription
+                              : step.inactiveDescription,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 12,
@@ -114,11 +127,22 @@ class CustomHorizontalOrderStatus extends StatelessWidget {
               ),
             ],
           );
-        } else {
+        } else if (state is OrdersLoading) {
           return const Center(child: CircularProgressIndicator());
+        } else {
+          return Container();
         }
       },
     );
+  }
+
+  String _extractLastStatus(statuses) {
+    if (statuses == null || statuses.isEmpty) return '';
+    return statuses.last.status;
+  }
+
+  bool _isActive(String currentStatus, List<String> validStatuses) {
+    return validStatuses.contains(currentStatus);
   }
 
   Widget _buildStatusIcon(IconData icon, bool isActive) {

@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_bloc.dart'; // <-- Asegúrate de apuntar a tu archivo con OrdersBloc
+import 'package:spl_front/bloc/ui_management/order/order_event.dart'; // <-- Necesario para LoadOrdersEvent
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/products/grids/customer_product_card.dart';
+import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
+import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
@@ -17,61 +25,79 @@ class CustomerMainDashboard extends StatefulWidget {
 
 class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   late UsersBloc usersBloc;
+  String activeLabel = "Todos";
 
   @override
   void initState() {
-    usersBloc = BlocProvider.of<UsersBloc>(context);
     super.initState();
+
+    usersBloc = BlocProvider.of<UsersBloc>(context);
+
+    // Fetch products and labels
+    context.read<ProductBloc>().add(LoadProducts());
+    context.read<LabelBloc>().add(LoadDashboardLabels());
+
+    // Fetch the current user's orders, passing role=consumer
+    final userId = usersBloc.state.sessionUser?.id ?? '';
+    if (userId.isNotEmpty) {
+      context.read<OrdersBloc>().add(
+            LoadOrdersEvent(
+              userId: userId,
+              userRole: 'customer',
+            ),
+          );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UsersBloc, UsersState>(
-      builder: (context, usersSstate) {
-        if (usersSstate.sessionUser == null) {
-          return Scaffold(
+      builder: (context, usersState) {
+        if (usersState.sessionUser == null) {
+          return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
             ),
           );
         }
+
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: CustomerUserAppBar(
-            hintText: CustomerStrings.searchHint, // Pass custom hint text
+            hintText: CustomerStrings.searchHint,
             onFilterPressed: () {
-              // TODO: Implement filters action
+              // TODO: Implement additional filter action if needed
             },
           ),
           body: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Category Tabs
+                // Display real labels
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    // TODO: Build category tabs according with the state and database info
-                    children: [
-                      _buildCategoryTab("Todos", isSelected: true),
-                      const SizedBox(width: 10),
-                      _buildCategoryTab(ProductStrings.productCategory),
-                      const SizedBox(width: 10),
-                      _buildCategoryTab(ProductStrings.productCategory),
-                    ],
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: LabelsWidget(
+                    activeLabel: activeLabel,
+                    onLabelSelected: (labelName) {
+                      setState(() {
+                        activeLabel = labelName;
+                      });
+                      context.read<ProductBloc>().add(
+                            FilterProductsByCategory(labelName),
+                          );
+                    },
                   ),
                 ),
-                const SizedBox(height: 8),
 
-                // Product List
+                // Display products
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      // Important: Change the widget according with the variability from the Product Line
-                      child: CustomerProductGrid(),
-                    ),
+                  child: BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, productState) {
+                      return _buildProductContent(productState);
+                    },
                   ),
                 ),
               ],
@@ -86,24 +112,49 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
     );
   }
 
-  Widget _buildCategoryTab(String text, {bool isSelected = false}) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Handle category tab selection
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.blue : Colors.white,
-          foregroundColor: isSelected ? Colors.white : Colors.black,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+  /// Builds the product grid or errors/loading accordingly.
+  Widget _buildProductContent(ProductState state) {
+    if (state is ProductInitial || state is ProductLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is ProductError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              ProductStrings.productLoadingError,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.read<ProductBloc>().add(LoadProducts()),
+              child: const Text(ProductStrings.retry),
+            ),
+          ],
+        ),
+      );
+    } else if (state is ProductLoaded) {
+      if (state.products.isEmpty) {
+        return const Center(
+          child: Text(
+            ProductStrings.noProductsAvailable,
+            style: TextStyle(fontSize: 16),
+          ),
+        );
+      }
+
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: CustomerProductGrid(
+            productsList: state.products,
           ),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ),
-    );
+      );
+    }
+
+    // Fallback
+    return const Center(child: Text(ProductStrings.productLoadingError));
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
-import 'package:spl_front/bloc/ui_management/cart/cart_bloc.dart';
-import 'package:spl_front/bloc/ui_management/cart/cart_event.dart';
-import 'package:spl_front/bloc/ui_management/cart/cart_state.dart';
+import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_event.dart';
+import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
@@ -15,18 +15,18 @@ import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
-import 'package:spl_front/widgets/payment/process/payment_total.dart';
+
+import '../../../models/order_models/order_product.dart';
 
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => CartBloc()..add(LoadCart())),
-        BlocProvider(create: (_) => AddressBloc()),
-      ],
+    return BlocProvider(
+      create: (_) => OrdersBloc()
+        ..add(LoadOrdersEvent(
+            userId: 'userId', userRole: 'customer')), // Load orders (cart)
       child: const PaymentPage(),
     );
   }
@@ -54,15 +54,19 @@ class PaymentPageState extends State<PaymentPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocBuilder<CartBloc, CartState>(
+        child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
-            if (state.isLoading) {
+            if (state is OrdersLoading) {
               return const Center(
                   child: CircularProgressIndicator(color: Colors.blue));
             }
-            return state.items.isEmpty
-                ? CircularProgressIndicator(color: Colors.blue)
-                : _buildCartWithItems(state.items, context);
+
+            if (state is OrdersLoaded && state.currentCartOrder != null) {
+              final cartItems = state.currentCartOrder!.orderProducts!;
+              return _buildCartWithItems(cartItems, context);
+            }
+
+            return _buildEmptyCart();
           },
         ),
       ),
@@ -126,12 +130,11 @@ class PaymentPageState extends State<PaymentPage> {
             );
             if (selected != null) {
               setState(() {
-                selectedCard =
-                    selected; // Process when the user selects a credit/debit card
+                selectedCard = selected;
               });
             } else {
               setState(() {
-                selectedCard = null; // Process when the user selects cash
+                selectedCard = null;
               });
             }
           },
@@ -187,10 +190,11 @@ class PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  Widget _buildCartWithItems(
-      List<Map<String, dynamic>> items, BuildContext context) {
-    double subtotal =
-        items.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
+  Widget _buildCartWithItems(List<OrderProduct> items, BuildContext context) {
+    double subtotal = items.fold(0, (sum, item) {
+      item.fetchProduct(); // Load product details
+      return sum + (item.price ?? 0) * item.quantity;
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +225,7 @@ class PaymentPageState extends State<PaymentPage> {
                 card: selectedCard,
                 address: selectedAddress,
               )
-            : Total(
+            : PaymentCreditTotal(
                 total: subtotal, card: selectedCard, address: selectedAddress),
       ],
     );
@@ -304,6 +308,12 @@ class PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Text('No items in your cart.'),
     );
   }
 }

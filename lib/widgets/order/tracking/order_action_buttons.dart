@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/utils/strings/order_strings.dart';
+
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_state.dart';
+import '../../../models/logic/user_type.dart';
+import '../../../utils/strings/order_strings.dart';
 
 class OrderActionButtons extends StatelessWidget {
   final String selectedStatus;
@@ -33,84 +33,99 @@ class OrderActionButtons extends StatelessWidget {
               backgroundColor: const Color.fromARGB(255, 37, 139, 217),
               minimumSize: const Size(double.infinity, 48),
             ),
-            child: const Text(OrderStrings.orderDetailsTitle,
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              OrderStrings.orderDetailsTitle,
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         if (showDetailsButton) const SizedBox(height: 8.0),
         if (showConfirmButton)
-          BlocBuilder<OrderStatusBloc, OrderStatusState>(
+          BlocBuilder<OrdersBloc, OrdersState>(
             builder: (context, state) {
-              if (state is OrderStatusLoaded) {
-                return ElevatedButton(
-                  onPressed: selectedStatus != state.currentStatus
-                      ? () {
-                          _confirmStatusChange(context);
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedStatus != state.currentStatus
-                        ? const Color.fromARGB(255, 37, 139, 217)
-                        : Colors.grey[350],
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: Text(OrderStrings.confirm,
-                      style: TextStyle(
-                          color: selectedStatus != state.currentStatus
-                              ? Colors.white
-                              : Colors.black)),
-                );
-              } else {
+              final currentStatus = _extractCurrentStatus(state);
+              if (currentStatus == null) {
                 return Container();
               }
+              final isEnabled = selectedStatus != currentStatus;
+              return ElevatedButton(
+                onPressed: isEnabled
+                    ? () {
+                        _confirmStatusChange(context);
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isEnabled
+                      ? const Color.fromARGB(255, 37, 139, 217)
+                      : Colors.grey[350],
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: Text(
+                  OrderStrings.confirm,
+                  style: TextStyle(
+                    color: isEnabled ? Colors.white : Colors.black,
+                  ),
+                ),
+              );
             },
           ),
       ],
     );
   }
 
-  // Navigate to the appropriate details page based on userType
   void _navigateToDetails(BuildContext context) {
-    // TODO: Pass the order ID to the details page
     if (userType == UserType.customer) {
       Navigator.of(context).pushNamed('customer_user_order_details');
     } else if (userType == UserType.business || userType == UserType.delivery) {
       Navigator.of(context).pushNamed('business_user_order_details');
+    } else if (userType == UserType.admin) {
+      Navigator.of(context).pushNamed('admin_user_order_details');
     }
   }
 
-  // Confirm status change dialog
   void _confirmStatusChange(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (_) {
         return AlertDialog(
           title: const Text(OrderStrings.confirmStatusChangeTitle),
           content:
               Text(OrderStrings.confirmStatusChangeContent(selectedStatus)),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pop(); // Close the dialog without doing anything
-              },
-              child: const Text(OrderStrings.cancel,
-                  style: TextStyle(color: Colors.blue)),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                OrderStrings.cancel,
+                style: TextStyle(color: Colors.blue),
+              ),
             ),
             TextButton(
               onPressed: () {
-                // Emit the event only after the user confirms
-                context
-                    .read<OrderStatusBloc>()
-                    .add(ChangeOrderStatusEvent(selectedStatus));
-                Navigator.of(context)
-                    .pop(); // Close the dialog after confirming
+                /*
+                context.read<OrdersBloc>().add(
+                 ConfirmOrderEvent(orderId: orderId, shippingCost: shippingCost, paymentAmount: paymentAmount)
+               );
+                */
+
+                Navigator.of(context).pop();
               },
-              child: const Text(OrderStrings.accept,
-                  style: TextStyle(color: Colors.blue)),
+              child: const Text(
+                OrderStrings.accept,
+                style: TextStyle(color: Colors.blue),
+              ),
             ),
           ],
         );
       },
     );
+  }
+
+  String? _extractCurrentStatus(OrdersState state) {
+    if (state is OrdersLoaded && state.filteredOrders.isNotEmpty) {
+      final order = state.filteredOrders.first;
+      final lastStatus = order.orderStatuses;
+      if (lastStatus == null || lastStatus.isEmpty) return null;
+      return lastStatus.last.status;
+    }
+    return null;
   }
 }

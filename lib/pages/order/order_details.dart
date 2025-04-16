@@ -1,21 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_event.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
-import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/utils/strings/order_strings.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/order/tracking/modify_order_status_options.dart';
-import 'package:spl_front/widgets/order/tracking/order_action_buttons.dart';
-import 'package:spl_front/widgets/order/list/products_popup.dart';
-import 'package:spl_front/widgets/order/tracking/shipping_company_selection.dart';
+
+import '../../../models/logic/user_type.dart';
+import '../../../spl/spl_variables.dart';
+import '../../../utils/strings/order_strings.dart';
+import '../../../widgets/navigation_bars/nav_bar.dart';
+import '../../bloc/ui_management/order/order_bloc.dart';
+import '../../bloc/ui_management/order/order_state.dart';
+import '../../widgets/order/list/products_popup.dart';
+import '../../widgets/order/tracking/modify_order_status_options.dart';
+import '../../widgets/order/tracking/order_action_buttons.dart';
+import '../../widgets/order/tracking/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final UserType userType;
-
   const OrderDetailsScreen({super.key, required this.userType});
 
   @override
@@ -28,7 +27,11 @@ class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
   final Color backgroundColor;
 
-  const OrderDetailsPage({super.key, required this.userType, this.backgroundColor = Colors.white});
+  const OrderDetailsPage({
+    super.key,
+    required this.userType,
+    this.backgroundColor = Colors.white,
+  });
 
   @override
   State<OrderDetailsPage> createState() => _OrderDetailsPageState();
@@ -40,77 +43,77 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Simulated order and customer data
-    final orderData = _getOrderData();
-    final customerData = _getCustomerData();
-
     return Scaffold(
       backgroundColor: widget.backgroundColor,
       body: Column(
         children: [
-          if(!kIsWeb) _headerOrderDetails(context),
+          if (!kIsWeb) _headerOrderDetails(context),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: BlocBuilder<OrderStatusBloc, OrderStatusState>(
+              child: BlocBuilder<OrdersBloc, OrdersState>(
                 builder: (context, state) {
-                  if (state is OrderStatusLoading) {
+                  if (state is OrdersLoading) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is OrderStatusLoaded) {
+                  } else if (state is OrdersLoaded &&
+                      state.filteredOrders.isNotEmpty) {
+                    final order = state.filteredOrders.first;
+                    final lastStatus = _extractLastStatus(order);
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSectionTitle(OrderStrings.orderDetailsTitle),
-
-                        // Order status and action buttons
-                        if (userType == UserType.business || userType == UserType.delivery) ...[
+                        if (userType == UserType.business ||
+                            userType == UserType.delivery) ...[
                           const SizedBox(height: 20),
                           ModifyOrderStatusOptions(
-                            selectedStatus: state.selectedStatus,
+                            selectedStatus: lastStatus,
                             onStatusChanged: (status) {
-                              context
-                                  .read<OrderStatusBloc>()
-                                  .add(ChangeSelectedStatusEvent(status));
+                              // context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
                             },
                           ),
                           const SizedBox(height: 24.0),
                           OrderActionButtons(
-                            selectedStatus: state.selectedStatus,
+                            selectedStatus: lastStatus,
                             showDetailsButton: false,
                             userType: userType,
                           ),
                           const SizedBox(height: 24.0),
                         ],
-
-                        // Order details
-                        _buildInfoRow(OrderStrings.orderNumber, orderData['numeroOrden']),
-                        _buildInfoRow(OrderStrings.orderDate, orderData['fecha']),
+                        _buildInfoRow(OrderStrings.orderNumber, '${order.id!}'),
+                        _buildInfoRow(
+                          OrderStrings.orderDate,
+                          order.creationDate!.toIso8601String(),
+                        ),
                         _buildInfoRow(
                           OrderStrings.orderProductCount,
-                          "${orderData['numProductos']}",
+                          '???', // Calcula la cantidad real si quieres
                           actionText: OrderStrings.viewProducts,
-                          onActionTap: () {
-                            _showProductPopup(context);
-                          },
+                          onActionTap: () => _showProductPopup(context),
                         ),
                         _buildInfoRow(
-                            OrderStrings.orderTotal,
-                            "\$${orderData['total'].toStringAsFixed(0)}",
+                          OrderStrings.orderTotal,
+                          '\$???', // Muestra un total calculado real
                         ),
                         const SizedBox(height: 20),
-
-                        // Customer details
-                        if (userType == UserType.business || userType == UserType.delivery) ...[
+                        if (userType == UserType.business ||
+                            userType == UserType.delivery) ...[
                           _buildSectionTitle(OrderStrings.customerDetailsTitle),
-                          _buildInfoRow(OrderStrings.customerName, customerData['cliente']),
-                          _buildInfoRow(OrderStrings.deliveryAddress, customerData['direccion']),
+                          _buildInfoRow(
+                              OrderStrings.customerName, order.idUser!),
+                          _buildInfoRow(
+                              OrderStrings.deliveryAddress, order.address!),
                         ],
-
-                        // Real-time tracking or company selection
                         if (SPLVariables.hasRealTimeTracking) ...[
                           const SizedBox(height: 20),
                           _buildSectionTitle(OrderStrings.deliveryDetailsTitle),
-                          _buildInfoRow(OrderStrings.deliveryPersonName, OrderStrings.noDeliveryPersonAssigned),
+                          _buildInfoRow(
+                            OrderStrings.deliveryPersonName,
+                            order.idDomiciliary?.isNotEmpty == true
+                                ? order.idDomiciliary!
+                                : OrderStrings.noDeliveryPersonAssigned,
+                          ),
                         ] else ...[
                           const SizedBox(height: 20),
                           _buildSectionTitle(OrderStrings.shippingCompanyTitle),
@@ -131,6 +134,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ],
                       ],
                     );
+                  } else if (state is OrdersError) {
+                    return Center(child: Text(state.message));
                   } else {
                     return const Center(
                         child: Text(OrderStrings.errorLoadingOrderStatus));
@@ -141,34 +146,16 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context,),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        userType: userType,
+        context: context,
+      ),
     );
   }
 
-  // Helper function to get simulated order data
-  Map<String, dynamic> _getOrderData() {
-    return {
-      'numeroOrden': "123456",
-      'fecha': "2025-02-17",
-      'numProductos': 5,
-      'total': 150.0,
-    };
-  }
-
-  // Helper function to get simulated customer data
-  Map<String, dynamic> _getCustomerData() {
-    return {
-      'cliente': "Juan Pérez",
-      'direccion': "Calle Falsa 123",
-      'empresaSeleccionada': "",
-    };
-  }
-
-  // Header of the order details page
   Widget _headerOrderDetails(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double topPadding = screenHeight * 0.05;
-
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.05;
     return Container(
       padding: EdgeInsets.only(top: topPadding, left: 10.0, right: 10.0),
       height: 80.0,
@@ -179,9 +166,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
         ],
@@ -189,7 +174,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  // Helper to build section titles
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -200,62 +184,68 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  // Helper to build a row with action (e.g. "Ver productos")
-  Widget _buildInfoRow(String label, String value,
-      {String? actionText, VoidCallback? onActionTap}) {
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    String? actionText,
+    VoidCallback? onActionTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: GestureDetector(
         onTap: onActionTap,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            bool isSmallScreen = constraints.maxWidth < 150;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(label,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black)),
-                      const SizedBox(height: 2),
-                      Text(value,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.grey)),
-                    ],
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
                   ),
                 ),
-                if (actionText != null)
-                  Row(
-                    children: [
-                      if (!isSmallScreen)
-                        Text(actionText,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                                decoration: TextDecoration.underline)),
-                      const Icon(Icons.chevron_right, color: Colors.grey),
-                    ],
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.grey,
                   ),
+                ),
               ],
-            );
-          },
+            ),
+            if (actionText != null)
+              Row(
+                children: [
+                  Text(
+                    actionText,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+          ],
         ),
       ),
     );
   }
 
-  // Helper to build a selectable row (for company selection)
-  Widget _buildSelectableRow(String label, String value,
-      {String? subtitle, VoidCallback? onActionTap}) {
+  Widget _buildSelectableRow(
+    String label,
+    String value, {
+    VoidCallback? onActionTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: GestureDetector(
@@ -265,29 +255,19 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           children: [
             Text(label,
                 style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black)),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                )),
             const SizedBox(height: 2),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(value,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.grey)),
-                    if (subtitle != null)
-                      Text(subtitle,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.grey)),
-                  ],
-                ),
+                Text(value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.grey,
+                    )),
                 const Spacer(),
                 const Icon(Icons.chevron_right, color: Colors.grey),
               ],
@@ -298,47 +278,32 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  // Show the products in a popup when the user taps "Ver productos"
   void _showProductPopup(BuildContext context) {
-    var horizontalFactor = 0.8;
-    if (kIsWeb) horizontalFactor = 0.4;
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: 200,
-              minWidth: 150,
-              maxWidth: MediaQuery.of(context).size.width * horizontalFactor,
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: const ProductPopup(),
-          ),
-        );
-      },
+      builder: (_) => const ProductPopup(),
     );
   }
 
-  // Show the shipping company selection popup
   void _showShippingCompanyPopup(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context) {
-        return ShippingCompanyPopup(
-          selectedCompany: selectedShippingCompany,
-          onCompanySelected: (company) {
-            setState(() {
-              selectedShippingCompany = company;
-            });
-          },
-        );
-      },
+      builder: (_) => ShippingCompanyPopup(
+        selectedCompany: selectedShippingCompany,
+        onCompanySelected: (company) {
+          setState(() {
+            selectedShippingCompany = company;
+          });
+        },
+      ),
     );
+  }
+
+  String _extractLastStatus(order) {
+    final statuses = order.orderStatuses;
+    if (statuses == null || statuses.isEmpty) return '';
+    return statuses.last.status;
   }
 }

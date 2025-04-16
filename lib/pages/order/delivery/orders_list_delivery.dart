@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_event.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
@@ -11,14 +8,22 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/order_item.dart';
 import 'package:spl_front/widgets/order/list/orders_filters_popup.dart';
 
-// This class is exclusively for the delivery user and will be visible when the SPL Variable of RealTimeTracking is True
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../bloc/ui_management/order/order_state.dart';
+import '../../../bloc/users_blocs/users/users_bloc.dart';
+import '../../../models/order_models/order_model.dart';
+
 class OrdersScreenDelivery extends StatelessWidget {
   const OrdersScreenDelivery({super.key});
 
   @override
   Widget build(BuildContext context) {
-    context.read<OrderListBloc>().add(LoadOrdersEvent());
-    return OrdersPageDelivery();
+    final String userId = context.read<UsersBloc>().state.sessionUser!.id;
+    context.read<OrdersBloc>().add(
+          LoadOrdersEvent(userId: userId, userRole: 'delivery'),
+        );
+    return const OrdersPageDelivery();
   }
 }
 
@@ -32,12 +37,24 @@ class OrdersPageDelivery extends StatefulWidget {
 class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
   @override
   void initState() {
-    final OrderListBloc orderListBloc = BlocProvider.of<OrderListBloc>(context);
-    orderListBloc.selectedFilters = [
-      OrderStrings.statusPreparing,
-      OrderStrings.onTheWay,
-    ];
     super.initState();
+    final state = context.read<OrdersBloc>().state;
+    if (state is OrdersLoaded) {
+      final selected = state.selectedFilters.toList();
+      if (!selected.contains(OrderStrings.statusPreparing)) {
+        selected.add(OrderStrings.statusPreparing);
+      }
+      if (!selected.contains(OrderStrings.statusOnTheWay)) {
+        selected.add(OrderStrings.statusOnTheWay);
+      }
+      final filtered = _applyStatusFilters(state.allOrders, selected);
+      context.read<OrdersBloc>().emit(
+            state.copyWith(
+              selectedFilters: selected,
+              filteredOrders: filtered,
+            ),
+          );
+    }
   }
 
   @override
@@ -47,7 +64,8 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
         centerTitle: true,
         title: Text(
           OrderStrings.ordersTitleDelivery,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         forceMaterialTransparency: true,
       ),
@@ -55,16 +73,17 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
+              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
               child: Column(
                 children: [
                   searchBar(context),
                   Expanded(
-                    child: BlocBuilder<OrderListBloc, OrderListState>(
+                    child: BlocBuilder<OrdersBloc, OrdersState>(
                       builder: (context, state) {
-                        if (state is OrderListLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (state is OrderListLoaded) {
+                        if (state is OrdersLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (state is OrdersLoaded) {
                           return ListView.builder(
                             itemCount: state.filteredOrders.length,
                             itemBuilder: (context, index) {
@@ -75,7 +94,7 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
                               );
                             },
                           );
-                        } else if (state is OrderListError) {
+                        } else if (state is OrdersError) {
                           return Center(child: Text(state.message));
                         } else {
                           return Container();
@@ -87,9 +106,62 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
               ),
             ),
           ),
-          CustomBottomNavigationBar(userType: UserType.delivery, context: context,),
+          CustomBottomNavigationBar(
+            userType: UserType.delivery,
+            context: context,
+          ),
         ],
       ),
+    );
+  }
+
+  Widget searchBar(BuildContext context) {
+    final focusNode = FocusNode();
+    final controller = TextEditingController();
+
+    return SearchBarInput(
+      focusNode: focusNode,
+      controller: controller,
+      hintText: OrderStrings.searchOrdersHint,
+      onEditingComplete: () {
+        context.read<OrdersBloc>().add(SearchOrdersEvent(controller.text));
+      },
+      showFilterButton: true,
+      onFilterPressed: () async {
+        focusNode.unfocus();
+        final ordersBloc = context.read<OrdersBloc>();
+        final currentState = ordersBloc.state;
+        List<String> currentAdditionalFilters = [];
+        DateTimeRange? currentDateRange;
+
+        if (currentState is OrdersLoaded) {
+          currentAdditionalFilters = currentState.additionalFilters;
+          currentDateRange = currentState.dateRange;
+        }
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return FiltersPopup(
+              onApplyFilters: (filters, dateRange) {
+                ordersBloc.add(ApplyAdditionalFiltersEvent(filters));
+                if (dateRange != null) {
+                  ordersBloc.add(SetDateRangeEvent(dateRange));
+                } else {
+                  ordersBloc.add(const ClearDateRangeEvent());
+                }
+              },
+              onClearFilters: () {
+                // Este evento solo existe en tu BLoC si lo definiste
+                // Si quieres restablecer los filtros para 'delivery', ajusta la lógica
+                // Ej:
+                ordersBloc.add(const ClearAdditionalFiltersEvent());
+              },
+              currentAdditionalFilters: currentAdditionalFilters,
+              currentDateRange: currentDateRange,
+            );
+          },
+        );
+      },
     );
   }
 
@@ -99,67 +171,23 @@ class _OrdersPageDeliveryState extends State<OrdersPageDelivery> {
     return ChoiceChip(
       label: Text(OrderStrings.showDateRangeString(startDate, endDate)),
       selected: true,
-      onSelected: (bool selected) {
-        // Do nothing, chip is always selected
-      },
+      onSelected: (_) {},
       selectedColor: Colors.blue,
       backgroundColor: Colors.grey[200],
-      labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+      labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       showCheckmark: false,
     );
   }
 
-  Widget searchBar(BuildContext context) {
-    // Create a FocusNode to control the TextField focus
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
-
-    return SearchBarInput(
-        focusNode: focusNode,
-        controller: controller,
-        hintText: OrderStrings.searchOrdersHint,
-        onEditingComplete: () {
-          context.read<OrderListBloc>().add(SearchOrdersEvent(controller.text));
-        },
-        showFilterButton: true,
-        onFilterPressed: () async {
-          // Dismiss the keyboard by unfocusing the TextField
-          focusNode.unfocus();
-
-          final List<String> currentAdditionalFilters =
-              context.read<OrderListBloc>().state is OrderListLoaded
-                  ? (context.read<OrderListBloc>().state as OrderListLoaded)
-                      .additionalFilters
-                  : [];
-          final DateTimeRange? currentDateRange =
-              context.read<OrderListBloc>().state is OrderListLoaded
-                  ? (context.read<OrderListBloc>().state as OrderListLoaded)
-                      .selectedDateRange
-                  : null;
-
-          // Show the popup
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return FiltersPopup(
-                onApplyFilters: (filters, dateRange) {
-                  context
-                      .read<OrderListBloc>()
-                      .add(ApplyAdditionalFiltersEvent(filters));
-                  context.read<OrderListBloc>().selectedDateRange = dateRange;
-                },
-                onClearFilters: () {
-                  context
-                      .read<OrderListBloc>()
-                      .add(ClearAdditionalFiltersDeliveryEvent());
-                  context.read<OrderListBloc>().selectedDateRange = null;
-                },
-                currentAdditionalFilters: currentAdditionalFilters,
-                currentDateRange: currentDateRange,
-              );
-            },
-          );
-        });
+  List<OrderModel> _applyStatusFilters(
+      List<OrderModel> orders, List<String> statuses) {
+    // Suponiendo que cada order no tiene un 'status' directo sino 'orderStatuses'.
+    // Ejemplo: busco el último status y veo si coincide
+    return orders.where((o) {
+      if (o.orderStatuses == null || o.orderStatuses!.isEmpty) return false;
+      final lastStatus = o.orderStatuses!.last.status;
+      return statuses.contains(lastStatus);
+    }).toList();
   }
 }
