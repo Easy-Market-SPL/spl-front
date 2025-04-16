@@ -37,6 +37,41 @@ class OrderModel {
     this.orderStatuses,
   });
 
+  /// CopyWith Method
+   copyWith({
+    int? id,
+    String? idUser,
+    DateTime? creationDate,
+    double? total,
+    String? address,
+    int? shippingCost,
+    String? transportCompany,
+    String? shippingGuide,
+    String? idDomiciliary,
+    double? lat,
+    double? lng,
+    double? debt,
+    List<OrderProduct>? orderProducts,
+    List<OrderStatus>? orderStatuses,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      idUser: idUser ?? this.idUser,
+      creationDate: creationDate ?? this.creationDate,
+      total: total ?? this.total,
+      address: address ?? this.address,
+      shippingCost: shippingCost ?? this.shippingCost,
+      transportCompany: transportCompany ?? this.transportCompany,
+      shippingGuide: shippingGuide ?? this.shippingGuide,
+      idDomiciliary: idDomiciliary ?? this.idDomiciliary,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      debt: debt ?? this.debt,
+      orderProducts: orderProducts ?? this.orderProducts,
+      orderStatuses: orderStatuses ?? this.orderStatuses,
+    );
+  }
+
   /// Create and order from a JSON string.
   factory OrderModel.fromRawJson(String str) =>
       OrderModel.fromJson(json.decode(str));

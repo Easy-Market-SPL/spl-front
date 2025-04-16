@@ -35,16 +35,17 @@ class OrdersLoaded extends OrdersState {
   final OrderModel? currentCartOrder;
 
   final String? errorMessage;
+  final bool isLoading;
 
-  const OrdersLoaded({
-    required this.allOrders,
-    required this.filteredOrders,
-    required this.selectedFilters,
-    required this.additionalFilters,
-    this.dateRange,
-    this.currentCartOrder,
-    this.errorMessage,
-  });
+  const OrdersLoaded(
+      {required this.allOrders,
+      required this.filteredOrders,
+      required this.selectedFilters,
+      required this.additionalFilters,
+      this.dateRange,
+      this.currentCartOrder,
+      this.errorMessage,
+      this.isLoading = false});
 
   @override
   List<Object?> get props => [
@@ -65,6 +66,8 @@ class OrdersLoaded extends OrdersState {
     DateTimeRange? dateRange,
     OrderModel? currentCartOrder,
     String? errorMessage,
+    bool? isLoading,
+    bool forceCartNull = false,
   }) {
     return OrdersLoaded(
       allOrders: allOrders ?? this.allOrders,
@@ -72,8 +75,10 @@ class OrdersLoaded extends OrdersState {
       selectedFilters: selectedFilters ?? this.selectedFilters,
       additionalFilters: additionalFilters ?? this.additionalFilters,
       dateRange: dateRange ?? this.dateRange,
-      currentCartOrder: currentCartOrder ?? this.currentCartOrder,
+      currentCartOrder:
+          forceCartNull ? null : (currentCartOrder ?? this.currentCartOrder),
       errorMessage: errorMessage ?? this.errorMessage,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }

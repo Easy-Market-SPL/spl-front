@@ -10,7 +10,7 @@ import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/logic/user_type.dart';
 import '../../models/order_models/order_product.dart';
 import '../../utils/strings/cart_strings.dart';
-import '../../widgets/cart/cart_subtotal.dart';
+import '../../widgets/cart/cart_subtotal.dart'; // Assuming Subtotal widget is here
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -23,17 +23,18 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
+    _loadCartData();
+  }
+
+  void _loadCartData() {
     final ordersBloc = context.read<OrdersBloc>();
     final usersBloc = context.read<UsersBloc>();
-    // Ensure sessionUser is not null before accessing id
     final userId = usersBloc.state.sessionUser?.id;
 
     if (userId != null) {
       ordersBloc.add(LoadOrdersEvent(userId: userId, userRole: 'customer'));
     } else {
-      // Handle case where user ID is not available, maybe navigate to login
       debugPrint("Error: User ID not found in initState of CartPage.");
-      // Optionally, show an error message or navigate away
     }
   }
 
@@ -43,32 +44,51 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title: _buildCartHeader(context),
         automaticallyImplyLeading: false,
-        surfaceTintColor: Colors.transparent, // Optional: Customize appearance
+        surfaceTintColor: Colors.transparent,
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            16.0, 0, 16.0, 16.0), // Adjust top padding if needed
+        padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
         child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
-            if (state is OrdersLoading) {
-              return const Center(
-                  child: CircularProgressIndicator(color: Colors.blue));
+            // Determine loading status for overlay
+            bool showLoadingOverlay = (state is OrdersLoaded && state.isLoading);
+            // Determine content based on non-loading states
+            Widget content;
+
+            if (state is OrdersInitial || state is OrdersLoading) {
+              // Show full loader only for initial load or explicit full loading state
+              content = const Center(child: CircularProgressIndicator(color: Colors.blue));
+            } else if (state is OrdersLoaded) {
+              // Check for items within the loaded state
+              final bool hasItems = state.currentCartOrder != null &&
+                  state.currentCartOrder!.orderProducts != null &&
+                  state.currentCartOrder!.orderProducts!.isNotEmpty;
+              content = hasItems
+                  ? _buildCartWithItems(state.currentCartOrder!.orderProducts!, context)
+                  : _buildEmptyCart(context);
+            } else if (state is OrdersError) {
+              debugPrint("OrdersError state in CartPage: ${state.message}");
+              content = _buildEmptyCart(context); // Fallback for errors
+            } else {
+              content = _buildEmptyCart(context); // Fallback for any other state
             }
 
-            // Check condition for showing items: Loaded state, non-null cart, non-empty items list
-            if (state is OrdersLoaded &&
-                state.currentCartOrder != null &&
-                state.currentCartOrder!.orderProducts != null &&
-                state.currentCartOrder!.orderProducts!.isNotEmpty) {
-              // Pass the non-nullable list
-              return _buildCartWithItems(
-                  state.currentCartOrder!.orderProducts!, context);
-            } else {
-              // In all other cases (Initial, Error, Loaded but empty/null cart), show empty cart
-              // Optionally handle OrdersError distinctly if needed
-              // if (state is OrdersError) { return Center(child: Text('Error: ${state.message}'));}
-              return _buildEmptyCart(context);
-            }
+            // Use a Stack to potentially overlay a loading indicator
+            return Stack(
+              children: [
+                // Main content (list, empty view, or initial loader)
+                content,
+
+                // Overlay loading indicator if isLoading flag is true in OrdersLoaded state
+                if (showLoadingOverlay)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.1), // Semi-transparent background
+                      child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                    ),
+                  ),
+              ],
+            );
           },
         ),
       ),
@@ -81,7 +101,7 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildCartHeader(BuildContext context) {
     return Stack(
-      alignment: Alignment.center, // Center the title easily
+      alignment: Alignment.center,
       children: [
         Align(
           alignment: Alignment.centerLeft,
@@ -92,12 +112,11 @@ class _CartPageState extends State<CartPage> {
                 Navigator.of(context).pop();
               }
             },
-            padding: EdgeInsets.zero, // Remove default padding
-            constraints: BoxConstraints(), // Remove default constraints
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ),
         Padding(
-          // Ensure title doesn't overlap the button if too long
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             CartStrings.cartTitle,
@@ -107,7 +126,7 @@ class _CartPageState extends State<CartPage> {
               color: Colors.black,
             ),
             textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis, // Handle long titles
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -115,22 +134,18 @@ class _CartPageState extends State<CartPage> {
   }
 
   Widget _buildEmptyCart(BuildContext context) {
+    // Build empty cart view.
     return Column(
       children: [
         Expanded(
-          // Use Expanded to take available space
           child: Center(
             child: SingleChildScrollView(
-              // Allow scrolling if content overflows on small screens
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                      Icons
-                          .shopping_cart_outlined, // Use outlined version perhaps
-                      size: 80,
-                      color: Colors.grey),
-                  const SizedBox(height: 24), // Increased spacing
+                  const Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: Colors.grey),
+                  const SizedBox(height: 24),
                   Container(
                     constraints: const BoxConstraints(maxWidth: 300),
                     child: Text(
@@ -139,25 +154,19 @@ class _CartPageState extends State<CartPage> {
                       style: const TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ),
-                  const SizedBox(
-                      height: 24), // Add space before potential actions
-                  // Optional: Add a button to go back to shopping
-                  // ElevatedButton(
-                  //   onPressed: () { /* Navigate to products page */ },
-                  //   child: Text('Seguir Comprando'),
-                  // )
                 ],
               ),
             ),
           ),
         ),
-        // Subtotal should be outside the Expanded/Center part
-        const Subtotal(isEmpty: true),
+        // Subtotal will correctly show 0.00 and disabled button via its own BlocBuilder.
+        const Subtotal(),
       ],
     );
   }
 
   Widget _buildCartWithItems(List<OrderProduct> items, BuildContext context) {
+    // Build cart view with items.
     return Column(
       children: [
         Expanded(
@@ -165,39 +174,34 @@ class _CartPageState extends State<CartPage> {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              // Use a key for better list item identification if needed
               return CartItem(key: ValueKey(item.idProduct), item: item);
             },
           ),
         ),
-        // Place buttons and subtotal below the list
         _buildClearCartButton(context),
-        const SizedBox(height: 8), // Add spacing
-        const Subtotal(), // Assuming this needs no parameters when not empty
+        const SizedBox(height: 8),
+        // Subtotal will correctly show calculated value and enabled button.
+        const Subtotal(),
       ],
     );
   }
 
   Widget _buildClearCartButton(BuildContext context) {
     return SizedBox(
-      // Use SizedBox to control width if needed
-      width: double.infinity, // Make button full width
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
           context.read<OrdersBloc>().add(ClearCartEvent());
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              const Color.fromARGB(255, 239, 83, 80), // Standard Material red
-          foregroundColor: Colors.white, // Text color
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8)), // Slightly less rounded
-          padding: const EdgeInsets.symmetric(vertical: 12), // Adjust padding
+          backgroundColor: const Color.fromARGB(255, 239, 83, 80),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
         child: Text(
           CartStrings.clearCartButton,
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w500), // Adjust text style
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );

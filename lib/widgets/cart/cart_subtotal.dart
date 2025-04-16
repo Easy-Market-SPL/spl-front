@@ -4,6 +4,7 @@ import 'package:spl_front/utils/strings/cart_strings.dart';
 
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_state.dart';
+import '../../utils/ui/format_currency.dart';
 
 class Subtotal extends StatelessWidget {
   final bool isEmpty;
@@ -29,7 +30,7 @@ class Subtotal extends StatelessWidget {
                     Text(CartStrings.subtotal,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('\$${subtotal.toStringAsFixed(2)}',
+                    Text(formatCurrency(subtotal),
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ],

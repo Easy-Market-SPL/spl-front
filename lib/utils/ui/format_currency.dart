@@ -5,6 +5,7 @@ String formatCurrency(double amount,
   final formatter = NumberFormat.currency(
     locale: locale,
     symbol: symbol,
+    decimalDigits: 0,
   );
   return formatter.format(amount);
 }

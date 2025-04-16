@@ -7,6 +7,7 @@ import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/order_models/order_product.dart';
 
 import '../../bloc/ui_management/order/order_state.dart';
+import '../../utils/ui/format_currency.dart';
 
 class CartItem extends StatelessWidget {
   final OrderProduct item;
@@ -18,6 +19,7 @@ class CartItem extends StatelessWidget {
     if (item.product == null) {
       debugPrint(
           'Error: CartItem recibió un item sin producto cargado: ${item.idProduct}');
+
       return const SizedBox.shrink();
     }
 
@@ -52,6 +54,7 @@ class CartItem extends StatelessWidget {
                 },
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
+
                   return Container(
                     width: 120,
                     height: 120,
@@ -72,20 +75,26 @@ class CartItem extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+
                     const SizedBox(height: 4), // Espacio
+
                     Text(
                       product.description,
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      maxLines: 2, // Evita overflow
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+
                     const SizedBox(height: 8), // Espacio
+
                     Text(
-                      // Formateo de precio podría ser mejorado (ej. con intl package)
-                      '\$${product.price.toStringAsFixed(2)}',
+                      formatCurrency(
+                        item.product!.price * item.quantity,
+                      ),
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 14),
                     ),
+
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Row(
@@ -108,12 +117,13 @@ class CartItem extends StatelessWidget {
                                   fontSize: 14, fontWeight: FontWeight.bold),
                             ),
                           ),
+
                           _buildIconButton(context, Icons.add, () {
-                            // Lógica para incrementar cantidad
                             _updateProductQuantity(context, item.quantity + 1);
                           }),
-                          // Separar un poco el botón de eliminar
+
                           const SizedBox(width: 10),
+
                           _buildIconButton(context, Icons.delete_outline, () {
                             _removeProduct(context);
                           },
@@ -146,22 +156,27 @@ class CartItem extends StatelessWidget {
 
   void _removeProduct(BuildContext context) {
     final orderState = context.read<OrdersBloc>().state;
-    if (orderState is OrdersLoaded && orderState.currentCartOrder?.id != null) {
+    int? currentCartOrderId;
+
+    if (orderState is OrdersLoaded) {
+      currentCartOrderId = orderState.currentCartOrder?.id;
+    }
+
+    if (currentCartOrderId != null) {
+      // Dispatch the event ONLY ONCE with the correct ID
       context.read<OrdersBloc>().add(RemoveProductFromOrderEvent(
-          orderId: orderState.currentCartOrder!.id!,
-          productCode: item.idProduct));
+          orderId: currentCartOrderId, productCode: item.idProduct));
     } else {
-      // Show error message by a popup:
+      // Show error message if cart ID cannot be determined
+      debugPrint(
+          "CartItem: Error - Could not find Order ID to remove product.");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Error: No se pudo eliminar el producto.'),
-          backgroundColor: Colors.red,
+          content: Text('Error: No se pudo determinar el carrito actual.'),
+          backgroundColor: Colors.orange,
         ),
       );
     }
-
-    context.read<OrdersBloc>().add(RemoveProductFromOrderEvent(
-        orderId: item.idOrder, productCode: item.idProduct));
   }
 
   Widget _buildIconButton(
