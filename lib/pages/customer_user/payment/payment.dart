@@ -19,6 +19,7 @@ import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 
 import '../../../bloc/users_blocs/users/users_bloc.dart';
 import '../../../models/order_models/order_product.dart';
+import '../../../widgets/payment/process/payment_total.dart';
 
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});
@@ -77,7 +78,7 @@ class PaymentPageState extends State<PaymentPage> {
               if (cartItems.isEmpty) {
                 return _buildEmptyCart(); // Si el carrito está vacío, muestra un mensaje.
               }
-              return _buildCartWithItems(cartItems, context);
+              return _buildCartWithItems(context);
             }
             if (state is OrdersError) {
               return Center(
@@ -153,10 +154,23 @@ class PaymentPageState extends State<PaymentPage> {
             if (selected != null) {
               setState(() {
                 selectedCard = selected;
+
+                // TODO: Change for save the selected card in order
+                final userId = context.read<UsersBloc>().state.sessionUser?.id;
+                if (userId != null) {
+                  context.read<OrdersBloc>().add(
+                      LoadOrdersEvent(userId: userId, userRole: 'customer'));
+                }
               });
             } else {
               setState(() {
                 selectedCard = null;
+
+                final userId = context.read<UsersBloc>().state.sessionUser?.id;
+                if (userId != null) {
+                  context.read<OrdersBloc>().add(
+                      LoadOrdersEvent(userId: userId, userRole: 'customer'));
+                }
               });
             }
           },
@@ -212,44 +226,57 @@ class PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  Widget _buildCartWithItems(List<OrderProduct> items, BuildContext context) {
-    double subtotal = items.fold(0, (sum, item) {
-      item.fetchProduct(); // Cargar detalles del producto
-      return sum + (item.price ?? 0) * item.quantity;
-    });
+  Widget _buildCartWithItems(BuildContext context) {
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        final List<OrderProduct> items = state.currentCartOrder!.orderProducts;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildAddressSelection(context),
-        const SizedBox(height: 16),
-        const Text(
-          OrderStrings.orderElements,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return CartItem(item: items[index]);
-            },
-          ),
-        ),
-        _buildPaymentMethodSelection(context),
-        const SizedBox(height: 16),
-        SPLVariables.hasCreditPayment
-            ? PaymentCreditTotal(
-                total: subtotal,
-                card: selectedCard,
-                address: selectedAddress,
-              )
-            : PaymentCreditTotal(
-                total: subtotal, card: selectedCard, address: selectedAddress),
-      ],
+        double subtotal = items.fold(0.0, (currentSum, item) {
+          final price = item.product?.price ?? 0.0;
+          final quantity = item.quantity > 0 ? item.quantity : 0;
+          return currentSum + (price * quantity);
+        });
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAddressSelection(context),
+            const SizedBox(height: 16),
+            const Text(
+              OrderStrings.orderElements,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return CartItem(
+                      key: ValueKey(items[index].idProduct),
+                      item: items[index]);
+                },
+              ),
+            ),
+            _buildPaymentMethodSelection(context),
+            const SizedBox(height: 16),
+            // Pass the correctly calculated subtotal
+            SPLVariables.hasCreditPayment
+                ? PaymentCreditTotal(
+                    total: subtotal,
+                    card: selectedCard,
+                    address: selectedAddress,
+                  )
+                : Total(
+                    total: subtotal,
+                    address: selectedAddress,
+                    card: selectedCard,
+                  ),
+          ],
+        );
+      },
     );
   }
 

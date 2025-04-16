@@ -76,7 +76,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           // Create cart immediately if not found
           final (newOrder, createError) = await OrderService.createOrder(
             idUser: event.userId,
-            address: ' ',
+            address:
+                'Address Creating...', // Example address, replace as needed
           );
           if (createError != null || newOrder == null) {
             emit(OrdersError(
@@ -98,7 +99,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         isLoading: false, // Explicitly false after load completes
       ));
     } catch (e) {
-      emit(OrdersError('${e.toString()}'));
+      emit(OrdersError(e.toString()));
     }
   }
 
@@ -504,7 +505,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         // Make sure copyWith handles the internal list correctly for immutability
         currentCartOrder: finalCartData.copyWith(
             orderProducts:
-                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
+                List<OrderProduct>.from(finalCartData.orderProducts)),
         isLoading: false, // Stop loading indicator
       ));
     } catch (e) {
@@ -520,15 +521,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       return;
     }
     final OrdersLoaded previousState = state as OrdersLoaded;
-    final orderIdToRemoveFrom =
-        event.orderId; // Event MUST provide the correct order ID
-
-    if (orderIdToRemoveFrom == null) {
-      emit(const OrdersError(
-          "ID de orden no especificado en el evento RemoveProduct."));
-      // Do not revert loading here as it wasn't set yet
-      return;
-    }
+    final orderIdToRemoveFrom = event.orderId;
 
     // Indicate loading within the current loaded state
     emit(previousState.copyWith(isLoading: true));
@@ -554,7 +547,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         return;
       }
 
-      OrderModel? finalCartData = null;
+      OrderModel? finalCartData;
       if (refetchedOrderData != null) {
         // Ensure product details are loaded
         await refetchedOrderData.fetchAllProducts();
@@ -566,7 +559,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         // Ensure internal list is new, handle null cart
         currentCartOrder: finalCartData?.copyWith(
             orderProducts:
-                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
+                List<OrderProduct>.from(finalCartData.orderProducts)),
         isLoading: false, // Stop loading indicator
         forceCartNull: finalCartData ==
             null, // Set cart null if order doesn't exist anymore

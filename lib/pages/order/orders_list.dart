@@ -29,13 +29,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-
-    final userId = context.read<UsersBloc>().state.sessionUser?.id ?? '';
-    if (userId.isNotEmpty) {
-      context.read<OrdersBloc>().add(
-            LoadOrdersEvent(userId: userId, userRole: widget.userType.name),
-          );
-    }
   }
 
   @override
@@ -54,6 +47,12 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.read<UsersBloc>().state.sessionUser?.id ?? '';
+    if (userId.isNotEmpty) {
+      context.read<OrdersBloc>().add(
+            LoadOrdersEvent(userId: userId, userRole: userType.name),
+          );
+    }
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -93,7 +92,8 @@ class OrdersPage extends StatelessWidget {
                             },
                           );
                         } else if (state is OrdersError) {
-                          return Center(child: Text(state.message));
+                          return Center(
+                              child: Text('ERROR ACAAAAA ${state.message}'));
                         } else {
                           return Container();
                         }
