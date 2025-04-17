@@ -6,6 +6,7 @@ import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
+import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
@@ -179,11 +180,13 @@ class OrderItem extends StatelessWidget {
                                 DeliveryUserTracking(order: order),
                           ),
                         );
-                      } else if (userType == UserType.business) {
-                        Navigator.pushNamed(
+                      } else if (userType == UserType.business ||
+                          userType == UserType.admin) {
+                        Navigator.pushReplacement(
                           context,
-                          'business_user_order_tracking',
-                          arguments: order,
+                          MaterialPageRoute(
+                              builder: (context) => OrderTrackingPage(
+                                  userType: userType, order: order)),
                         );
                       } else {
                         Navigator.pushNamed(

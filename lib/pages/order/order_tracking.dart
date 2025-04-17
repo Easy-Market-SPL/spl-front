@@ -39,6 +39,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
   UserType get userType => widget.userType;
 
   @override
+  void initState() {
+    super.initState();
+    print('ORDERRRR ${widget.order!.id} ${widget.order!.orderStatuses}');
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.order == null) {
       return const Center(child: Text('Error: Order not found'));
