@@ -37,7 +37,7 @@ class OrderService {
         // Sort the statuses by date in each order
         for (var order in orders) {
           order.orderStatuses
-              ?.sort((a, b) => a.startDate.compareTo(b.startDate));
+               .sort((a, b) => a.startDate.compareTo(b.startDate));
         }
         return (orders, null);
       } else {
@@ -63,7 +63,7 @@ class OrderService {
         final order = OrderModel.fromJson(jsonDecode(decodedBody));
 
         // Sort the statuses by date
-        order.orderStatuses?.sort((a, b) => a.startDate.compareTo(b.startDate));
+        order.orderStatuses.sort((a, b) => a.startDate.compareTo(b.startDate));
         return (order, null);
       } else {
         final err = ApiError.fromJson(jsonDecode(decodedBody));
@@ -92,7 +92,7 @@ class OrderService {
         // Sort the statuses by date in each order
         for (var order in orders) {
           order.orderStatuses
-              ?.sort((a, b) => a.startDate.compareTo(b.startDate));
+              .sort((a, b) => a.startDate.compareTo(b.startDate));
         }
 
         return (orders, null);

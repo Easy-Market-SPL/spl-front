@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 import '../../bloc/ui_management/search_places/search_places_bloc.dart';
 import '../../models/ui/google/places_google_response.dart';
@@ -14,18 +15,24 @@ class PlacesSearchResults extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SearchPlacesBloc, SearchPlacesState>(
       builder: (context, state) {
+        if (state.googlePlaces == null) {
+          return SizedBox(
+            child: CustomLoading(),
+          );
+        }
+
         // Show loading indicator if searching, else show nothing
-        if (isSearching && state.googlePlaces.isEmpty) {
+        if (isSearching && state.googlePlaces!.isEmpty) {
           return Center(child: CircularProgressIndicator());
         } else {
-          if (state.googlePlaces.isEmpty && !isSearching) {
+          if (state.googlePlaces!.isEmpty && !isSearching) {
             return SizedBox(); // If not searching, show nothing
           } else {
             // Show results
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (state.googlePlaces.isNotEmpty)
+                if (state.googlePlaces!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
@@ -39,9 +46,9 @@ class PlacesSearchResults extends StatelessWidget {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: state.googlePlaces.length,
+                  itemCount: state.googlePlaces!.length,
                   itemBuilder: (context, index) {
-                    final place = state.googlePlaces[index];
+                    final place = state.googlePlaces![index];
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(

@@ -29,7 +29,6 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
   Future<void> getCurrentPosition() async {
     final position = await Geolocator.getCurrentPosition();
-    // TODO return a LatLng object
     add(OnNewUserLocationEvent(LatLng(position.latitude, position.longitude)));
   }
 

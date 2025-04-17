@@ -110,25 +110,48 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     LoadSingleOrderEvent event,
     Emitter<OrdersState> emit,
   ) async {
-    emit(OrdersLoading());
-    final (order, error) = await OrderService.getOrderById(event.orderId);
-    if (error != null) {
-      emit(OrdersError(error));
+    // Only proceed if we already have a loaded list.
+    if (state is! OrdersLoaded) return;
+
+    final OrdersLoaded previous = state as OrdersLoaded;
+    emit(previous.copyWith(isLoading: true)); // inline loader
+
+    final (remoteOrder, err) = await OrderService.getOrderById(event.orderId);
+    if (err != null) {
+      emit(OrdersError(err));
       return;
     }
-    if (order == null) {
-      emit(const OrdersError("No se encontró la orden solicitada."));
+    if (remoteOrder == null) {
+      emit(const OrdersError('Requested order was not found.'));
       return;
     }
-    // We can display just this one order in allOrders
-    emit(OrdersLoaded(
-      allOrders: [order],
-      filteredOrders: [order],
-      selectedFilters: [],
-      additionalFilters: [],
-      dateRange: null,
-      currentCartOrder: null,
-    ));
+
+    await remoteOrder.fetchAllProducts();
+
+    // Replace or append the refreshed order inside the existing list
+    final List<OrderModel> updatedAll = List.from(previous.allOrders);
+    final int idx = updatedAll.indexWhere((o) => o.id == remoteOrder.id);
+    if (idx != -1) {
+      updatedAll[idx] = remoteOrder;
+    } else {
+      updatedAll.add(remoteOrder);
+    }
+
+    // Re‑apply filters & other user‑selected criteria
+    final List<OrderModel> updatedFiltered = _applyFilters(
+      orders: updatedAll,
+      selectedFilters: previous.selectedFilters,
+      additionalFilters: previous.additionalFilters,
+      dateRange: previous.dateRange,
+    );
+
+    emit(
+      previous.copyWith(
+        allOrders: updatedAll,
+        filteredOrders: updatedFiltered,
+        isLoading: false,
+      ),
+    );
   }
 
   //

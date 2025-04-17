@@ -47,12 +47,10 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.read<UsersBloc>().state.sessionUser?.id ?? '';
-    if (userId.isNotEmpty) {
-      context.read<OrdersBloc>().add(
-            LoadOrdersEvent(userId: userId, userRole: userType.name),
-          );
-    }
+    final userId = context.read<UsersBloc>().state.sessionUser!.id;
+    context.read<OrdersBloc>().add(
+          LoadOrdersEvent(userId: userId, userRole: userType.name),
+        );
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

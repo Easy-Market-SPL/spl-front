@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_event.dart';
 import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
@@ -30,17 +29,15 @@ class OrderItem extends StatelessWidget {
     // If you need GPS logic
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
-    // Calculate how many items in total from orderProducts
     final itemsCount = (order.orderProducts ?? [])
         .fold<int>(0, (sum, op) => sum + op.quantity);
 
     // Determine the current (placeholder) status from the last OrderStatus
     // If there are none, we default to something like '(no status)'
     // Determine the current (placeholder) status from the last OrderStatus
-    final placeholderStatus =
-        (order.orderStatuses != null && order.orderStatuses!.isNotEmpty)
-            ? order.orderStatuses!.last.status
-            : 'Sin Estado';
+    final placeholderStatus = (order.orderStatuses.isNotEmpty)
+        ? order.orderStatuses.last.status
+        : 'Sin Estado';
 
     final statusMap = {
       'confirmed': 'Confirmada',
@@ -172,18 +169,6 @@ class OrderItem extends StatelessWidget {
                 // Button for viewing/tracking
                 ElevatedButton(
                   onPressed: () {
-                    // Example: if user is delivery, dispatch OnTheWayDomiciliaryOrderEvent
-                    if (userType == UserType.delivery && order.id != null) {
-                      ordersBloc.add(
-                        OnTheWayDomiciliaryOrderEvent(
-                          orderId: order.id!,
-                          idDomiciliary: "User123",
-                          initialLatitude: 4.648, // example lat
-                          initialLongitude: -74.072, // example lng
-                        ),
-                      );
-                    }
-
                     // Then navigate:
                     void navigateToTracking() {
                       if (userType == UserType.delivery) {

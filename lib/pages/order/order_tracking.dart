@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
@@ -16,20 +17,19 @@ import '../../widgets/order/tracking/vertical_order_status.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
-  const OrderTrackingScreen({super.key, required this.userType});
+  final OrderModel? order;
+  const OrderTrackingScreen({super.key, required this.userType, this.order});
 
   @override
   Widget build(BuildContext context) {
-    context.read<OrdersBloc>().add(
-          LoadSingleOrderEvent(12),
-        );
-    return OrderTrackingPage(userType: userType);
+    return OrderTrackingPage(userType: userType, order: order);
   }
 }
 
 class OrderTrackingPage extends StatefulWidget {
   final UserType userType;
-  const OrderTrackingPage({super.key, required this.userType});
+  final OrderModel? order;
+  const OrderTrackingPage({super.key, required this.userType, this.order});
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingScreenState();
@@ -40,6 +40,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.order == null) {
+      return const Center(child: Text('Error: Order not found'));
+    }
+    context.read<OrdersBloc>().add(
+          LoadSingleOrderEvent(widget.order!.id!),
+        );
     return Scaffold(
       body: Stack(
         children: [
@@ -194,7 +200,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
 
   String _extractLastStatus(order) {
     final statuses = order.orderStatuses;
-    if (statuses == null || statuses.isEmpty) return '';
-    return statuses.last.status;
+    if (statuses.isEmpty) return '';
+
+    final lastStatus = statuses.last.status;
+
+    switch (lastStatus) {
+      case 'confirmed':
+        return 'Confirmada';
+      case 'preparing':
+        return 'En preparación';
+      case 'on-the-way':
+        return 'En camino';
+      case 'delivered':
+        return 'Entregado';
+      default:
+        return '';
+    }
   }
 }
