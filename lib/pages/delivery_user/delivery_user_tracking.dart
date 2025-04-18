@@ -57,6 +57,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
 
     locationBloc.getCurrentPosition();
     locationBloc.startFollowingUser();
+    searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       infoTripProvider.reset();
@@ -238,12 +239,6 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   ) async {
     final start = locationBloc.state.lastKnowLocation;
     if (start == null) return;
-
-    // Take the latlng of the end
-    searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
-    Future.delayed(const Duration(milliseconds: 500));
-
-    // Get the destination coordinates
 
     if (searchBloc.state.googlePlaces?.first == null) return;
     final destination = searchBloc.state.googlePlaces!.first;

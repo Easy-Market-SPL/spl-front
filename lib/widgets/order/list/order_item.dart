@@ -25,8 +25,6 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Access the unified OrdersBloc
-    final ordersBloc = BlocProvider.of<OrdersBloc>(context);
     // If you need GPS logic
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
@@ -176,23 +174,20 @@ class OrderItem extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                DeliveryUserTracking(order: order),
+                            builder: (context) => DeliveryUserTracking(
+                              order: order,
+                            ),
                           ),
                         );
-                      } else if (userType == UserType.business ||
-                          userType == UserType.admin) {
-                        Navigator.pushReplacement(
+                      } else {
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => OrderTrackingPage(
-                                  userType: userType, order: order)),
-                        );
-                      } else {
-                        Navigator.pushNamed(
-                          context,
-                          'customer_user_order_tracking',
-                          arguments: order,
+                            builder: (context) => OrderTrackingPage(
+                              userType: userType,
+                              order: order,
+                            ),
+                          ),
                         );
                       }
                     }

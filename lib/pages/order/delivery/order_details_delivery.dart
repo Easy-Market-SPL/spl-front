@@ -70,12 +70,12 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
                     final currentOrder = state.filteredOrders.isNotEmpty
                         ? state.filteredOrders.first
                         : widget.order;
-                    final totalItems = _calculateProductCount(
-                        currentOrder.orderProducts ?? []);
+                    final totalItems =
+                        _calculateProductCount(currentOrder.orderProducts);
                     final totalOrder =
-                        _calculateOrderTotal(currentOrder.orderProducts ?? []);
+                        _calculateOrderTotal(currentOrder.orderProducts);
                     final lastStatus =
-                        _extractLastStatus(currentOrder.orderStatuses ?? []);
+                        _extractLastStatus(currentOrder.orderStatuses);
                     final domiciliaryName =
                         (currentOrder.idDomiciliary?.isNotEmpty == true)
                             ? currentOrder.idDomiciliary!
@@ -100,7 +100,8 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
                             OrderStrings.orderProductCount,
                             '$totalItems',
                             actionText: OrderStrings.viewProducts,
-                            onActionTap: () => _showProductPopup(context),
+                            onActionTap: () =>
+                                _showProductPopup(context, widget.order),
                           ),
                           _buildInfoRow(
                             OrderStrings.orderTotal,
@@ -233,11 +234,13 @@ class _OrderDetailsDeliveryPageState extends State<OrderDetailsDeliveryPage> {
     );
   }
 
-  void _showProductPopup(BuildContext context) {
+  void _showProductPopup(BuildContext context, OrderModel order) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const ProductPopup(),
+      builder: (_) => ProductPopup(
+        orderModel: order,
+      ),
     );
   }
 

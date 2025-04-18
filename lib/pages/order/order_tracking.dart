@@ -6,7 +6,6 @@ import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../widgets/navigation_bars/nav_bar.dart';
 import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
 import '../../bloc/ui_management/order/order_state.dart';
 import '../../widgets/order/tracking/horizontal_order_status.dart';
 import '../../widgets/order/tracking/modify_order_status_options.dart';
@@ -47,11 +46,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.order == null) {
-      return const Center(child: Text('Error: Order not found'));
+      return Scaffold(
+          body: const Center(child: Text('Error: Order not found')));
     }
-    context.read<OrdersBloc>().add(
-          LoadSingleOrderEvent(widget.order!.id!),
-        );
     return Scaffold(
       body: Stack(
         children: [
@@ -65,7 +62,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is OrdersLoaded &&
                         state.filteredOrders.isNotEmpty) {
-                      final order = state.filteredOrders.first;
+                      final order = widget.order;
                       final lastStatus = _extractLastStatus(order);
                       return SingleChildScrollView(
                         child: Padding(
@@ -73,7 +70,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (userType == UserType.business) ...[
+                              if (userType == UserType.business ||
+                                  userType == UserType.admin) ...[
                                 const HorizontalOrderStatus(),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
@@ -94,6 +92,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                   OrderActionButtons(
                                     selectedStatus: lastStatus,
                                     userType: userType,
+                                    order: order,
                                   ),
                                 ],
                               ] else if (userType == UserType.customer) ...[
@@ -109,7 +108,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                   const VerticalOrderStatus(),
                                   const SizedBox(height: 24.0),
                                   ShippingGuide(
-                                    orderNumber: '${order.id!}',
+                                    orderNumber: '${order!.id!}',
                                     estimatedDeliveryDate: "2025-02-20",
                                   ),
                                   const SizedBox(height: 10.0),
@@ -117,6 +116,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                     selectedStatus: lastStatus,
                                     showConfirmButton: false,
                                     userType: userType,
+                                    order: order,
                                   ),
                                 ],
                               ] else if (userType == UserType.delivery) ...[
@@ -140,6 +140,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                   OrderActionButtons(
                                     selectedStatus: lastStatus,
                                     userType: userType,
+                                    order: order,
                                   ),
                                 ],
                               ] else ...[
@@ -172,6 +173,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                 selectedStatus: "",
                 showConfirmButton: false,
                 userType: userType,
+                order: widget.order,
               ),
             ),
           ],
@@ -192,6 +194,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                     selectedStatus: "",
                     showConfirmButton: false,
                     userType: userType,
+                    order: widget.order,
                   ),
                 ],
               ),

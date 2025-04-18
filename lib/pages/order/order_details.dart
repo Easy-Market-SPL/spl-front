@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
@@ -15,21 +17,27 @@ import '../../widgets/order/tracking/shipping_company_selection.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final UserType userType;
-  const OrderDetailsScreen({super.key, required this.userType});
+  final OrderModel? order;
+  const OrderDetailsScreen({super.key, required this.userType, this.order});
 
   @override
   Widget build(BuildContext context) {
-    return OrderDetailsPage(userType: userType);
+    return OrderDetailsPage(
+      userType: userType,
+      order: order,
+    );
   }
 }
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
   final Color backgroundColor;
+  final OrderModel? order;
 
   const OrderDetailsPage({
     super.key,
     required this.userType,
+    this.order,
     this.backgroundColor = Colors.white,
   });
 
@@ -43,6 +51,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate the total items according with the ProductOrder of the order
+    final totalItems = widget.order!.orderProducts
+        .map((product) => product.quantity)
+        .reduce((a, b) => a + b);
+
+    final orderTotal = widget.order!.total;
+    final orderAddress = widget.order!.address;
+    final orderId = widget.order!.id.toString();
     return Scaffold(
       backgroundColor: widget.backgroundColor,
       body: Column(
@@ -57,7 +73,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is OrdersLoaded &&
                       state.filteredOrders.isNotEmpty) {
-                    final order = state.filteredOrders.first;
+                    final order = widget.order;
                     final lastStatus = _extractLastStatus(order);
 
                     return Column(
@@ -81,20 +97,20 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                           ),
                           const SizedBox(height: 24.0),
                         ],
-                        _buildInfoRow(OrderStrings.orderNumber, '${order.id!}'),
+                        _buildInfoRow(OrderStrings.orderNumber, orderId),
                         _buildInfoRow(
                           OrderStrings.orderDate,
-                          order.creationDate!.toIso8601String(),
+                          order!.creationDate!.toIso8601String(),
                         ),
                         _buildInfoRow(
                           OrderStrings.orderProductCount,
-                          '???', // Calcula la cantidad real si quieres
+                          totalItems.toString(),
                           actionText: OrderStrings.viewProducts,
-                          onActionTap: () => _showProductPopup(context),
+                          onActionTap: () => _showProductPopup(context, order),
                         ),
                         _buildInfoRow(
                           OrderStrings.orderTotal,
-                          '\$???', // Muestra un total calculado real
+                          formatCurrency(orderTotal!),
                         ),
                         const SizedBox(height: 20),
                         if (userType == UserType.business ||
@@ -103,7 +119,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                           _buildInfoRow(
                               OrderStrings.customerName, order.idUser!),
                           _buildInfoRow(
-                              OrderStrings.deliveryAddress, order.address!),
+                              OrderStrings.deliveryAddress, orderAddress!),
                         ],
                         if (SPLVariables.hasRealTimeTracking) ...[
                           const SizedBox(height: 20),
@@ -278,11 +294,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  void _showProductPopup(BuildContext context) {
+  void _showProductPopup(BuildContext context, OrderModel? order) {
     showDialog(
       context: context,
-      barrierDismissible: true,
-      builder: (_) => const ProductPopup(),
+      builder: (_) => ProductPopup(orderModel: order!),
     );
   }
 

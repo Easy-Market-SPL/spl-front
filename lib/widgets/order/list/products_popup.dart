@@ -1,112 +1,189 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/models/order_models/order_product.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/utils/ui/format_currency.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
-class ProductPopup extends StatelessWidget {
-  const ProductPopup({super.key});
+class ProductPopup extends StatefulWidget {
+  final OrderModel orderModel;
+  const ProductPopup({super.key, required this.orderModel});
+
+  @override
+  State<ProductPopup> createState() => _ProductPopupState();
+}
+
+class _ProductPopupState extends State<ProductPopup> {
+  late final Future<void> _loadFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⇣ cargamos una sola vez todos los productos de la orden
+    _loadFuture = widget.orderModel.fetchAllProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Product> products = [
-      Product(
-        name: 'Nombre del Producto X',
-        description: 'Descripción general del Producto',
-        price: 50.0,
-        quantity: 1,
-      ),
-      Product(
-        name: 'Nombre del Producto Y',
-        description: 'Descripción general del Producto',
-        price: 30.0,
-        quantity: 2,
-      ),
-    ];
+    return Material(
+      color: Colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: SafeArea(
+        top: false,
+        child: FutureBuilder<void>(
+          future: _loadFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.all(40),
+                child: SizedBox(
+                  child: CustomLoading(),
+                ),
+              );
+            }
 
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                OrderStrings.productsInOrder,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Cierra el popup
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Lista de productos con scroll interno
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return _buildProductRow(product);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            final items = widget.orderModel.orderProducts;
 
-  Widget _buildProductRow(Product product) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Container(
-            width: 70,
-            height: 70,
-            color: Colors.grey[300], // Imagen del producto (usé un contenedor de placeholder)
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '${product.name} [${product.quantity}]',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  product.description,
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                _header(context),
+                const Divider(height: 1),
+                Flexible(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 18),
+                    itemBuilder: (_, i) => _line(items[i]),
+                  ),
                 ),
               ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────────── cabecera ──────────────────────────
+  Widget _header(BuildContext ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 18, 8, 12),
+        child: Row(
+          children: [
+            const Expanded(
+              child: Text(
+                OrderStrings.productsInOrder,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
             ),
+            IconButton(
+              splashRadius: 22,
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(ctx),
+            )
+          ],
+        ),
+      );
+
+  // ────────────────────── línea de producto ─────────────────────
+  Widget _line(OrderProduct op) {
+    final p = op.product!;
+    final subtotal = p.price * op.quantity;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _thumb(p.imagePath),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Text(
+                  p.name,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 12),
+              ]),
+              Row(
+                children: [
+                  Text(formatCurrency(p.price),
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w500)),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'x${op.quantity}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    formatCurrency(subtotal),
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87),
+                  ),
+                ],
+              ),
+              if (p.description.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  p.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+              ],
+            ],
           ),
+        ),
+      ],
+    );
+  }
+
+  // ───────────── imagen con placeholder fijo ─────────────
+  Widget _thumb(String url) {
+    const double size = 64;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Stack(
+        children: [
+          Container(
+            width: size,
+            height: size,
+            color: Colors.grey.shade300,
+            alignment: Alignment.center,
+            child: const Icon(Icons.image, size: 26, color: Colors.white70),
+          ),
+          if (url.isNotEmpty)
+            Image.network(
+              url,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              loadingBuilder: (_, widget, progress) =>
+                  progress == null ? widget : const SizedBox.shrink(),
+            ),
         ],
       ),
     );
   }
-}
-
-class Product {
-  final String name;
-  final String description;
-  final double price;
-  final int quantity;
-
-  Product({
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.quantity,
-  });
 }
