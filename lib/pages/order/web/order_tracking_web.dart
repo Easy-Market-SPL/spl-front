@@ -143,6 +143,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                 child: OrderDetailsPage(
                   userType: userType,
                   backgroundColor: PrimaryColors.blueWeb,
+                  order: order!,
                 ),
               ),
             ),
