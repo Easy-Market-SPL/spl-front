@@ -37,7 +37,7 @@ class OrderService {
         // Sort the statuses by date in each order
         for (var order in orders) {
           order.orderStatuses
-               .sort((a, b) => a.startDate.compareTo(b.startDate));
+              .sort((a, b) => a.startDate.compareTo(b.startDate));
         }
         return (orders, null);
       } else {
@@ -207,7 +207,7 @@ class OrderService {
   /// PUT /orders/{id}/prepare
   /// Changes the status of an order to 'preparing'.
   static Future<(OrderModel?, String?)> prepareOrder(int orderId) async {
-    final url = '$_baseUrl/orders/$orderId/prepare';
+    final url = '$_baseUrl/orders/$orderId/preparing';
     try {
       final response = await _client.put(Uri.parse(url));
       final decodedBody = utf8.decode(response.bodyBytes);

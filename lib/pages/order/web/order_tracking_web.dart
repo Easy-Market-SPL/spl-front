@@ -59,7 +59,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                           state.filteredOrders.isNotEmpty &&
                           order != null) {
                         final order = widget.order;
-                        final lastStatus = _extractLastStatus(order);
+                        var lastStatus = _extractLastStatus(order);
                         return SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -100,10 +100,8 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                                   ] else ...[
                                     const SizedBox(height: 24.0),
                                     ModifyOrderStatusOptions(
-                                      selectedStatus: lastStatus,
-                                      onStatusChanged: (status) {
-                                        // context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
-                                      },
+                                      selectedStatus:
+                                          lastStatus, // el raw normalizado
                                     ),
                                     const SizedBox(height: 24.0),
                                     OrderActionButtons(
