@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_state.dart';
 import '../../../utils/strings/order_strings.dart';
 
 class HorizontalOrderStatus extends StatelessWidget {
-  const HorizontalOrderStatus({super.key});
+  final OrderModel order;
+  const HorizontalOrderStatus({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (state is OrdersLoaded && state.filteredOrders.isNotEmpty) {
-          final order = state.filteredOrders.first;
           final currentStatus = _extractLastStatus(order);
+          final currentStatusDescription = _extractLastStatusDescription(order);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -85,13 +87,16 @@ class HorizontalOrderStatus extends StatelessWidget {
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const Text(
-                      'Descripción del estado actual.',
+                    Text(
+                      currentStatusDescription,
                       style: TextStyle(
                           fontSize: 16, color: Color.fromARGB(127, 0, 0, 0)),
                     ),
                   ],
                 ),
+              ),
+              SizedBox(
+                height: 4,
               ),
             ],
           );
@@ -107,7 +112,35 @@ class HorizontalOrderStatus extends StatelessWidget {
   String _extractLastStatus(order) {
     final statuses = order.orderStatuses;
     if (statuses == null || statuses.isEmpty) return '';
-    return statuses.last.status;
+    switch (statuses.last.status) {
+      case 'confirmed':
+        return OrderStrings.orderConfirmed;
+      case 'preparing':
+        return OrderStrings.preparingOrder;
+      case 'on-the-way':
+        return OrderStrings.onTheWay;
+      case 'delivered':
+        return OrderStrings.delivered;
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  String _extractLastStatusDescription(order) {
+    final statuses = order.orderStatuses;
+    if (statuses == null || statuses.isEmpty) return '';
+    switch (statuses.last.status) {
+      case 'confirmed':
+        return OrderStrings.orderConfirmedDescription;
+      case 'preparing':
+        return OrderStrings.preparingOrderDescription;
+      case 'on-the-way':
+        return OrderStrings.onTheWayDescription;
+      case 'delivered':
+        return OrderStrings.deliveredDescription;
+      default:
+        return 'Desconocido';
+    }
   }
 
   bool _isActive(String currentStatus, List<String> validStates) {

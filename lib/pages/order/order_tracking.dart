@@ -40,7 +40,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
   @override
   void initState() {
     super.initState();
-    print('ORDERRRR ${widget.order!.id} ${widget.order!.orderStatuses}');
   }
 
   @override
@@ -72,7 +71,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                             children: [
                               if (userType == UserType.business ||
                                   userType == UserType.admin) ...[
-                                const HorizontalOrderStatus(),
+                                HorizontalOrderStatus(order: order!),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 400,
@@ -97,7 +96,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                 ],
                               ] else if (userType == UserType.customer) ...[
                                 if (SPLVariables.hasRealTimeTracking) ...[
-                                  const HorizontalOrderStatus(),
+                                  HorizontalOrderStatus(
+                                    order: order!,
+                                  ),
                                   Container(
                                     height: 500,
                                     color: Colors.grey[300],
@@ -120,7 +121,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                                   ),
                                 ],
                               ] else if (userType == UserType.delivery) ...[
-                                const HorizontalOrderStatus(),
+                                HorizontalOrderStatus(order: order!),
                                 if (SPLVariables.hasRealTimeTracking) ...[
                                   Container(
                                     height: 400,
