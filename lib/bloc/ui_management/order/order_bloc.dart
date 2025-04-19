@@ -66,13 +66,10 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
       final List<OrderModel> safeOrders = List.from(orderList ?? []);
       OrderModel? currentCartOrder;
-
-      // Inicialmente, mostramos todo
       List<OrderModel> filtered = safeOrders;
 
       if (event.userRole == 'customer') {
-        // Lógica de carrito para customer (igual que antes)…
-        int cartIndex = safeOrders.indexWhere((order) =>
+        final cartIndex = safeOrders.indexWhere((order) =>
             order.idUser == event.userId && order.orderStatuses.isEmpty);
 
         if (cartIndex != -1) {
@@ -84,16 +81,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
             address: 'Address Creating...',
           );
           if (createError != null || newOrder == null) {
-            emit(OrdersError(
-                createError ?? "No se pudo crear el carrito inicial."));
+            emit(OrdersError(createError ?? "Failed to create cart order"));
             return;
           }
           currentCartOrder = newOrder;
           safeOrders.add(newOrder);
-          filtered = safeOrders;
         }
+        filtered = safeOrders;
       } else if (event.userRole == 'delivery') {
-        // Para delivery: solo preparing o asignadas al delivery
         filtered = safeOrders.where((o) {
           final lastStatus = o.orderStatuses.isNotEmpty
               ? normalizeOnTheWay(o.orderStatuses.last.status)
@@ -102,7 +97,10 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         }).toList();
       }
 
-      // Emit: si es delivery, usamos filtered tanto en allOrders como en filteredOrders
+      if (event.userRole != 'delivery') {
+        filtered = filtered.where((o) => o.orderStatuses.isNotEmpty).toList();
+      }
+
       if (event.userRole == 'delivery') {
         emit(OrdersLoaded(
           allOrders: filtered,
@@ -114,7 +112,6 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           isLoading: false,
         ));
       } else {
-        // customer y admin/business
         emit(OrdersLoaded(
           allOrders: safeOrders,
           filteredOrders: filtered,
@@ -267,7 +264,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         orders: current.allOrders,
         selectedFilters: current.selectedFilters,
         additionalFilters: [],
-        dateRange: current.dateRange,
+        dateRange: null,
       );
       emit(current.copyWith(
         filteredOrders: newFiltered,

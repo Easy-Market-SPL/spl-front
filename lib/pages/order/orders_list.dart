@@ -141,7 +141,7 @@ class OrdersPage extends StatelessWidget {
                   ),
                 ],
               ),
-              if (state.additionalFilters.isNotEmpty || state.dateRange != null)
+              if (state.additionalFilters.isNotEmpty)
                 Wrap(
                   alignment: WrapAlignment.start,
                   spacing: 8.0,
@@ -167,7 +167,6 @@ class OrdersPage extends StatelessWidget {
     String label, {
     bool isAdditionalFilter = false,
   }) {
-    // 1) Mapear el texto que ve el usuario al valor interno
     final labelFilter = {
           OrderStrings.statusConfirmed: 'confirmed',
           OrderStrings.statusPreparing: 'preparing',
@@ -176,17 +175,17 @@ class OrdersPage extends StatelessWidget {
         }[label] ??
         label;
 
-    // 2) Averiguamos si este filtro está activo
-    final isSelected = context.select<OrdersBloc, bool>(
-      (bloc) =>
-          (bloc.state is OrdersLoaded) &&
-          (bloc.state as OrdersLoaded).selectedFilters.contains(labelFilter),
-    );
+    final normalSelected = context.select<OrdersBloc, bool>((bloc) {
+      if (bloc.state is! OrdersLoaded) return false;
+      return (bloc.state as OrdersLoaded).selectedFilters.contains(labelFilter);
+    });
+
+    final chipSelected = isAdditionalFilter ? true : normalSelected;
 
     return ChoiceChip(
       label: Text(label),
-      selected: isSelected,
-      onSelected: (bool sel) {
+      selected: chipSelected,
+      onSelected: (sel) {
         if (!isAdditionalFilter) {
           context.read<OrdersBloc>().add(FilterOrdersEvent(labelFilter));
         }
@@ -194,7 +193,7 @@ class OrdersPage extends StatelessWidget {
       selectedColor: Colors.blue,
       backgroundColor: Colors.grey[200],
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black,
+        color: chipSelected ? Colors.white : Colors.black,
         fontSize: 12,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -221,41 +220,47 @@ class OrdersPage extends StatelessWidget {
   Widget searchBar(BuildContext context) {
     final focusNode = FocusNode();
     final controller = TextEditingController();
-    return SearchBarInput(
-      focusNode: focusNode,
-      controller: controller,
-      hintText: OrderStrings.searchOrdersHint,
-      onEditingComplete: () {
-        context.read<OrdersBloc>().add(SearchOrdersEvent(controller.text));
-      },
-      showFilterButton: true,
-      onFilterPressed: () async {
-        final ordersBloc = context.read<OrdersBloc>();
-        final currentState = ordersBloc.state;
-        List<String> currentAdditionalFilters = [];
-        DateTimeRange? currentDateRange;
-        if (currentState is OrdersLoaded) {
-          currentAdditionalFilters = currentState.additionalFilters;
-          currentDateRange = currentState.dateRange;
-        }
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return FiltersPopup(
-              onApplyFilters: (filters, dateRange) {
-                ordersBloc.add(ApplyAdditionalFiltersEvent(filters));
-                if (dateRange != null) {
-                  ordersBloc.add(SetDateRangeEvent(dateRange));
-                } else {
-                  ordersBloc.add(const ClearDateRangeEvent());
-                }
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        return SearchBarInput(
+          focusNode: focusNode,
+          controller: controller,
+          hintText: OrderStrings.searchOrdersHint,
+          onEditingComplete: () {
+            context.read<OrdersBloc>().add(SearchOrdersEvent(controller.text));
+          },
+          showFilterButton: true,
+          onFilterPressed: () async {
+            final ordersBloc = context.read<OrdersBloc>();
+            final currentState = ordersBloc.state;
+            List<String> currentAdditionalFilters = [];
+            DateTimeRange? currentDateRange;
+            if (currentState is OrdersLoaded) {
+              currentAdditionalFilters = currentState.additionalFilters;
+              currentDateRange = currentState.dateRange;
+            }
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return FiltersPopup(
+                  onApplyFilters: (filters, dateRange) {
+                    ordersBloc.add(ApplyAdditionalFiltersEvent(filters));
+                    if (dateRange != null) {
+                      ordersBloc.add(SetDateRangeEvent(dateRange));
+                    } else {
+                      ordersBloc.add(const ClearDateRangeEvent());
+                    }
+                  },
+                  onClearFilters: () {
+                    ordersBloc.add(ClearAdditionalFiltersEvent());
+                    ordersBloc.add(ClearDateRangeEvent());
+                    currentDateRange = null;
+                    currentAdditionalFilters.clear();
+                  },
+                  currentAdditionalFilters: currentAdditionalFilters,
+                  currentDateRange: currentDateRange,
+                );
               },
-              onClearFilters: () {
-                ordersBloc.add(const ClearAdditionalFiltersEvent());
-                ordersBloc.add(const ClearDateRangeEvent());
-              },
-              currentAdditionalFilters: currentAdditionalFilters,
-              currentDateRange: currentDateRange,
             );
           },
         );
