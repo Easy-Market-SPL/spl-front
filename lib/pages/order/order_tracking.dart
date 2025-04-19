@@ -1,11 +1,14 @@
+// lib/pages/order/tracking/order_tracking_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
+import '../../../utils/ui/order_statuses.dart';
 import '../../../widgets/navigation_bars/nav_bar.dart';
 import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
 import '../../bloc/ui_management/order/order_state.dart';
 import '../../widgets/order/tracking/horizontal_order_status.dart';
 import '../../widgets/order/tracking/modify_order_status_options.dart';
@@ -16,185 +19,221 @@ import '../../widgets/order/tracking/vertical_order_status.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
-  const OrderTrackingScreen({super.key, required this.userType});
+  final OrderModel? order;
+
+  const OrderTrackingScreen({
+    super.key,
+    required this.userType,
+    this.order,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    context.read<OrdersBloc>().add(
-          LoadSingleOrderEvent(12),
-        );
-    return OrderTrackingPage(userType: userType);
-  }
+  Widget build(BuildContext context) =>
+      OrderTrackingPage(userType: userType, order: order);
 }
+
+/* ───────────────────────────────────────── */
 
 class OrderTrackingPage extends StatefulWidget {
   final UserType userType;
-  const OrderTrackingPage({super.key, required this.userType});
+  final OrderModel? order;
+
+  const OrderTrackingPage({
+    super.key,
+    required this.userType,
+    this.order,
+  });
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingScreenState();
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
-  UserType get userType => widget.userType;
+  late String _selectedStatus;
+
+  static const List<String> _flow = [
+    'confirmed',
+    'preparing',
+    'on-the-way',
+    'delivered'
+  ];
+  int _idx(String s) => _flow.indexOf(s);
+
+  UserType get _userType => widget.userType;
+
+  @override
+  void initState() {
+    super.initState();
+    final rawLast =
+        (widget.order != null && widget.order!.orderStatuses.isNotEmpty)
+            ? normalizeOnTheWay(widget.order!.orderStatuses.last.status)
+            : 'confirmed';
+    final lastIdx = _idx(rawLast);
+    _selectedStatus =
+        (lastIdx + 1 < _flow.length) ? _flow[lastIdx + 1] : rawLast;
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.order == null) {
+      return const Scaffold(
+        body: Center(child: Text('Error: Order not found')),
+      );
+    }
+
     return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              const OrderTrackingHeader(),
-              Expanded(
-                child: BlocBuilder<OrdersBloc, OrdersState>(
-                  builder: (context, state) {
-                    if (state is OrdersLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is OrdersLoaded &&
-                        state.filteredOrders.isNotEmpty) {
-                      final order = state.filteredOrders.first;
-                      final lastStatus = _extractLastStatus(order);
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (userType == UserType.business) ...[
-                                const HorizontalOrderStatus(),
-                                if (SPLVariables.hasRealTimeTracking) ...[
-                                  Container(
-                                    height: 400,
-                                    color: Colors.grey[300],
-                                    child:
-                                        const Center(child: Text('Mapa aquí')),
-                                  ),
-                                ] else ...[
-                                  const SizedBox(height: 24.0),
-                                  ModifyOrderStatusOptions(
-                                    selectedStatus: lastStatus,
-                                    onStatusChanged: (status) {
-                                      // e.g. context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
-                                    },
-                                  ),
-                                  const SizedBox(height: 24.0),
-                                  OrderActionButtons(
-                                    selectedStatus: lastStatus,
-                                    userType: userType,
-                                  ),
-                                ],
-                              ] else if (userType == UserType.customer) ...[
-                                if (SPLVariables.hasRealTimeTracking) ...[
-                                  const HorizontalOrderStatus(),
-                                  Container(
-                                    height: 500,
-                                    color: Colors.grey[300],
-                                    child:
-                                        const Center(child: Text('Mapa aquí')),
-                                  ),
-                                ] else ...[
-                                  const VerticalOrderStatus(),
-                                  const SizedBox(height: 24.0),
-                                  ShippingGuide(
-                                    orderNumber: '${order.id!}',
-                                    estimatedDeliveryDate: "2025-02-20",
-                                  ),
-                                  const SizedBox(height: 10.0),
-                                  OrderActionButtons(
-                                    selectedStatus: lastStatus,
-                                    showConfirmButton: false,
-                                    userType: userType,
-                                  ),
-                                ],
-                              ] else if (userType == UserType.delivery) ...[
-                                const HorizontalOrderStatus(),
-                                if (SPLVariables.hasRealTimeTracking) ...[
-                                  Container(
-                                    height: 400,
-                                    color: Colors.grey[300],
-                                    child:
-                                        const Center(child: Text('Mapa aquí')),
-                                  ),
-                                ] else ...[
-                                  const SizedBox(height: 24.0),
-                                  ModifyOrderStatusOptions(
-                                    selectedStatus: lastStatus,
-                                    onStatusChanged: (status) {
-                                      // e.g. context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
-                                    },
-                                  ),
-                                  const SizedBox(height: 24.0),
-                                  OrderActionButtons(
-                                    selectedStatus: lastStatus,
-                                    userType: userType,
-                                  ),
-                                ],
-                              ] else ...[
-                                const Text(
-                                    'Error al cargar el estado de la orden')
-                              ]
-                            ],
-                          ),
-                        ),
-                      );
-                    } else if (state is OrdersError) {
-                      return Center(child: Text(state.message));
-                    } else {
-                      return const Center(
-                        child: Text('Error al cargar el estado de la orden'),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          if (userType == UserType.business &&
-              SPLVariables.hasRealTimeTracking) ...[
-            Positioned(
-              bottom: 0.0,
-              left: 16.0,
-              right: 16.0,
-              child: OrderActionButtons(
-                selectedStatus: "",
-                showConfirmButton: false,
-                userType: userType,
-              ),
-            ),
-          ],
-          if (userType == UserType.customer &&
-              SPLVariables.hasRealTimeTracking) ...[
-            Positioned(
-              bottom: 0.0,
-              left: 16.0,
-              right: 16.0,
-              child: Column(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SPLVariables.hasRealTimeTracking
+            ? _buildRealTimeMap()
+            : Column(
                 children: [
-                  ShippingGuide(
-                    orderNumber: "???",
-                    estimatedDeliveryDate: "???",
-                  ),
-                  const SizedBox(height: 10.0),
-                  OrderActionButtons(
-                    selectedStatus: "",
-                    showConfirmButton: false,
-                    userType: userType,
-                  ),
+                  // Le damos a la columna _buildNonRealTime() un height finito
+                  Expanded(child: _buildNonRealTime()),
                 ],
               ),
-            ),
-          ],
-        ],
       ),
       bottomNavigationBar:
-          CustomBottomNavigationBar(userType: userType, context: context),
+          CustomBottomNavigationBar(userType: _userType, context: context),
     );
   }
 
-  String _extractLastStatus(order) {
-    final statuses = order.orderStatuses;
-    if (statuses == null || statuses.isEmpty) return '';
-    return statuses.last.status;
+  /* ────────────── 1. tracking en tiempo real ────────────── */
+  Widget _buildRealTimeMap() {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            OrderTrackingHeader(userType: _userType),
+            HorizontalOrderStatus(order: widget.order!),
+            Expanded(
+              child: Container(
+                color: Colors.grey[300],
+                alignment: Alignment.center,
+                child: const Text('Mapa aquí'),
+              ),
+            ),
+          ],
+        ),
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 0,
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 200,
+              child: OrderActionButtons(
+                selectedStatus: _selectedStatus,
+                userType: _userType,
+                order: widget.order,
+                showConfirmButton: false,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /* ────────────── 2. sin tracking en tiempo real ────────────── */
+  Widget _buildNonRealTime() {
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        if (state is OrdersLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is OrdersError) {
+          return Center(child: Text('Bloc error: ${state.message}'));
+        }
+
+        final order = widget.order!;
+
+        /* ---- Business / Admin / Delivery ---- */
+        final isBusinessLike = (_userType == UserType.business ||
+                _userType == UserType.admin ||
+                _userType == UserType.delivery) &&
+            !SPLVariables.hasRealTimeTracking;
+
+        if (isBusinessLike) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OrderTrackingHeader(userType: _userType),
+              const SizedBox(height: 24),
+              HorizontalOrderStatus(order: order),
+              const SizedBox(height: 24),
+              ModifyOrderStatusOptions(selectedStatus: _selectedStatus),
+
+              const Spacer(), // empuja los botones al fondo
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: OrderActionButtons(
+                  selectedStatus: _selectedStatus,
+                  userType: _userType,
+                  order: order,
+                ),
+              ),
+            ],
+          );
+        }
+
+        /* ---- Customer sin tracking ---- */
+        if (_userType == UserType.customer &&
+            !SPLVariables.hasRealTimeTracking) {
+          // 1️⃣ calcular ETA = creationDate + 5 días, o la fecha real si ya está entregada
+          DateTime eta = order.creationDate!.add(const Duration(days: 5));
+          final deliveredStatus = order.orderStatuses.lastWhere(
+            (s) => normalizeOnTheWay(s.status) == 'delivered',
+            orElse: () => order.orderStatuses.first,
+          );
+          final bool hasDelivered =
+              normalizeOnTheWay(deliveredStatus.status) == 'delivered';
+          if (hasDelivered) eta = deliveredStatus.startDate;
+          final String etaText = DateFormat('dd/MM/yyyy').format(eta);
+
+          // 2️⃣ layout casi idéntico a admin/business sin tracking
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OrderTrackingHeader(userType: _userType),
+              const SizedBox(height: 24),
+              VerticalOrderStatus(order: order),
+              const SizedBox(height: 48),
+              ShippingGuide(
+                orderNumber: '${order.id!}',
+                estimatedDeliveryDate: etaText,
+              ),
+              const Spacer(), // empuja el botón al fondo
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: OrderActionButtons(
+                  selectedStatus: _selectedStatus,
+                  showConfirmButton: false,
+                  userType: _userType,
+                  order: order,
+                ),
+              ),
+            ],
+          );
+        }
+
+        /* ---- Fallback (no debería ocurrir) ---- */
+        return Column(
+          children: [
+            OrderTrackingHeader(userType: _userType),
+            HorizontalOrderStatus(order: order),
+            Expanded(
+              child: Container(
+                color: Colors.grey[300],
+                alignment: Alignment.center,
+                child: const Text('Mapa aquí'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

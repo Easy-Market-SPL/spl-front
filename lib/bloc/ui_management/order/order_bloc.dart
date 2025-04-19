@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 import '../../../models/order_models/order_model.dart';
 import '../../../models/order_models/order_product.dart';
 import '../../../services/api/order_service.dart';
+import '../../../utils/ui/order_statuses.dart';
 import 'order_event.dart';
 import 'order_state.dart';
 
@@ -47,10 +49,11 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   // 1) Loading orders
   //
   //
-
   Future<void> _onLoadOrders(
-      LoadOrdersEvent event, Emitter<OrdersState> emit) async {
-    emit(OrdersLoading()); // Full loading state for initial fetch
+    LoadOrdersEvent event,
+    Emitter<OrdersState> emit,
+  ) async {
+    emit(OrdersLoading());
     try {
       final (orderList, error) = (event.userRole == 'customer')
           ? await OrderService.getOrdersByUser(event.userId)
@@ -61,44 +64,66 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         return;
       }
 
-      final List<OrderModel> safeOrders =
-          List.from(orderList ?? []); // Mutable copy
+      final List<OrderModel> safeOrders = List.from(orderList ?? []);
       OrderModel? currentCartOrder;
+      List<OrderModel> filtered = safeOrders;
 
       if (event.userRole == 'customer') {
-        int cartIndex = safeOrders.indexWhere((order) =>
-            order.idUser == event.userId && (order.orderStatuses.isEmpty));
+        final cartIndex = safeOrders.indexWhere((order) =>
+            order.idUser == event.userId && order.orderStatuses.isEmpty);
 
         if (cartIndex != -1) {
           currentCartOrder = safeOrders[cartIndex];
           await currentCartOrder.fetchAllProducts();
         } else {
-          // Create cart immediately if not found
           final (newOrder, createError) = await OrderService.createOrder(
             idUser: event.userId,
-            address: ' ',
+            address: 'Address Creating...',
           );
           if (createError != null || newOrder == null) {
-            emit(OrdersError(
-                createError ?? "No se pudo crear el carrito inicial."));
+            emit(OrdersError(createError ?? "Failed to create cart order"));
             return;
           }
           currentCartOrder = newOrder;
-          safeOrders.add(newOrder); // Add to the list shown
+          safeOrders.add(newOrder);
         }
+        filtered = safeOrders;
+      } else if (event.userRole == 'delivery') {
+        filtered = safeOrders.where((o) {
+          final lastStatus = o.orderStatuses.isNotEmpty
+              ? normalizeOnTheWay(o.orderStatuses.last.status)
+              : '';
+          return lastStatus == 'preparing' || o.idDomiciliary == event.userId;
+        }).toList();
       }
 
-      emit(OrdersLoaded(
-        allOrders: safeOrders,
-        filteredOrders: safeOrders, // Start with all orders shown
-        selectedFilters: [],
-        additionalFilters: [],
-        dateRange: null,
-        currentCartOrder: currentCartOrder,
-        isLoading: false, // Explicitly false after load completes
-      ));
+      if (event.userRole != 'delivery') {
+        filtered = filtered.where((o) => o.orderStatuses.isNotEmpty).toList();
+      }
+
+      if (event.userRole == 'delivery') {
+        emit(OrdersLoaded(
+          allOrders: filtered,
+          filteredOrders: filtered,
+          selectedFilters: [],
+          additionalFilters: [],
+          dateRange: null,
+          currentCartOrder: currentCartOrder,
+          isLoading: false,
+        ));
+      } else {
+        emit(OrdersLoaded(
+          allOrders: safeOrders,
+          filteredOrders: filtered,
+          selectedFilters: [],
+          additionalFilters: [],
+          dateRange: null,
+          currentCartOrder: currentCartOrder,
+          isLoading: false,
+        ));
+      }
     } catch (e) {
-      emit(OrdersError('${e.toString()}'));
+      emit(OrdersError(e.toString()));
     }
   }
 
@@ -109,25 +134,48 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     LoadSingleOrderEvent event,
     Emitter<OrdersState> emit,
   ) async {
-    emit(OrdersLoading());
-    final (order, error) = await OrderService.getOrderById(event.orderId);
-    if (error != null) {
-      emit(OrdersError(error));
+    // Only proceed if we already have a loaded list.
+    if (state is! OrdersLoaded) return;
+
+    final OrdersLoaded previous = state as OrdersLoaded;
+    emit(previous.copyWith(isLoading: true)); // inline loader
+
+    final (remoteOrder, err) = await OrderService.getOrderById(event.orderId);
+    if (err != null) {
+      emit(OrdersError(err));
       return;
     }
-    if (order == null) {
-      emit(const OrdersError("No se encontró la orden solicitada."));
+    if (remoteOrder == null) {
+      emit(const OrdersError('Requested order was not found.'));
       return;
     }
-    // We can display just this one order in allOrders
-    emit(OrdersLoaded(
-      allOrders: [order],
-      filteredOrders: [order],
-      selectedFilters: [],
-      additionalFilters: [],
-      dateRange: null,
-      currentCartOrder: null,
-    ));
+
+    await remoteOrder.fetchAllProducts();
+
+    // Replace or append the refreshed order inside the existing list
+    final List<OrderModel> updatedAll = List.from(previous.allOrders);
+    final int idx = updatedAll.indexWhere((o) => o.id == remoteOrder.id);
+    if (idx != -1) {
+      updatedAll[idx] = remoteOrder;
+    } else {
+      updatedAll.add(remoteOrder);
+    }
+
+    // Re‑apply filters & other user‑selected criteria
+    final List<OrderModel> updatedFiltered = _applyFilters(
+      orders: updatedAll,
+      selectedFilters: previous.selectedFilters,
+      additionalFilters: previous.additionalFilters,
+      dateRange: previous.dateRange,
+    );
+
+    emit(
+      previous.copyWith(
+        allOrders: updatedAll,
+        filteredOrders: updatedFiltered,
+        isLoading: false,
+      ),
+    );
   }
 
   //
@@ -216,7 +264,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         orders: current.allOrders,
         selectedFilters: current.selectedFilters,
         additionalFilters: [],
-        dateRange: current.dateRange,
+        dateRange: null,
       );
       emit(current.copyWith(
         filteredOrders: newFiltered,
@@ -504,7 +552,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         // Make sure copyWith handles the internal list correctly for immutability
         currentCartOrder: finalCartData.copyWith(
             orderProducts:
-                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
+                List<OrderProduct>.from(finalCartData.orderProducts)),
         isLoading: false, // Stop loading indicator
       ));
     } catch (e) {
@@ -520,15 +568,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       return;
     }
     final OrdersLoaded previousState = state as OrdersLoaded;
-    final orderIdToRemoveFrom =
-        event.orderId; // Event MUST provide the correct order ID
-
-    if (orderIdToRemoveFrom == null) {
-      emit(const OrdersError(
-          "ID de orden no especificado en el evento RemoveProduct."));
-      // Do not revert loading here as it wasn't set yet
-      return;
-    }
+    final orderIdToRemoveFrom = event.orderId;
 
     // Indicate loading within the current loaded state
     emit(previousState.copyWith(isLoading: true));
@@ -554,7 +594,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         return;
       }
 
-      OrderModel? finalCartData = null;
+      OrderModel? finalCartData;
       if (refetchedOrderData != null) {
         // Ensure product details are loaded
         await refetchedOrderData.fetchAllProducts();
@@ -566,7 +606,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         // Ensure internal list is new, handle null cart
         currentCartOrder: finalCartData?.copyWith(
             orderProducts:
-                List<OrderProduct>.from(finalCartData.orderProducts ?? [])),
+                List<OrderProduct>.from(finalCartData.orderProducts)),
         isLoading: false, // Stop loading indicator
         forceCartNull: finalCartData ==
             null, // Set cart null if order doesn't exist anymore
@@ -620,35 +660,36 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     required List<String> additionalFilters,
     required DateTimeRange? dateRange,
   }) {
-    // Filter by "status" if you have a direct property or the last status in orderStatuses
     List<OrderModel> filtered = orders;
     if (selectedFilters.isNotEmpty) {
       filtered = filtered.where((o) {
-        // Suppose o has a single "currentStatus" or check orderStatuses last entry
-        // For demonstration, we'll skip. In real code:
-        // return selectedFilters.contains(o.currentStatus);
-        return false;
+        final currentStatus = o.orderStatuses.isNotEmpty
+            ? normalizeOnTheWay(o.orderStatuses.last.status)
+            : ' ';
+        return selectedFilters.contains(currentStatus);
       }).toList();
     }
 
-    // Additional filters example
-    for (String flt in additionalFilters) {
+    for (final flt in additionalFilters) {
       switch (flt) {
-        case "mostRecent":
-          // Sort descending by creationDate
+        case OrderStrings.mostRecent:
           filtered.sort((a, b) => b.creationDate!.compareTo(a.creationDate!));
           break;
-        case "leastRecent":
+        case OrderStrings.leastRecent:
           filtered.sort((a, b) => a.creationDate!.compareTo(b.creationDate!));
           break;
-        case "mostItems":
-          // If you had a total item count, you'd do something like:
-          // filtered.sort((a, b) => b.totalItems.compareTo(a.totalItems));
+        case OrderStrings.mostItems:
+          filtered.sort((a, b) {
+            final countA =
+                a.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity);
+            final countB =
+                b.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity);
+            return countB.compareTo(countA);
+          });
           break;
       }
     }
 
-    // Filter by date range
     if (dateRange != null) {
       filtered = filtered.where((o) {
         final d = o.creationDate;

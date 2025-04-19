@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
+import 'package:spl_front/utils/ui/format_currency.dart';
 
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_event.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
 
 class Total extends StatelessWidget {
@@ -254,7 +258,7 @@ class Total extends StatelessWidget {
     final StripeCustomReponse response =
         await stripeService.payWithExistingCard(
       amount: amount,
-      currency: 'usd',
+      currency: 'cop',
       card: card!,
     );
     // Close the loading dialog
@@ -267,7 +271,14 @@ class Total extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
 
-      // TODO: Update on API and DB the order status
+      final orderBloc = BlocProvider.of<OrdersBloc>(context);
+
+      // In this case, the payment is done with card in one installment, so it's neccesary update the order status to confirmed
+      orderBloc.add(ConfirmOrderEvent(
+          orderId: orderBloc.state.currentCartOrder!.id!,
+          shippingCost: 0,
+          paymentAmount: total));
+
       Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
     } else {
       // Mostrar mensaje de error
@@ -295,7 +306,7 @@ class Total extends StatelessWidget {
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '\$${total.toStringAsFixed(2)}',
+                  formatCurrency(total),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

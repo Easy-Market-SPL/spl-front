@@ -6,6 +6,7 @@ import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/order_item.dart';
@@ -29,13 +30,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-
-    final userId = context.read<UsersBloc>().state.sessionUser?.id ?? '';
-    if (userId.isNotEmpty) {
-      context.read<OrdersBloc>().add(
-            LoadOrdersEvent(userId: userId, userRole: widget.userType.name),
-          );
-    }
   }
 
   @override
@@ -54,6 +48,10 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.read<UsersBloc>().state.sessionUser!.id;
+    context.read<OrdersBloc>().add(
+          LoadOrdersEvent(userId: userId, userRole: userType.name),
+        );
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -93,9 +91,9 @@ class OrdersPage extends StatelessWidget {
                             },
                           );
                         } else if (state is OrdersError) {
-                          return Center(child: Text(state.message));
+                          return Center(child: CustomLoading());
                         } else {
-                          return Container();
+                          return CustomLoading();
                         }
                       },
                     ),
@@ -128,38 +126,29 @@ class OrdersPage extends StatelessWidget {
                   filterChip(
                     context,
                     OrderStrings.statusConfirmed,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusConfirmed),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusPreparing,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusPreparing),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusOnTheWay,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusOnTheWay),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusDelivered,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusDelivered),
                   ),
                 ],
               ),
-              if (state.additionalFilters.isNotEmpty || state.dateRange != null)
+              if (state.additionalFilters.isNotEmpty)
                 Wrap(
                   alignment: WrapAlignment.start,
                   spacing: 8.0,
                   runSpacing: 4.0,
                   children: [
                     for (var filter in state.additionalFilters)
-                      filterChip(context, filter,
-                          selected: true, isAdditionalFilter: true),
+                      filterChip(context, filter, isAdditionalFilter: true),
                     if (state.dateRange != null)
                       dateRangeChip(context, state.dateRange!),
                   ],
@@ -176,26 +165,39 @@ class OrdersPage extends StatelessWidget {
   Widget filterChip(
     BuildContext context,
     String label, {
-    bool selected = false,
     bool isAdditionalFilter = false,
   }) {
+    final labelFilter = {
+          OrderStrings.statusConfirmed: 'confirmed',
+          OrderStrings.statusPreparing: 'preparing',
+          OrderStrings.statusOnTheWay: 'on-the-way',
+          OrderStrings.statusDelivered: 'delivered',
+        }[label] ??
+        label;
+
+    final normalSelected = context.select<OrdersBloc, bool>((bloc) {
+      if (bloc.state is! OrdersLoaded) return false;
+      return (bloc.state as OrdersLoaded).selectedFilters.contains(labelFilter);
+    });
+
+    final chipSelected = isAdditionalFilter ? true : normalSelected;
+
     return ChoiceChip(
       label: Text(label),
-      selected: selected,
-      onSelected: (bool isSelected) {
+      selected: chipSelected,
+      onSelected: (sel) {
         if (!isAdditionalFilter) {
-          context.read<OrdersBloc>().add(FilterOrdersEvent(label));
+          context.read<OrdersBloc>().add(FilterOrdersEvent(labelFilter));
         }
       },
       selectedColor: Colors.blue,
-      disabledColor: Colors.grey[300],
+      backgroundColor: Colors.grey[200],
       labelStyle: TextStyle(
-        color: selected ? Colors.white : Colors.black,
+        color: chipSelected ? Colors.white : Colors.black,
         fontSize: 12,
       ),
-      backgroundColor: Colors.grey[200],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       showCheckmark: false,
     );
   }
@@ -218,41 +220,47 @@ class OrdersPage extends StatelessWidget {
   Widget searchBar(BuildContext context) {
     final focusNode = FocusNode();
     final controller = TextEditingController();
-    return SearchBarInput(
-      focusNode: focusNode,
-      controller: controller,
-      hintText: OrderStrings.searchOrdersHint,
-      onEditingComplete: () {
-        context.read<OrdersBloc>().add(SearchOrdersEvent(controller.text));
-      },
-      showFilterButton: true,
-      onFilterPressed: () async {
-        final ordersBloc = context.read<OrdersBloc>();
-        final currentState = ordersBloc.state;
-        List<String> currentAdditionalFilters = [];
-        DateTimeRange? currentDateRange;
-        if (currentState is OrdersLoaded) {
-          currentAdditionalFilters = currentState.additionalFilters;
-          currentDateRange = currentState.dateRange;
-        }
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return FiltersPopup(
-              onApplyFilters: (filters, dateRange) {
-                ordersBloc.add(ApplyAdditionalFiltersEvent(filters));
-                if (dateRange != null) {
-                  ordersBloc.add(SetDateRangeEvent(dateRange));
-                } else {
-                  ordersBloc.add(const ClearDateRangeEvent());
-                }
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        return SearchBarInput(
+          focusNode: focusNode,
+          controller: controller,
+          hintText: OrderStrings.searchOrdersHint,
+          onEditingComplete: () {
+            context.read<OrdersBloc>().add(SearchOrdersEvent(controller.text));
+          },
+          showFilterButton: true,
+          onFilterPressed: () async {
+            final ordersBloc = context.read<OrdersBloc>();
+            final currentState = ordersBloc.state;
+            List<String> currentAdditionalFilters = [];
+            DateTimeRange? currentDateRange;
+            if (currentState is OrdersLoaded) {
+              currentAdditionalFilters = currentState.additionalFilters;
+              currentDateRange = currentState.dateRange;
+            }
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return FiltersPopup(
+                  onApplyFilters: (filters, dateRange) {
+                    ordersBloc.add(ApplyAdditionalFiltersEvent(filters));
+                    if (dateRange != null) {
+                      ordersBloc.add(SetDateRangeEvent(dateRange));
+                    } else {
+                      ordersBloc.add(const ClearDateRangeEvent());
+                    }
+                  },
+                  onClearFilters: () {
+                    ordersBloc.add(ClearAdditionalFiltersEvent());
+                    ordersBloc.add(ClearDateRangeEvent());
+                    currentDateRange = null;
+                    currentAdditionalFilters.clear();
+                  },
+                  currentAdditionalFilters: currentAdditionalFilters,
+                  currentDateRange: currentDateRange,
+                );
               },
-              onClearFilters: () {
-                ordersBloc.add(const ClearAdditionalFiltersEvent());
-                ordersBloc.add(const ClearDateRangeEvent());
-              },
-              currentAdditionalFilters: currentAdditionalFilters,
-              currentDateRange: currentDateRange,
             );
           },
         );

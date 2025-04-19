@@ -1,12 +1,12 @@
+// lib/widgets/order/list/orders_filters_popup.dart
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
-import 'package:spl_front/widgets/order/list/order_filters_section.dart';
+
+import 'order_filters_section.dart';
 
 class FiltersPopup extends StatelessWidget {
   final Function(List<String>, DateTimeRange?) onApplyFilters;
   final Function() onClearFilters;
-  final Function(String)? onSearchOrders;
-  final Function(String)? onStatusFilter;
   final List<String> currentAdditionalFilters;
   final DateTimeRange? currentDateRange;
 
@@ -14,8 +14,6 @@ class FiltersPopup extends StatelessWidget {
     super.key,
     required this.onApplyFilters,
     required this.onClearFilters,
-    this.onSearchOrders,
-    this.onStatusFilter,
     required this.currentAdditionalFilters,
     this.currentDateRange,
   });
@@ -23,48 +21,38 @@ class FiltersPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDialogHeader(context),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(OrderStrings.filtersTitle,
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             FiltersSection(
-              onApplyFilters: (filters, dateRange) {
-                onApplyFilters(filters, dateRange);
+              currentAdditionalFilters: currentAdditionalFilters,
+              currentDateRange: currentDateRange,
+              onApplyFilters: (f, dr) {
+                onApplyFilters(f, dr);
                 Navigator.of(context).pop();
               },
               onClearFilters: onClearFilters,
-              onSearchOrders: onSearchOrders,
-              onStatusFilter: onStatusFilter,
-              currentAdditionalFilters: currentAdditionalFilters,
-              currentDateRange: currentDateRange,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  // Header with close button
-  Widget _buildDialogHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          OrderStrings.filtersTitle,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(), // Close the popup
-        ),
-      ],
     );
   }
 }

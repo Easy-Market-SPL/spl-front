@@ -14,10 +14,6 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
 
-import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
-import '../../bloc/users_blocs/users/users_bloc.dart';
-
 class BusinessUserMainDashboard extends StatefulWidget {
   const BusinessUserMainDashboard({super.key});
 
@@ -27,8 +23,8 @@ class BusinessUserMainDashboard extends StatefulWidget {
 }
 
 class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
-  String activeLabel = "Todos"; 
-  
+  String activeLabel = "Todos";
+
   @override
   void initState() {
     super.initState();
@@ -53,16 +49,19 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Labels 
+                // Labels
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: LabelsWidget(
                     activeLabel: activeLabel,
                     onLabelSelected: (labelName) {
                       setState(() {
                         activeLabel = labelName;
                       });
-                      context.read<ProductBloc>().add(FilterProductsByCategory(labelName));
+                      context
+                          .read<ProductBloc>()
+                          .add(FilterProductsByCategory(labelName));
                     },
                   ),
                 ),

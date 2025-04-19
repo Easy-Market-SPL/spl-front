@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
+import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../bloc/ui_management/order/order_bloc.dart';
+import '../../../bloc/ui_management/order/order_event.dart';
 import '../../../models/ui/credit_card/credit_card_model.dart';
 import '../../../models/ui/stripe/stripe_custom_response.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
@@ -86,7 +90,7 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
     final stripeService = StripeService();
     final response = await stripeService.payWithExistingCard(
       amount: amount,
-      currency: 'usd',
+      currency: 'cop',
       card: widget.card!,
     );
 
@@ -99,7 +103,15 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
       Navigator.pop(context); // Close success dialog
       Navigator.pop(context); // Close installments dialog
 
-      // TODO: Update order in the API/DB and update the total debt field
+      final ordersBloc = BlocProvider.of<OrdersBloc>(context);
+
+      // Update the order status to confirmed
+      ordersBloc.add(ConfirmOrderEvent(
+        orderId: ordersBloc.state.currentCartOrder!.id!,
+        shippingCost: 0,
+        paymentAmount: _monthlyPayment,
+      ));
+
       Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
     } else {
       widget.onErrorPaymentDialog(response);
@@ -140,7 +152,7 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
 
                 // Show total
                 Text(
-                  "${PaymentStrings.totalPayment}\n\$${widget.total.toStringAsFixed(2)}",
+                  formatCurrency(widget.total),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -202,7 +214,7 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
                       PaymentStrings.monthlyInstallment,
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    Text("\$${_monthlyPayment.toStringAsFixed(2)}"),
+                    Text(formatCurrency(_monthlyPayment)),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -215,7 +227,7 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
                       PaymentStrings.debt,
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    Text("\$${_remainingDebt.toStringAsFixed(2)}"),
+                    Text(formatCurrency(_remainingDebt)),
                   ],
                 ),
                 const SizedBox(height: 20),

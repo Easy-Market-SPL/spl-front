@@ -14,7 +14,7 @@ abstract class OrdersState extends Equatable {
     if (this is OrdersLoaded) {
       return (this as OrdersLoaded).currentCartOrder;
     }
-    return null; // Return null if the state is not OrdersLoaded
+    return null;
   }
 }
 
@@ -23,9 +23,8 @@ class OrdersInitial extends OrdersState {}
 class OrdersLoading extends OrdersState {}
 
 class OrdersLoaded extends OrdersState {
-  final List<OrderModel> allOrders; // All or user-specific orders
-  final List<OrderModel>
-      filteredOrders; // After applying filters, search, date range
+  final List<OrderModel> allOrders;
+  final List<OrderModel> filteredOrders;
   final List<String> selectedFilters;
   final List<String> additionalFilters;
   final DateTimeRange? dateRange;
@@ -54,8 +53,8 @@ class OrdersLoaded extends OrdersState {
         selectedFilters,
         additionalFilters,
         dateRange,
-        currentCartOrder, // Ensure null safety
-        errorMessage, // Ensure null safety
+        currentCartOrder,
+        errorMessage,
       ];
 
   OrdersLoaded copyWith({

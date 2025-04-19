@@ -19,7 +19,6 @@ import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/pages/notifications/notifications.dart';
 import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
-import 'package:spl_front/pages/order/order_details.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 import 'package:spl_front/pages/order/web/order_tracking_web.dart';
@@ -81,10 +80,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// ORDER PAGES
   'business_user_orders': (_) => !kIsWeb
-      ? OrdersScreen(userType: UserType.business)
+      ? OrdersPage(userType: UserType.business)
       : OrdersListWeb(userType: UserType.business),
   'customer_user_orders': (_) => !kIsWeb
-      ? OrdersScreen(userType: UserType.customer)
+      ? OrdersPage(userType: UserType.customer)
       : OrdersListWeb(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
 
@@ -96,11 +95,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       ? OrderTrackingScreen(userType: UserType.customer)
       : OrderTrackingWebScreen(userType: UserType.customer),
   'delivery_user_tracking': (_) => DeliveryUserTracking(),
-  // order details
-  'business_user_order_details': (_) =>
-      OrderDetailsPage(userType: UserType.business),
-  'customer_user_order_details': (_) =>
-      OrderDetailsPage(userType: UserType.customer),
 
   /// ADDRESS PAGES
   'add_address': (_) => AddAddressPage(),

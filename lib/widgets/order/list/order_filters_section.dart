@@ -46,7 +46,7 @@ class _FiltersSectionState extends State<FiltersSection> {
         (filter) => selectedFilters.contains(filter),
         orElse: () => OrderStrings.mostRecent,
       );
-    } 
+    }
     // Most recent filter by default
     else {
       selectedSortOption = OrderStrings.mostRecent;
@@ -127,19 +127,20 @@ class _FiltersSectionState extends State<FiltersSection> {
           },
         ),
         const SizedBox(height: 10),
-        if (kIsWeb) StatusSection(
-          selectedStatusFilters: selectedStatusFilters,
-          onStatusChanged: (status) {
-            setState(() {
-              if (selectedStatusFilters.contains(status)) {
-                selectedStatusFilters.remove(status);
-              } else {
-                selectedStatusFilters.add(status);
-              }
-              widget.onStatusFilter!(status);
-            });
-          },
-        ),
+        if (kIsWeb)
+          StatusSection(
+            selectedStatusFilters: selectedStatusFilters,
+            onStatusChanged: (status) {
+              setState(() {
+                if (selectedStatusFilters.contains(status)) {
+                  selectedStatusFilters.remove(status);
+                } else {
+                  selectedStatusFilters.add(status);
+                }
+                widget.onStatusFilter!(status);
+              });
+            },
+          ),
         const SizedBox(height: 10),
       ],
     );

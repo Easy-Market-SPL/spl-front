@@ -140,6 +140,10 @@ class OrderModel {
         startDate: DateTime.parse(startDateString),
       ));
     });
+
+    statuses.sort(
+      (a, b) => a.startDate.compareTo(b.startDate),
+    );
     return statuses;
   }
 

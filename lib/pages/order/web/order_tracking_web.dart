@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/widgets/order/web/horizontal_order_status_web.dart'; // Ajusta a tu conveniencia
 
 import '../../../bloc/ui_management/order/order_bloc.dart';
-import '../../../bloc/ui_management/order/order_event.dart';
 import '../../../bloc/ui_management/order/order_state.dart';
 import '../../../models/logic/user_type.dart';
 import '../../../pages/order/order_details.dart';
@@ -17,18 +17,19 @@ import '../../../widgets/web/scaffold_web.dart';
 
 class OrderTrackingWebScreen extends StatelessWidget {
   final UserType userType;
-  const OrderTrackingWebScreen({super.key, required this.userType});
+  final OrderModel? order;
+  const OrderTrackingWebScreen({super.key, required this.userType, this.order});
 
   @override
   Widget build(BuildContext context) {
-    context.read<OrdersBloc>().add(LoadSingleOrderEvent(1));
     return OrderTrackingWebPage(userType: userType);
   }
 }
 
 class OrderTrackingWebPage extends StatefulWidget {
   final UserType userType;
-  const OrderTrackingWebPage({super.key, required this.userType});
+  final OrderModel? order;
+  const OrderTrackingWebPage({super.key, required this.userType, this.order});
 
   @override
   State<OrderTrackingWebPage> createState() => _OrderTrackingWebPageState();
@@ -36,6 +37,7 @@ class OrderTrackingWebPage extends StatefulWidget {
 
 class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
   UserType get userType => widget.userType;
+  OrderModel? get order => widget.order;
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +49,17 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
             flex: 3,
             child: Column(
               children: [
-                const OrderTrackingHeader(),
+                OrderTrackingHeader(userType: userType),
                 Expanded(
                   child: BlocBuilder<OrdersBloc, OrdersState>(
                     builder: (context, state) {
                       if (state is OrdersLoading) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (state is OrdersLoaded &&
-                          state.filteredOrders.isNotEmpty) {
-                        final order = state.filteredOrders.first;
-                        final lastStatus = _extractLastStatus(order);
+                          state.filteredOrders.isNotEmpty &&
+                          order != null) {
+                        final order = widget.order;
+                        var lastStatus = _extractLastStatus(order);
                         return SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -86,7 +89,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                                     ),
                                   ],
                                 ] else if (userType == UserType.delivery) ...[
-                                  const HorizontalOrderStatus(),
+                                  HorizontalOrderStatus(order: order!),
                                   if (SPLVariables.hasRealTimeTracking) ...[
                                     Container(
                                       height: 400,
@@ -97,10 +100,8 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                                   ] else ...[
                                     const SizedBox(height: 24.0),
                                     ModifyOrderStatusOptions(
-                                      selectedStatus: lastStatus,
-                                      onStatusChanged: (status) {
-                                        // context.read<OrdersBloc>().add(ChangeSelectedStatusEvent(status));
-                                      },
+                                      selectedStatus:
+                                          lastStatus, // el raw normalizado
                                     ),
                                     const SizedBox(height: 24.0),
                                     OrderActionButtons(
@@ -140,6 +141,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                 child: OrderDetailsPage(
                   userType: userType,
                   backgroundColor: PrimaryColors.blueWeb,
+                  order: order!,
                 ),
               ),
             ),

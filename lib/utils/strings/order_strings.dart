@@ -47,20 +47,21 @@ class OrderStrings {
   static const String confirmStatusChangeTitle = 'Confirmar cambio de estado';
   static const String cancel = 'Cancelar';
   static const String accept = 'Aceptar';
-  static const String orderConfirmed = 'Orden confirmada';
+  static const String orderConfirmed = 'Orden Confirmada';
   static const String orderConfirmedDescription =
       'Tu orden ha sido procesada correctamente';
   static const String notConfirmed = 'Sin confirmar';
   static const String notConfirmedDescription =
       'Tu orden aún no ha sido aceptada';
-  static const String preparingOrder = 'Preparando la orden';
+  static const String preparingOrder = 'Preparando la Orden';
   static const String preparingOrderDescription =
       'Tu orden está siendo preparada para su entrega';
   static const String notPrepared = 'Sin preparar';
   static const String notPreparedDescription =
       'Tu orden aún no se ha procesado';
   static const String onTheWay = 'En camino';
-  static const String onTheWayDescription = 'La orden ha salido en camino';
+  static const String onTheWayDescription =
+      'La orden se encuentra en camino hacía el destino';
   static const String notOnTheWay = 'Sin salir';
   static const String notOnTheWayDescription =
       'Tu orden no está lista para partir';
