@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/utils/strings/order_strings.dart';
 
 import '../../../models/order_models/order_model.dart';
 import '../../../models/order_models/order_product.dart';
@@ -672,16 +673,15 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       }).toList();
     }
 
-    // 2) Aplicar filtros adicionales (ej.: más recientes, más items, etc.)
     for (final flt in additionalFilters) {
       switch (flt) {
-        case "mostRecent":
+        case OrderStrings.mostRecent:
           filtered.sort((a, b) => b.creationDate!.compareTo(a.creationDate!));
           break;
-        case "leastRecent":
+        case OrderStrings.leastRecent:
           filtered.sort((a, b) => a.creationDate!.compareTo(b.creationDate!));
           break;
-        case "mostItems":
+        case OrderStrings.mostItems:
           filtered.sort((a, b) {
             final countA =
                 a.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity);
@@ -693,7 +693,6 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       }
     }
 
-    // 3) Filtrar por rango de fechas
     if (dateRange != null) {
       filtered = filtered.where((o) {
         final d = o.creationDate;

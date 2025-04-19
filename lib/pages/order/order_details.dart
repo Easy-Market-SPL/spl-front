@@ -492,7 +492,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               Navigator.pop(ctx);
               Navigator.of(ctx).pushAndRemoveUntil(
                 MaterialPageRoute(
-                  builder: (_) => OrdersScreen(userType: userType),
+                  builder: (_) => OrdersPage(userType: userType),
                 ),
                 ModalRoute.withName('/'),
               );

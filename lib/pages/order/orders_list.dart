@@ -126,26 +126,18 @@ class OrdersPage extends StatelessWidget {
                   filterChip(
                     context,
                     OrderStrings.statusConfirmed,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusConfirmed),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusPreparing,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusPreparing),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusOnTheWay,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusOnTheWay),
                   ),
                   filterChip(
                     context,
                     OrderStrings.statusDelivered,
-                    selected: state.selectedFilters
-                        .contains(OrderStrings.statusDelivered),
                   ),
                 ],
               ),
@@ -156,8 +148,7 @@ class OrdersPage extends StatelessWidget {
                   runSpacing: 4.0,
                   children: [
                     for (var filter in state.additionalFilters)
-                      filterChip(context, filter,
-                          selected: true, isAdditionalFilter: true),
+                      filterChip(context, filter, isAdditionalFilter: true),
                     if (state.dateRange != null)
                       dateRangeChip(context, state.dateRange!),
                   ],
@@ -174,35 +165,40 @@ class OrdersPage extends StatelessWidget {
   Widget filterChip(
     BuildContext context,
     String label, {
-    bool selected = false,
     bool isAdditionalFilter = false,
   }) {
-    final labelFilter = label == OrderStrings.statusConfirmed
-        ? 'confirmed'
-        : label == OrderStrings.statusPreparing
-            ? 'preparing'
-            : label == OrderStrings.statusOnTheWay
-                ? 'on-the-way'
-                : label == OrderStrings.statusDelivered
-                    ? 'delivered'
-                    : label;
+    // 1) Mapear el texto que ve el usuario al valor interno
+    final labelFilter = {
+          OrderStrings.statusConfirmed: 'confirmed',
+          OrderStrings.statusPreparing: 'preparing',
+          OrderStrings.statusOnTheWay: 'on-the-way',
+          OrderStrings.statusDelivered: 'delivered',
+        }[label] ??
+        label;
+
+    // 2) Averiguamos si este filtro está activo
+    final isSelected = context.select<OrdersBloc, bool>(
+      (bloc) =>
+          (bloc.state is OrdersLoaded) &&
+          (bloc.state as OrdersLoaded).selectedFilters.contains(labelFilter),
+    );
+
     return ChoiceChip(
       label: Text(label),
-      selected: selected,
-      onSelected: (bool isSelected) {
+      selected: isSelected,
+      onSelected: (bool sel) {
         if (!isAdditionalFilter) {
           context.read<OrdersBloc>().add(FilterOrdersEvent(labelFilter));
         }
       },
       selectedColor: Colors.blue,
-      disabledColor: Colors.grey[300],
+      backgroundColor: Colors.grey[200],
       labelStyle: TextStyle(
-        color: selected ? Colors.white : Colors.black,
+        color: isSelected ? Colors.white : Colors.black,
         fontSize: 12,
       ),
-      backgroundColor: Colors.grey[200],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       showCheckmark: false,
     );
   }

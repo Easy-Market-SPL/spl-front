@@ -218,7 +218,7 @@ class OrderActionButtons extends StatelessWidget {
   void _goBackToOrders(BuildContext ctx) {
     Navigator.of(ctx).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (_) => OrdersScreen(userType: userType),
+        builder: (_) => OrdersPage(userType: userType),
       ),
       ModalRoute.withName('/'),
     );

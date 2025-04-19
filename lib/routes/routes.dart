@@ -80,10 +80,10 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// ORDER PAGES
   'business_user_orders': (_) => !kIsWeb
-      ? OrdersScreen(userType: UserType.business)
+      ? OrdersPage(userType: UserType.business)
       : OrdersListWeb(userType: UserType.business),
   'customer_user_orders': (_) => !kIsWeb
-      ? OrdersScreen(userType: UserType.customer)
+      ? OrdersPage(userType: UserType.customer)
       : OrdersListWeb(userType: UserType.customer),
   'delivery_user_orders': (_) => OrdersScreenDelivery(),
 
