@@ -204,7 +204,7 @@ class OrderService {
     }
   }
 
-  /// PUT /orders/{id}/prepare
+  /// PUT /orders/{id}/preparing
   /// Changes the status of an order to 'preparing'.
   static Future<(OrderModel?, String?)> prepareOrder(int orderId) async {
     final url = '$_baseUrl/orders/$orderId/preparing';
@@ -233,7 +233,7 @@ class OrderService {
     required double initialLatitude,
     required double initialLongitude,
   }) async {
-    final url = '$_baseUrl/orders/$orderId/onTheWay/domiciliary';
+    final url = '$_baseUrl/orders/$orderId/on-the-way/domiciliary';
     final body = jsonEncode({
       "idDomiciliary": idDomiciliary,
       "initialLatitude": initialLatitude,
@@ -268,7 +268,7 @@ class OrderService {
     required String transportCompany,
     required String shippingGuide,
   }) async {
-    final url = '$_baseUrl/orders/$orderId/onTheWay/transport';
+    final url = '$_baseUrl/orders/$orderId/on-the-way/company';
     final body = jsonEncode({
       "transportCompany": transportCompany,
       "shippingGuide": shippingGuide,

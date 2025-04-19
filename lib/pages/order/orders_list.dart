@@ -6,6 +6,7 @@ import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/inputs/search_bar_input.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/order/list/order_item.dart';
@@ -90,10 +91,9 @@ class OrdersPage extends StatelessWidget {
                             },
                           );
                         } else if (state is OrdersError) {
-                          return Center(
-                              child: Text('ERROR ACAAAAA ${state.message}'));
+                          return Center(child: CustomLoading());
                         } else {
-                          return Container();
+                          return CustomLoading();
                         }
                       },
                     ),

@@ -46,13 +46,14 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                   const Expanded(
                     child: Text(
                       OrderStrings.selectShippingCompany,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
-                      Navigator.of(context).pop();  // Close the popup
+                      Navigator.of(context).pop(); // Close the popup
                     },
                   ),
                 ],
@@ -68,7 +69,8 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    child: const Text(OrderStrings.cancel, style: TextStyle(color: Colors.blue)),
+                    child: const Text(OrderStrings.cancel,
+                        style: TextStyle(color: Colors.blue)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -80,7 +82,8 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
                             Navigator.of(context).pop();
                           }
                         : null,
-                    child: const Text(OrderStrings.confirm, style: TextStyle(color: Colors.blue)),
+                    child: const Text('Confirmar',
+                        style: TextStyle(color: Colors.blue)),
                   ),
                 ],
               ),
@@ -113,7 +116,8 @@ class _ShippingCompanyPopupState extends State<ShippingCompanyPopup> {
             });
           },
           activeColor: Colors.blue,
-          controlAffinity: ListTileControlAffinity.trailing, // Moves the radio button to the right
+          controlAffinity: ListTileControlAffinity
+              .trailing, // Moves the radio button to the right
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
         ),

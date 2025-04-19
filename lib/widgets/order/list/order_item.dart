@@ -28,8 +28,8 @@ class OrderItem extends StatelessWidget {
     // If you need GPS logic
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
-    final itemsCount = (order.orderProducts ?? [])
-        .fold<int>(0, (sum, op) => sum + op.quantity);
+    final itemsCount =
+        (order.orderProducts).fold<int>(0, (sum, op) => sum + op.quantity);
 
     // Determine the current (placeholder) status from the last OrderStatus
     // If there are none, we default to something like '(no status)'
@@ -41,7 +41,7 @@ class OrderItem extends StatelessWidget {
     final statusMap = {
       'confirmed': 'Confirmada',
       'preparing': 'Preparando',
-      'on_the_way': 'En Camino',
+      'on the way': 'En Camino',
       'delivered': 'Entregada',
     };
 

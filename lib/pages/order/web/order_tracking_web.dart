@@ -49,7 +49,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
             flex: 3,
             child: Column(
               children: [
-                const OrderTrackingHeader(),
+                OrderTrackingHeader(userType: userType),
                 Expanded(
                   child: BlocBuilder<OrdersBloc, OrdersState>(
                     builder: (context, state) {

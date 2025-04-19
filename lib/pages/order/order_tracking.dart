@@ -1,5 +1,4 @@
 // lib/pages/order/tracking/order_tracking_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
@@ -22,26 +21,27 @@ class OrderTrackingScreen extends StatelessWidget {
   final OrderModel? order;
 
   const OrderTrackingScreen({
-    Key? key,
+    super.key,
     required this.userType,
     this.order,
-  }) : super(key: key);
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return OrderTrackingPage(userType: userType, order: order);
-  }
+  Widget build(BuildContext context) =>
+      OrderTrackingPage(userType: userType, order: order);
 }
+
+/* ───────────────────────────────────────── */
 
 class OrderTrackingPage extends StatefulWidget {
   final UserType userType;
   final OrderModel? order;
 
   const OrderTrackingPage({
-    Key? key,
+    super.key,
     required this.userType,
     this.order,
-  }) : super(key: key);
+  });
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingScreenState();
@@ -49,6 +49,7 @@ class OrderTrackingPage extends StatefulWidget {
 
 class _OrderTrackingScreenState extends State<OrderTrackingPage> {
   late String _selectedStatus;
+
   static const List<String> _flow = [
     'confirmed',
     'preparing',
@@ -56,6 +57,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
     'delivered'
   ];
   int _idx(String s) => _flow.indexOf(s);
+
   UserType get _userType => widget.userType;
 
   @override
@@ -78,25 +80,25 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
       );
     }
 
-    // Envuelve todo en padding horizontal de 16
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SPLVariables.hasRealTimeTracking
-            ? _buildRealTimeMap(context)
-            : _buildNonRealTime(context),
+            ? _buildRealTimeMap()
+            : _buildNonRealTime(),
       ),
       bottomNavigationBar:
           CustomBottomNavigationBar(userType: _userType, context: context),
     );
   }
 
-  Widget _buildRealTimeMap(BuildContext context) {
+  /* ────────────── 1. tracking en tiempo real ────────────── */
+  Widget _buildRealTimeMap() {
     return Stack(
       children: [
         Column(
           children: [
-            const OrderTrackingHeader(),
+            OrderTrackingHeader(userType: _userType),
             HorizontalOrderStatus(order: widget.order!),
             Expanded(
               child: Container(
@@ -107,7 +109,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
             ),
           ],
         ),
-        // Botón de detalles más angosto y centrado
         Positioned(
           bottom: 16,
           left: 0,
@@ -115,7 +116,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           child: Align(
             alignment: Alignment.center,
             child: SizedBox(
-              width: 200, // ancho fijo menor para botón más angosto
+              width: 200,
               child: OrderActionButtons(
                 selectedStatus: _selectedStatus,
                 userType: _userType,
@@ -129,107 +130,90 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
     );
   }
 
-  Widget _buildNonRealTime(BuildContext context) {
-    return Column(
-      children: [
-        const OrderTrackingHeader(),
-        Expanded(
-          child: BlocBuilder<OrdersBloc, OrdersState>(
-            builder: (context, state) {
-              if (state is OrdersLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is OrdersLoaded &&
-                  state.filteredOrders.isNotEmpty) {
-                final order = widget.order!;
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 16, bottom: 16),
-                  child: _buildBody(order, state),
-                );
-              } else if (state is OrdersError) {
-                return Center(child: Text('Bloc error: ${state.message}'));
-              } else {
-                return const Center(
-                  child: Text('Estado inesperado o sin órdenes para mostrar.'),
-                );
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  /* ────────────── 2. sin tracking en tiempo real ────────────── */
+  Widget _buildNonRealTime() {
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        if (state is OrdersLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is OrdersError) {
+          return Center(child: Text('Bloc error: ${state.message}'));
+        }
 
-  Widget _buildBody(OrderModel order, OrdersState state) {
-    // Business/Admin sin real-time tracking
-    if ((_userType == UserType.business || _userType == UserType.admin) &&
-        !SPLVariables.hasRealTimeTracking) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          HorizontalOrderStatus(order: order),
-          const SizedBox(height: 24),
-          ModifyOrderStatusOptions(selectedStatus: _selectedStatus),
-          const SizedBox(height: 24),
-          OrderActionButtons(
-            selectedStatus: _selectedStatus,
-            userType: _userType,
-            order: order,
-          ),
-        ],
-      );
-    }
+        final order = widget.order!;
 
-    // Delivery sin real-time tracking
-    if (_userType == UserType.delivery && !SPLVariables.hasRealTimeTracking) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          HorizontalOrderStatus(order: order),
-          const SizedBox(height: 24),
-          ModifyOrderStatusOptions(selectedStatus: _selectedStatus),
-          const SizedBox(height: 24),
-          OrderActionButtons(
-            selectedStatus: _selectedStatus,
-            userType: _userType,
-            order: order,
-          ),
-        ],
-      );
-    }
+        /* ---- Business / Admin / Delivery ---- */
+        final isBusinessLike = (_userType == UserType.business ||
+                _userType == UserType.admin ||
+                _userType == UserType.delivery) &&
+            !SPLVariables.hasRealTimeTracking;
 
-    // Customer sin real-time tracking
-    if (_userType == UserType.customer && !SPLVariables.hasRealTimeTracking) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const VerticalOrderStatus(),
-          const SizedBox(height: 24),
-          ShippingGuide(
-            orderNumber: '${order.id!}',
-            estimatedDeliveryDate: '2025-02-20',
-          ),
-          const SizedBox(height: 10),
-          OrderActionButtons(
-            selectedStatus: _selectedStatus,
-            showConfirmButton: false,
-            userType: _userType,
-            order: order,
-          ),
-        ],
-      );
-    }
+        if (isBusinessLike) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OrderTrackingHeader(userType: _userType),
+              HorizontalOrderStatus(order: order),
+              const SizedBox(height: 24),
+              ModifyOrderStatusOptions(selectedStatus: _selectedStatus),
 
-    // Fallback
-    return Column(
-      children: [
-        HorizontalOrderStatus(order: order),
-        Container(
-          height: 400,
-          color: Colors.grey[300],
-          alignment: Alignment.center,
-          child: const Text('Mapa aquí'),
-        ),
-      ],
+              const Spacer(), // empuja los botones al fondo
+
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: OrderActionButtons(
+                  selectedStatus: _selectedStatus,
+                  userType: _userType,
+                  order: order,
+                ),
+              ),
+            ],
+          );
+        }
+
+        /* ---- Customer sin tracking ---- */
+        if (_userType == UserType.customer &&
+            !SPLVariables.hasRealTimeTracking) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(top: 16, bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OrderTrackingHeader(userType: _userType),
+                const VerticalOrderStatus(),
+                const SizedBox(height: 24),
+                ShippingGuide(
+                  orderNumber: '${order.id!}',
+                  estimatedDeliveryDate: '2025-02-20',
+                ),
+                const SizedBox(height: 10),
+                OrderActionButtons(
+                  selectedStatus: _selectedStatus,
+                  showConfirmButton: false,
+                  userType: _userType,
+                  order: order,
+                ),
+              ],
+            ),
+          );
+        }
+
+        /* ---- Fallback (no debería ocurrir) ---- */
+        return Column(
+          children: [
+            OrderTrackingHeader(userType: _userType),
+            HorizontalOrderStatus(order: order),
+            Expanded(
+              child: Container(
+                color: Colors.grey[300],
+                alignment: Alignment.center,
+                child: const Text('Mapa aquí'),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

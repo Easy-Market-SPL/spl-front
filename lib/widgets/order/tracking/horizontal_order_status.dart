@@ -117,7 +117,7 @@ class HorizontalOrderStatus extends StatelessWidget {
         return OrderStrings.orderConfirmed;
       case 'preparing':
         return OrderStrings.preparingOrder;
-      case 'on-the-way':
+      case 'on the way':
         return OrderStrings.onTheWay;
       case 'delivered':
         return OrderStrings.delivered;
@@ -134,7 +134,7 @@ class HorizontalOrderStatus extends StatelessWidget {
         return OrderStrings.orderConfirmedDescription;
       case 'preparing':
         return OrderStrings.preparingOrderDescription;
-      case 'on-the-way':
+      case 'on the way':
         return OrderStrings.onTheWayDescription;
       case 'delivered':
         return OrderStrings.deliveredDescription;
