@@ -1,4 +1,3 @@
-// lib/pages/order/order_details.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -221,8 +220,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ),
                       ] else ...[
                         _subTitle('Compañía de Envío'),
-                        if (widget.userType == UserType.business)
-                          /* ---------- editable SOLO antes de on‑the‑way ---------- */
+                        if (widget.userType == UserType.customer)
+                          Text(
+                            order.transportCompany ?? 'Sin asignar',
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.black),
+                          )
+                        else if (widget.userType == UserType.business ||
+                            widget.userType == UserType.admin)
                           shippedOrAfter
                               ? Padding(
                                   padding:
@@ -262,7 +267,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
               /* ------- botón Cambiar estado ------- */
               if (widget.userType == UserType.business ||
-                  widget.userType == UserType.delivery)
+                  widget.userType == UserType.admin)
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(

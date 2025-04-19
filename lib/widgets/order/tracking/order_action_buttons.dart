@@ -15,7 +15,7 @@ import '../../../utils/ui/order_statuses.dart';
 import '../../order/tracking/shipping_company_selection.dart';
 
 class OrderActionButtons extends StatelessWidget {
-  /* ----------  colores corporativos ---------- */
+  /* ───────── colores corporativos ───────── */
   static const Color darkBlue = Color(0xFF0D47A1);
   static const Color lightBlue = Color(0xFF258BD9);
 
@@ -34,6 +34,7 @@ class OrderActionButtons extends StatelessWidget {
     this.order,
   });
 
+  /* flujo normalizado */
   static const List<String> _flow = [
     'confirmed',
     'preparing',
@@ -46,6 +47,7 @@ class OrderActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     if (order == null) return const SizedBox.shrink();
 
+    /* sincronizar con estado del bloc */
     final blocState = context.watch<OrdersBloc>().state;
     OrderModel current = order!;
     if (blocState is OrdersLoaded) {
@@ -62,53 +64,89 @@ class OrderActionButtons extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
-          /* 1 ─ Confirmar / Cambiar estado  */
+          /* 1 · Confirmar / Cambiar estado */
           if (showConfirmButton)
-            ElevatedButton(
-              onPressed: canConfirm ? () => _confirm(context, current) : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: canConfirm ? lightBlue : Colors.grey,
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: Text(
-                OrderStrings.confirm,
-                style: TextStyle(
-                    color: canConfirm ? Colors.white : Colors.black87),
-              ),
-            ),
+            _plainConfirmButton(canConfirm, context, current),
           if (showConfirmButton && showDetailsButton)
             const SizedBox(height: 16),
 
-          /* 2 ─ Ver detalles  */
-          if (showDetailsButton)
-            ElevatedButton(
-              onPressed: () => _goToDetails(context, current),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: lightBlue,
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: const Text(
-                OrderStrings.orderDetailsTitle,
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          const SizedBox(height: 16),
+          /* 2 · Detalles de la orden */
+          if (showDetailsButton) _prettyDetailsButton(context, current),
         ],
       ),
     );
   }
 
-  /* ----------  navegación a detalles ---------- */
-  void _goToDetails(BuildContext context, OrderModel o) {
+  /* BOTÓN “CONFIRMAR” (mantiene estilo sencillo) */
+  Widget _plainConfirmButton(bool canConfirm, BuildContext ctx, OrderModel o) {
+    return ElevatedButton(
+      onPressed: canConfirm ? () => _confirm(ctx, o) : null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: canConfirm ? darkBlue : Colors.grey.shade400,
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
+      child: Text(
+        OrderStrings.confirm,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  /* BOTÓN “DETALLES” ESTILIZADO */
+  Widget _prettyDetailsButton(BuildContext ctx, OrderModel o) {
+    return GestureDetector(
+      onTap: () => _goToDetails(ctx, o),
+      child: Container(
+        width: double.infinity,
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [darkBlue, darkBlue],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              OrderStrings.orderDetailsTitle,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /* Navegar a detalles */
+  void _goToDetails(BuildContext ctx, OrderModel o) {
     Navigator.push(
-      context,
+      ctx,
       MaterialPageRoute(
         builder: (_) => OrderDetailsScreen(userType: userType, order: o),
       ),
     );
   }
 
-  /* ----------  confirmar cambio de estado ---------- */
+  /* Confirmar cambio de estado */
   void _confirm(BuildContext ctx, OrderModel o) {
     switch (selectedStatus) {
       case 'preparing':
@@ -116,7 +154,6 @@ class OrderActionButtons extends StatelessWidget {
         _showSnack(ctx);
         _goBackToOrders(ctx);
         break;
-
       case 'on-the-way':
         showDialog(
           context: ctx,
@@ -124,13 +161,12 @@ class OrderActionButtons extends StatelessWidget {
           builder: (_) => ShippingCompanyPopup(
             selectedCompany: o.transportCompany ?? 'Sin seleccionar',
             onCompanySelected: (company) {
-              Navigator.pop(ctx); // cierra popup
+              Navigator.pop(ctx);
               _handleConfirmShippingCompany(ctx, o, company);
             },
           ),
         );
         break;
-
       case 'delivered':
         ctx.read<OrdersBloc>().add(DeliveredOrderEvent(o.id!));
         _showSnack(ctx);
@@ -139,28 +175,24 @@ class OrderActionButtons extends StatelessWidget {
     }
   }
 
-  /* ----------  confirmación de empresa ---------- */
+  /* Confirmar empresa de envío */
   void _handleConfirmShippingCompany(
       BuildContext ctx, OrderModel o, String company) {
     if (company == 'Sin seleccionar') {
       _showErrorDialog(ctx);
       return;
     }
-
     final guide = '$company-${o.id}';
-    ctx.read<OrdersBloc>().add(
-          OnTheWayTransportOrderEvent(
-            orderId: o.id!,
-            transportCompany: company,
-            shippingGuide: guide,
-          ),
-        );
-
+    ctx.read<OrdersBloc>().add(OnTheWayTransportOrderEvent(
+          orderId: o.id!,
+          transportCompany: company,
+          shippingGuide: guide,
+        ));
     _showSnack(ctx);
     _goBackToOrders(ctx);
   }
 
-  /* ----------  snack de éxito ---------- */
+  /* Snackbar de éxito */
   void _showSnack(BuildContext ctx) {
     final messenger = ScaffoldMessenger.of(ctx);
     messenger
@@ -177,11 +209,12 @@ class OrderActionButtons extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white, fontSize: 16),
           ),
-          duration: const Duration(seconds: 1, milliseconds: 500),
+          duration: const Duration(seconds: 2),
         ),
       );
   }
 
+  /* Volver a OrdersScreen */
   void _goBackToOrders(BuildContext ctx) {
     Navigator.of(ctx).pushAndRemoveUntil(
       MaterialPageRoute(
@@ -191,7 +224,7 @@ class OrderActionButtons extends StatelessWidget {
     );
   }
 
-  /* ----------  diálogo de error ---------- */
+  /* Diálogo de error */
   void _showErrorDialog(BuildContext ctx) {
     showDialog(
       context: ctx,
@@ -205,7 +238,10 @@ class OrderActionButtons extends StatelessWidget {
         title: const Text(
           'Error',
           style: TextStyle(
-              color: darkBlue, fontWeight: FontWeight.bold, fontSize: 18),
+            color: darkBlue,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         content: const Text(
           'Por favor, seleccione una compañía de envío.',
@@ -220,10 +256,7 @@ class OrderActionButtons extends StatelessWidget {
               ),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Aceptar',
-              style: TextStyle(color: darkBlue),
-            ),
+            child: const Text('Aceptar', style: TextStyle(color: darkBlue)),
           ),
         ],
       ),

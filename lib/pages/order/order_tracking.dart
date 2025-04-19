@@ -1,6 +1,7 @@
 // lib/pages/order/tracking/order_tracking_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
 
 import '../../../models/logic/user_type.dart';
@@ -175,27 +176,40 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
         /* ---- Customer sin tracking ---- */
         if (_userType == UserType.customer &&
             !SPLVariables.hasRealTimeTracking) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.only(top: 16, bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OrderTrackingHeader(userType: _userType),
-                const VerticalOrderStatus(),
-                const SizedBox(height: 24),
-                ShippingGuide(
-                  orderNumber: '${order.id!}',
-                  estimatedDeliveryDate: '2025-02-20',
-                ),
-                const SizedBox(height: 10),
-                OrderActionButtons(
+          // 1️⃣ calcular ETA = creationDate + 5 días, o la fecha real si ya está entregada
+          DateTime eta = order.creationDate!.add(const Duration(days: 5));
+          final deliveredStatus = order.orderStatuses.lastWhere(
+            (s) => normalizeOnTheWay(s.status) == 'delivered',
+            orElse: () => order.orderStatuses.first,
+          );
+          final bool hasDelivered =
+              normalizeOnTheWay(deliveredStatus.status) == 'delivered';
+          if (hasDelivered) eta = deliveredStatus.startDate;
+          final String etaText = DateFormat('dd/MM/yyyy').format(eta);
+
+          // 2️⃣ layout casi idéntico a admin/business sin tracking
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OrderTrackingHeader(userType: _userType),
+              const SizedBox(height: 24),
+              VerticalOrderStatus(order: order),
+              const SizedBox(height: 48),
+              ShippingGuide(
+                orderNumber: '${order.id!}',
+                estimatedDeliveryDate: etaText,
+              ),
+              const Spacer(), // empuja el botón al fondo
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: OrderActionButtons(
                   selectedStatus: _selectedStatus,
                   showConfirmButton: false,
                   userType: _userType,
                   order: order,
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         }
 
