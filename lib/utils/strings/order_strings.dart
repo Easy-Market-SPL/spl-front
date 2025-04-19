@@ -37,7 +37,7 @@ class OrderStrings {
   static const String leastRecent = 'Menos recientes';
   static const String mostItems = 'Más items';
   static const String clear = 'Limpiar';
-  static const String confirm = 'Confirmar Cambio de Estado';
+  static const String confirm = 'Confirmar';
   static const String date = 'Fecha';
   static const String client = 'Cliente';
   static const String status = 'Estado';

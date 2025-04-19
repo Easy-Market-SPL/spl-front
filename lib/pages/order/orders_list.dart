@@ -177,12 +177,21 @@ class OrdersPage extends StatelessWidget {
     bool selected = false,
     bool isAdditionalFilter = false,
   }) {
+    final labelFilter = label == OrderStrings.statusConfirmed
+        ? 'confirmed'
+        : label == OrderStrings.statusPreparing
+            ? 'preparing'
+            : label == OrderStrings.statusOnTheWay
+                ? 'on-the-way'
+                : label == OrderStrings.statusDelivered
+                    ? 'delivered'
+                    : label;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (bool isSelected) {
         if (!isAdditionalFilter) {
-          context.read<OrdersBloc>().add(FilterOrdersEvent(label));
+          context.read<OrdersBloc>().add(FilterOrdersEvent(labelFilter));
         }
       },
       selectedColor: Colors.blue,

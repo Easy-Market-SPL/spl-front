@@ -229,14 +229,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         else if (widget.userType == UserType.business ||
                             widget.userType == UserType.admin)
                           shippedOrAfter
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text(
-                                    selectedShippingCompany,
-                                    style: const TextStyle(
-                                        fontSize: 14, color: Colors.black),
-                                  ),
+                              ? Text(
+                                  selectedShippingCompany,
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.black),
                                 )
                               : InkWell(
                                   onTap: () => _showShippingPopup(context),

@@ -87,7 +87,7 @@ class OrderActionButtons extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
       child: Text(
-        OrderStrings.confirm,
+        'Confirmar Cambio de Estado',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
