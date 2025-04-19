@@ -86,7 +86,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SPLVariables.hasRealTimeTracking
             ? _buildRealTimeMap()
-            : _buildNonRealTime(),
+            : Column(
+                children: [
+                  // Le damos a la columna _buildNonRealTime() un height finito
+                  Expanded(child: _buildNonRealTime()),
+                ],
+              ),
       ),
       bottomNavigationBar:
           CustomBottomNavigationBar(userType: _userType, context: context),
@@ -155,6 +160,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               OrderTrackingHeader(userType: _userType),
+              const SizedBox(height: 24),
               HorizontalOrderStatus(order: order),
               const SizedBox(height: 24),
               ModifyOrderStatusOptions(selectedStatus: _selectedStatus),

@@ -236,23 +236,19 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 )
                               : InkWell(
                                   onTap: () => _showShippingPopup(context),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            selectedShippingCompany,
-                                            style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.black),
-                                          ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          selectedShippingCompany,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black),
                                         ),
-                                        const Icon(Icons.arrow_drop_down,
-                                            color: Colors.black),
-                                      ],
-                                    ),
+                                      ),
+                                      const Icon(Icons.arrow_drop_down,
+                                          color: Colors.black),
+                                    ],
                                   ),
                                 ),
                       ],
