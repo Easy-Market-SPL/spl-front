@@ -179,7 +179,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           );
         }
 
-        /* ---- Customer sin tracking ---- */
         if (_userType == UserType.customer &&
             !SPLVariables.hasRealTimeTracking) {
           // 1️⃣ calcular ETA = creationDate + 5 días, o la fecha real si ya está entregada

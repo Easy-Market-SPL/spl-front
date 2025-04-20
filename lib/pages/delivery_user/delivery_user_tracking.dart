@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/services/api/user_service.dart';
@@ -15,6 +16,7 @@ import '../../bloc/ui_management/search_places/search_places_bloc.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/logic/user_type.dart';
 import '../../models/order_models/order_model.dart';
+import '../../models/order_models/order_status.dart';
 import '../../providers/info_trip_provider.dart';
 import '../../utils/strings/order_strings.dart';
 import '../../widgets/map/map_view_address.dart';
@@ -46,13 +48,11 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     isDelivery = widget.isTriggerDelivery ?? false;
     _userFuture = UserService.getUser(widget.order!.idUser!);
 
-    // Si no está cargado, pedimos el pedido completo
     final ordersBloc = context.read<OrdersBloc>();
     if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order!.id!));
     }
 
-    // Arranca GPS y Google Places
     final locationBloc = context.read<LocationBloc>();
     final searchBloc = context.read<SearchPlacesBloc>();
     locationBloc.getCurrentPosition();
@@ -67,13 +67,12 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
 
     return MultiBlocListener(
       listeners: [
-        // Cada vez que cambia la ubicación:
         BlocListener<LocationBloc, LocationState>(
           listener: (context, locState) {
             final loc = locState.lastKnowLocation;
             if (loc == null) return;
 
-            // 2️⃣ Dibuja ruta de nuevo (destino ya cargado por SearchPlaces)
+            // redibujar ruta siempre que cambie ubicación
             final places = context.read<SearchPlacesBloc>().state.googlePlaces;
             if (places != null && places.isNotEmpty) {
               _drawDestinationRoute(
@@ -84,7 +83,6 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
               );
             }
 
-            // 3️⃣ Dispara OnTheWay Domiciliary solo la primera vez
             if (isDelivery && !_didSendOnTheWay) {
               _didSendOnTheWay = true;
               final userId = context.read<UsersBloc>().state.sessionUser!.id;
@@ -97,7 +95,6 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
             }
           },
         ),
-        // También esperamos a que carguen los lugares para inicializar la ruta
         BlocListener<SearchPlacesBloc, SearchPlacesState>(
           listener: (context, state) {
             final loc = context.read<LocationBloc>().state.lastKnowLocation;
@@ -141,17 +138,15 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 ),
                 body: Stack(
                   children: [
-                    // Mapa con todos los marcadores
                     Positioned.fill(
                       child: MapViewAddress(
                         initialLocation: locationState.lastKnowLocation!,
                         markers: mapState.markers.values.toSet(),
                       ),
                     ),
-                    // Botón para centrar en usuario
                     Positioned(
                       bottom: _isExpanded
-                          ? MediaQuery.of(context).size.height * 0.30
+                          ? MediaQuery.of(context).size.height * 0.33
                           : MediaQuery.of(context).size.height * 0.15,
                       right: 20,
                       child: FloatingActionButton(
@@ -162,7 +157,6 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                             color: Colors.white),
                       ),
                     ),
-                    // Expandir/contraer InfoCard
                     Positioned(
                       bottom: MediaQuery.of(context).size.height * 0.05,
                       right: 20,
@@ -208,6 +202,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -225,12 +220,16 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                   ),
                 ],
               ),
+
+              // Address
               Text(
                 widget.order?.address ?? OrderStrings.notAvailable,
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 5),
+
+              // Customer Info
               FutureBuilder<UserModel?>(
                 future: _userFuture,
                 builder: (context, snap) {
@@ -245,6 +244,8 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 },
               ),
               const SizedBox(height: 10),
+
+              // Distance
               Row(
                 children: [
                   const Icon(Icons.route, color: Colors.blue),
@@ -259,6 +260,8 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 ],
               ),
               const SizedBox(height: 5),
+
+              // Duration
               Row(
                 children: [
                   const Icon(Icons.timer, color: Colors.blue),
@@ -269,6 +272,71 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                   ),
                 ],
               ),
+
+              const SizedBox(height: 16),
+
+              // ════════════════════════════════════════════
+              // Text or Botton according with last status
+              Builder(
+                builder: (_) {
+                  final lastStatus = widget.order!.orderStatuses.last.status;
+                  if (lastStatus != 'delivered') {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            final now = DateTime.now();
+                            widget.order!.orderStatuses.add(OrderStatus(
+                              status: 'delivered',
+                              startDate: now,
+                            ));
+                          });
+                          context
+                              .read<OrdersBloc>()
+                              .add(DeliveredOrderEvent(widget.order!.id!));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Entregar Orden',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                    );
+                  } else {
+                    final deliveredStatus = widget.order!.orderStatuses
+                        .lastWhere((s) => s.status == 'delivered');
+                    final dateText = DateFormat('dd/MM/yyyy')
+                        .format(deliveredStatus.startDate);
+                    return Row(
+                      children: [
+                        const Text(
+                          'Orden Entregada:',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          dateText,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
+              )
             ],
           ),
         ),
