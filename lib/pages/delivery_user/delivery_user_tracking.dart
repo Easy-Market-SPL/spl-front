@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/services/api/user_service.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 import '../../bloc/ui_management/location/location_bloc.dart';
 import '../../bloc/ui_management/map/map_bloc.dart';
@@ -37,7 +38,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   late final bool isDelivery;
   late final Future<UserModel?> _userFuture;
   bool _isExpanded = false;
-  bool _didInitRoute = false;
+  bool _didSendOnTheWay = false;
 
   @override
   void initState() {
@@ -45,13 +46,13 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     isDelivery = widget.isTriggerDelivery ?? false;
     _userFuture = UserService.getUser(widget.order!.idUser!);
 
+    // Si no está cargado, pedimos el pedido completo
     final ordersBloc = context.read<OrdersBloc>();
-    // si no está cargado, pide el pedido completo
     if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order!.id!));
     }
 
-    // arranca GPS y places
+    // Arranca GPS y Google Places
     final locationBloc = context.read<LocationBloc>();
     final searchBloc = context.read<SearchPlacesBloc>();
     locationBloc.getCurrentPosition();
@@ -59,57 +60,70 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
   }
 
-  // Comprueba si ya tengo location AND places, y dispara ruta y evento only once
-  void _tryInitRouteAndMarkers() {
-    if (_didInitRoute) return;
-    final locationState = context.read<LocationBloc>().state;
-    final places = context.read<SearchPlacesBloc>().state.googlePlaces;
-    if (locationState.lastKnowLocation != null &&
-        places != null &&
-        places.isNotEmpty) {
-      _didInitRoute = true;
-      final mapBloc = context.read<MapBloc>();
-      final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
-      _drawDestinationRoute(
-        locationState.lastKnowLocation!,
-        places.first,
-        mapBloc,
-        infoTrip,
-      );
-      if (isDelivery) {
-        final userId = context.read<UsersBloc>().state.sessionUser!.id;
-        context.read<OrdersBloc>().add(OnTheWayDomiciliaryOrderEvent(
-              orderId: widget.order!.id!,
-              idDomiciliary: userId,
-              initialLatitude: locationState.lastKnowLocation!.latitude,
-              initialLongitude: locationState.lastKnowLocation!.longitude,
-            ));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final mapBloc = context.read<MapBloc>();
+    final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
+
     return MultiBlocListener(
       listeners: [
+        // Cada vez que cambia la ubicación:
         BlocListener<LocationBloc, LocationState>(
-          listener: (_, __) => _tryInitRouteAndMarkers(),
+          listener: (context, locState) {
+            final loc = locState.lastKnowLocation;
+            if (loc == null) return;
+
+            // 2️⃣ Dibuja ruta de nuevo (destino ya cargado por SearchPlaces)
+            final places = context.read<SearchPlacesBloc>().state.googlePlaces;
+            if (places != null && places.isNotEmpty) {
+              _drawDestinationRoute(
+                loc,
+                places.first,
+                mapBloc,
+                infoTrip,
+              );
+            }
+
+            // 3️⃣ Dispara OnTheWay Domiciliary solo la primera vez
+            if (isDelivery && !_didSendOnTheWay) {
+              _didSendOnTheWay = true;
+              final userId = context.read<UsersBloc>().state.sessionUser!.id;
+              context.read<OrdersBloc>().add(OnTheWayDomiciliaryOrderEvent(
+                    orderId: widget.order!.id!,
+                    idDomiciliary: userId,
+                    initialLatitude: loc.latitude,
+                    initialLongitude: loc.longitude,
+                  ));
+            }
+          },
         ),
+        // También esperamos a que carguen los lugares para inicializar la ruta
         BlocListener<SearchPlacesBloc, SearchPlacesState>(
-          listener: (_, __) => _tryInitRouteAndMarkers(),
+          listener: (context, state) {
+            final loc = context.read<LocationBloc>().state.lastKnowLocation;
+            if (loc != null &&
+                state.googlePlaces != null &&
+                state.googlePlaces!.isNotEmpty) {
+              _drawDestinationRoute(
+                loc,
+                state.googlePlaces!.first,
+                mapBloc,
+                infoTrip,
+              );
+            }
+          },
         ),
       ],
-      child: BlocBuilder<MapBloc, MapState>(
-        builder: (context, mapState) {
-          return BlocBuilder<LocationBloc, LocationState>(
-            builder: (context, locationState) {
-              // mientras no haya ubicación...
-              if (locationState.lastKnowLocation == null) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              }
+      child: BlocBuilder<LocationBloc, LocationState>(
+        builder: (context, locationState) {
+          if (locationState.lastKnowLocation == null) {
+            return const Scaffold(
+              body: Center(child: CustomLoading()),
+            );
+          }
 
+          return BlocBuilder<MapBloc, MapState>(
+            builder: (context, mapState) {
               return Scaffold(
                 appBar: AppBar(
                   leading: IconButton(
@@ -127,15 +141,28 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 ),
                 body: Stack(
                   children: [
-                    // Mapa con marcadores pintados por MapBloc
+                    // Mapa con todos los marcadores
                     Positioned.fill(
                       child: MapViewAddress(
                         initialLocation: locationState.lastKnowLocation!,
                         markers: mapState.markers.values.toSet(),
                       ),
                     ),
-
-                    // Botón que expande/cierra la tarjeta
+                    // Botón para centrar en usuario
+                    Positioned(
+                      bottom: _isExpanded
+                          ? MediaQuery.of(context).size.height * 0.30
+                          : MediaQuery.of(context).size.height * 0.15,
+                      right: 20,
+                      child: FloatingActionButton(
+                        backgroundColor: Colors.blue,
+                        onPressed: () =>
+                            mapBloc.moveCamera(locationState.lastKnowLocation!),
+                        child: const Icon(Icons.directions_walk,
+                            color: Colors.white),
+                      ),
+                    ),
+                    // Expandir/contraer InfoCard
                     Positioned(
                       bottom: MediaQuery.of(context).size.height * 0.05,
                       right: 20,
@@ -147,11 +174,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                             const Icon(Icons.expand_less, color: Colors.white),
                       ),
                     ),
-
-                    // Tarjeta de info
-                    if (_isExpanded)
-                      _buildInfoCard(
-                          context, Provider.of<InfoTripProvider>(context)),
+                    if (_isExpanded) _buildInfoCard(context, infoTrip),
                   ],
                 ),
                 bottomNavigationBar: CustomBottomNavigationBar(
@@ -166,100 +189,90 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, InfoTripProvider tripInfo) {
-    return Positioned(
-      bottom: MediaQuery.of(context).size.height * 0.05,
-      left: 20,
-      right: 20,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2)
-          ],
+  Widget _buildInfoCard(BuildContext context, InfoTripProvider tripInfo) =>
+      Positioned(
+        bottom: MediaQuery.of(context).size.height * 0.05,
+        left: 20,
+        right: 20,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2)
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    OrderStrings.deliverAt,
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.expand_more_outlined,
+                        color: Colors.blue),
+                    onPressed: () => setState(() => _isExpanded = false),
+                  ),
+                ],
+              ),
+              Text(
+                widget.order?.address ?? OrderStrings.notAvailable,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 5),
+              FutureBuilder<UserModel?>(
+                future: _userFuture,
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const SizedBox.shrink();
+                  }
+                  final name = snap.data?.fullname ?? '';
+                  return Text(
+                    name.isNotEmpty ? OrderStrings.nameOrder(name) : 'Cliente:',
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.route, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    tripInfo.metersDistance
+                        ? OrderStrings.estimatedDistanceMeters(
+                            tripInfo.distance)
+                        : OrderStrings.estimatedDistanceKms(tripInfo.distance),
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  const Icon(Icons.timer, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    OrderStrings.estimatedDeliveryMinutes(tripInfo.duration),
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cabecera con botón de cerrar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  OrderStrings.deliverAt,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.expand_more_outlined,
-                      color: Colors.blue),
-                  onPressed: () => setState(() {
-                    _isExpanded = false;
-                  }),
-                ),
-              ],
-            ),
-
-            // Dirección
-            Text(
-              widget.order?.address ?? OrderStrings.notAvailable,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 5),
-
-            // Nombre de cliente
-            FutureBuilder<UserModel?>(
-              future: _userFuture,
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return SizedBox.shrink();
-                }
-                final name = (snap.hasData ? snap.data!.fullname : '');
-                return Text(
-                  name.isNotEmpty ? OrderStrings.nameOrder(name) : 'Cliente:',
-                  style: const TextStyle(fontSize: 16, color: Colors.black87),
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-
-            // Distancia
-            Row(
-              children: [
-                const Icon(Icons.route, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  tripInfo.metersDistance
-                      ? OrderStrings.estimatedDistanceMeters(tripInfo.distance)
-                      : OrderStrings.estimatedDistanceKms(tripInfo.distance),
-                  style: const TextStyle(fontSize: 16, color: Colors.black87),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-
-            // Duración
-            Row(
-              children: [
-                const Icon(Icons.timer, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  OrderStrings.estimatedDeliveryMinutes(tripInfo.duration),
-                  style: const TextStyle(fontSize: 16, color: Colors.black87),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      );
 
   Future<void> _drawDestinationRoute(
     LatLng start,
@@ -271,7 +284,6 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
       destinationPlace.geometry.location.lat,
       destinationPlace.geometry.location.lng,
     );
-
     final travelAnswer =
         await mapBloc.drawMarkersAndGetDistanceBetweenPoints(start, end);
 

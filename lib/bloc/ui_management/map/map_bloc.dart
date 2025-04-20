@@ -37,6 +37,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       if (locationState.lastKnowLocation == null) return;
       moveCamera(locationState.lastKnowLocation!);
     });
+
+    on<UpdateUserMarkerEvent>((event, emit) {
+      final newMarkers = Map<String, Marker>.from(state.markers);
+      newMarkers['start'] = Marker(
+        markerId: const MarkerId('start'),
+        position: event.position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueAzure,
+        ),
+      );
+      emit(state.copyWith(markers: newMarkers));
+    });
   }
 
   // Other Dispatches:
