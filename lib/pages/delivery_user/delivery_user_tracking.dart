@@ -11,6 +11,7 @@ import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
 import '../../bloc/ui_management/order/order_state.dart';
 import '../../bloc/ui_management/search_places/search_places_bloc.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/logic/user_type.dart';
 import '../../models/order_models/order_model.dart';
 import '../../providers/info_trip_provider.dart';
@@ -20,121 +21,148 @@ import '../../widgets/navigation_bars/nav_bar.dart';
 
 class DeliveryUserTracking extends StatefulWidget {
   final OrderModel? order;
+  final bool? isTriggerDelivery;
 
-  const DeliveryUserTracking({super.key, this.order});
+  const DeliveryUserTracking({
+    super.key,
+    this.order,
+    this.isTriggerDelivery,
+  });
 
   @override
-  State<DeliveryUserTracking> createState() => _DeliveryUserTrackingState();
+  DeliveryUserTrackingState createState() => DeliveryUserTrackingState();
 }
 
-class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
-  double distanceToDestination = 0.0;
-  double timeToDestination = 0.0;
-  String? currentOrderStatus;
+class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
+  late final bool isDelivery;
+  late final Future<UserModel?> _userFuture;
   bool _isExpanded = false;
-  late final Future<UserModel?> _userFuture; // async user fetch
+  bool _didInitRoute = false; // para no repetir la inicialización
 
   @override
   void initState() {
     super.initState();
-    final ordersBloc = context.read<OrdersBloc>();
-    final locationBloc = context.read<LocationBloc>();
-    final mapBloc = context.read<MapBloc>();
-    final searchBloc = context.read<SearchPlacesBloc>();
-    final infoTripProvider =
-        Provider.of<InfoTripProvider>(context, listen: false);
-
-    // Fetch the customer only once
+    isDelivery = widget.isTriggerDelivery ?? false;
     _userFuture = UserService.getUser(widget.order!.idUser!);
 
-    // Load single order event
-    final ordersState = ordersBloc.state;
-    if (ordersState is! OrdersLoaded) {
+    final ordersBloc = context.read<OrdersBloc>();
+    // si no está cargado, pide el pedido completo
+    if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order!.id!));
     }
 
-    currentOrderStatus = _extractLastStatus(widget.order);
-
+    // arranca GPS y places
+    final locationBloc = context.read<LocationBloc>();
+    final searchBloc = context.read<SearchPlacesBloc>();
     locationBloc.getCurrentPosition();
     locationBloc.startFollowingUser();
     searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      infoTripProvider.reset();
+  // Comprueba si ya tengo location AND places, y dispara ruta y evento only once
+  void _tryInitRouteAndMarkers() {
+    if (_didInitRoute) return;
+    final locationState = context.read<LocationBloc>().state;
+    final places = context.read<SearchPlacesBloc>().state.googlePlaces;
+    if (locationState.lastKnowLocation != null &&
+        places != null &&
+        places.isNotEmpty) {
+      _didInitRoute = true;
+      final mapBloc = context.read<MapBloc>();
+      final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
       _drawDestinationRoute(
-        context,
-        locationBloc,
+        locationState.lastKnowLocation!,
+        places.first,
         mapBloc,
-        searchBloc,
-        infoTripProvider,
+        infoTrip,
       );
-    });
+      if (isDelivery) {
+        final userId = context.read<UsersBloc>().state.sessionUser!.id;
+        context.read<OrdersBloc>().add(OnTheWayDomiciliaryOrderEvent(
+              orderId: widget.order!.id!,
+              idDomiciliary: userId,
+              initialLatitude: locationState.lastKnowLocation!.latitude,
+              initialLongitude: locationState.lastKnowLocation!.longitude,
+            ));
+      }
+    }
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    final locationBloc = context.read<LocationBloc>();
-    final mapBloc = context.read<MapBloc>();
-    final searchBloc = context.read<SearchPlacesBloc>();
-    final tripInfo = Provider.of<InfoTripProvider>(context);
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<LocationBloc, LocationState>(
+          listener: (_, __) => _tryInitRouteAndMarkers(),
+        ),
+        BlocListener<SearchPlacesBloc, SearchPlacesState>(
+          listener: (_, __) => _tryInitRouteAndMarkers(),
+        ),
+      ],
+      child: BlocBuilder<MapBloc, MapState>(
+        builder: (context, mapState) {
+          return BlocBuilder<LocationBloc, LocationState>(
+            builder: (context, locationState) {
+              // mientras no haya ubicación...
+              if (locationState.lastKnowLocation == null) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-    return BlocBuilder<MapBloc, MapState>(
-      builder: (context, mapState) {
-        return BlocBuilder<LocationBloc, LocationState>(
-          builder: (context, locationState) {
-            if (locationState.lastKnowLocation == null) {
-              return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()));
-            }
-
-            _drawDestinationRoute(
-                context, locationBloc, mapBloc, searchBloc, tripInfo);
-
-            return Scaffold(
-              appBar: AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () => Navigator.popAndPushNamed(
-                      context, 'delivery_user_orders'),
-                ),
-                title: Text(
-                  OrderStrings.orderNumberString(widget.order!.id.toString()),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 20),
-                ),
-                backgroundColor: Colors.white,
-                elevation: 0,
-              ),
-              body: Stack(
-                children: [
-                  Positioned.fill(
-                    child: MapViewAddress(
-                      initialLocation: locationState.lastKnowLocation!,
-                      markers: mapState.markers.values.toSet(),
-                    ),
+              return Scaffold(
+                appBar: AppBar(
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () => Navigator.popAndPushNamed(
+                        context, 'delivery_user_orders'),
                   ),
-                  Positioned(
-                    bottom: MediaQuery.of(context).size.height * 0.05,
-                    right: 20,
-                    child: FloatingActionButton(
-                      backgroundColor: Colors.blue,
-                      onPressed: () =>
-                          setState(() => _isExpanded = !_isExpanded),
-                      child: const Icon(Icons.expand_less, color: Colors.white),
-                    ),
+                  title: Text(
+                    OrderStrings.orderNumberString(widget.order!.id.toString()),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 20),
                   ),
-                  if (_isExpanded) _buildInfoCard(context, tripInfo),
-                ],
-              ),
-              bottomNavigationBar: CustomBottomNavigationBar(
-                userType: UserType.delivery,
-                context: context,
-              ),
-            );
-          },
-        );
-      },
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                ),
+                body: Stack(
+                  children: [
+                    // Mapa con marcadores pintados por MapBloc
+                    Positioned.fill(
+                      child: MapViewAddress(
+                        initialLocation: locationState.lastKnowLocation!,
+                        markers: mapState.markers.values.toSet(),
+                      ),
+                    ),
+
+                    // Botón que expande/cierra la tarjeta
+                    Positioned(
+                      bottom: MediaQuery.of(context).size.height * 0.05,
+                      right: 20,
+                      child: FloatingActionButton(
+                        backgroundColor: Colors.blue,
+                        onPressed: () =>
+                            setState(() => _isExpanded = !_isExpanded),
+                        child:
+                            const Icon(Icons.expand_less, color: Colors.white),
+                      ),
+                    ),
+
+                    // Tarjeta de info
+                    if (_isExpanded)
+                      _buildInfoCard(
+                          context, Provider.of<InfoTripProvider>(context)),
+                  ],
+                ),
+                bottomNavigationBar: CustomBottomNavigationBar(
+                  userType: UserType.delivery,
+                  context: context,
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -157,6 +185,7 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Cabecera con botón de cerrar
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -170,36 +199,38 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 IconButton(
                   icon: const Icon(Icons.expand_more_outlined,
                       color: Colors.blue),
-                  onPressed: () {
-                    setState(() {
-                      _isExpanded = false;
-                    });
-                  },
+                  onPressed: () => setState(() {
+                    _isExpanded = false;
+                  }),
                 ),
               ],
             ),
+
+            // Dirección
             Text(
               widget.order?.address ?? OrderStrings.notAvailable,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 5),
+
+            // Nombre de cliente
             FutureBuilder<UserModel?>(
               future: _userFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
                   return const SizedBox(
                       height: 18, child: LinearProgressIndicator(minHeight: 2));
                 }
-                if (snapshot.hasError || snapshot.data == null) {
-                  return const Text('Cliente: ',
-                      style: TextStyle(fontSize: 16, color: Colors.black87));
-                }
-                return Text(OrderStrings.nameOrder(snapshot.data!.fullname),
-                    style:
-                        const TextStyle(fontSize: 16, color: Colors.black87));
+                final name = (snap.hasData ? snap.data!.fullname : '');
+                return Text(
+                  name.isNotEmpty ? OrderStrings.nameOrder(name) : 'Cliente:',
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                );
               },
             ),
             const SizedBox(height: 10),
+
+            // Distancia
             Row(
               children: [
                 const Icon(Icons.route, color: Colors.blue),
@@ -213,6 +244,8 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
               ],
             ),
             const SizedBox(height: 5),
+
+            // Duración
             Row(
               children: [
                 const Icon(Icons.timer, color: Colors.blue),
@@ -220,7 +253,6 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                 Text(
                   OrderStrings.estimatedDeliveryMinutes(tripInfo.duration),
                   style: const TextStyle(fontSize: 16, color: Colors.black87),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -231,20 +263,16 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   }
 
   Future<void> _drawDestinationRoute(
-    BuildContext context,
-    LocationBloc locationBloc,
+    LatLng start,
+    dynamic destinationPlace,
     MapBloc mapBloc,
-    SearchPlacesBloc searchBloc,
     InfoTripProvider infoTripProvider,
   ) async {
-    final start = locationBloc.state.lastKnowLocation;
-    if (start == null) return;
-
-    if (searchBloc.state.googlePlaces?.first == null) return;
-    final destination = searchBloc.state.googlePlaces!.first;
-
     final end = LatLng(
-        destination.geometry.location.lat, destination.geometry.location.lng);
+      destinationPlace.geometry.location.lat,
+      destinationPlace.geometry.location.lng,
+    );
+
     final travelAnswer =
         await mapBloc.drawMarkersAndGetDistanceBetweenPoints(start, end);
 
@@ -258,23 +286,5 @@ class _DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   int _calculateMinutes(double distance, bool isMeters) {
     final timeInMinutes = isMeters ? (distance / 1000) * 3.5 : distance * 3.5;
     return timeInMinutes.round();
-  }
-
-  // ----- HELPER ACTUALIZADO -----
-  String _extractLastStatus(OrderModel? order) {
-    if (order == null || order.orderStatuses.isEmpty) return '';
-
-    switch (order.orderStatuses.last.status) {
-      case 'confirmed':
-        return 'Confirmada';
-      case 'preparing':
-        return 'En preparación';
-      case 'on-the-way':
-        return 'En camino';
-      case 'delivered':
-        return 'Entregado';
-      default:
-        return '';
-    }
   }
 }

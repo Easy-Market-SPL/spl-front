@@ -16,12 +16,13 @@ import '../../../pages/customer_user/profile_addresses/add_address.dart';
 class OrderItem extends StatelessWidget {
   final OrderModel order;
   final UserType userType;
+  final bool? triggerFollow;
 
-  const OrderItem({
-    super.key,
-    required this.order,
-    required this.userType,
-  });
+  const OrderItem(
+      {super.key,
+      required this.order,
+      required this.userType,
+      this.triggerFollow});
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +177,7 @@ class OrderItem extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => DeliveryUserTracking(
                               order: order,
+                              isTriggerDelivery: triggerFollow,
                             ),
                           ),
                         );
@@ -211,7 +213,9 @@ class OrderItem extends StatelessWidget {
                   ),
                   child: userType == UserType.delivery
                       ? Text(
-                          OrderStrings.takeOrder,
+                          triggerFollow!
+                              ? OrderStrings.takeOrder
+                              : OrderStrings.viewOrder,
                           style: const TextStyle(color: Colors.white),
                         )
                       : Text(

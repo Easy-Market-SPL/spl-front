@@ -62,6 +62,20 @@ class SearchOrdersEvent extends OrdersEvent {
   List<Object?> get props => [query];
 }
 
+/// Filters delivery orders based on the user's role.
+class FilterDeliveryOrdersEvent extends OrdersEvent {
+  /// true → "Preparing Orders", false → "My deliveries"
+  final bool preparacion;
+
+  /// idUser
+  final String userId;
+
+  const FilterDeliveryOrdersEvent({
+    required this.preparacion,
+    required this.userId,
+  });
+}
+
 /// Applies extra filters like "mostRecent", "leastRecent", "mostItems".
 class ApplyAdditionalFiltersEvent extends OrdersEvent {
   final List<String> filters;

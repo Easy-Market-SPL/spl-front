@@ -28,6 +28,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<ClearAdditionalFiltersEvent>(_onClearAdditionalFilters);
     on<SetDateRangeEvent>(_onSetDateRange);
     on<ClearDateRangeEvent>(_onClearDateRange);
+    on<FilterDeliveryOrdersEvent>(_onFilterDeliveryOrders);
 
     // Updates / cart / status changes
     on<UpdateOrderAddressEvent>(_onUpdateOrderAddress);
@@ -708,5 +709,26 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     final e = DateTime(end.year, end.month, end.day);
     return (c.isAtSameMomentAs(s) || c.isAfter(s)) &&
         (c.isAtSameMomentAs(e) || c.isBefore(e));
+  }
+
+  void _onFilterDeliveryOrders(
+    FilterDeliveryOrdersEvent event,
+    Emitter<OrdersState> emit,
+  ) {
+    if (state is! OrdersLoaded) return;
+    final current = state as OrdersLoaded;
+
+    final filtered = current.allOrders.where((o) {
+      if (event.preparacion) {
+        // solo las que estén en "preparing"
+        return o.orderStatuses.isNotEmpty &&
+            normalizeOnTheWay(o.orderStatuses.last.status) == 'preparing';
+      } else {
+        // solo las que le fueron asignadas al domiciliario
+        return o.idDomiciliary == event.userId;
+      }
+    }).toList();
+
+    emit(current.copyWith(filteredOrders: filtered));
   }
 }
