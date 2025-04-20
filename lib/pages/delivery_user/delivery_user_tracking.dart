@@ -37,7 +37,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   late final bool isDelivery;
   late final Future<UserModel?> _userFuture;
   bool _isExpanded = false;
-  bool _didInitRoute = false; // para no repetir la inicialización
+  bool _didInitRoute = false;
 
   @override
   void initState() {
@@ -218,8 +218,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
               future: _userFuture,
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(
-                      height: 18, child: LinearProgressIndicator(minHeight: 2));
+                  return SizedBox.shrink();
                 }
                 final name = (snap.hasData ? snap.data!.fullname : '');
                 return Text(
