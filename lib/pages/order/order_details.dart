@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
+import 'package:spl_front/pages/order/orders_list.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_model.dart';
@@ -245,6 +246,61 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
+  /// Show forbidden on the way business/admin
+  void _onTheWayBusinessAdminError() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text(
+                'Contacta a un domiciliario de tu empresa para que realice el envío hacía el cliente.',
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -257,10 +313,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         future: _orderFuture,
         builder: (ctx, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CustomLoading());
+            return const Center(child: SizedBox.shrink());
           }
           if (snap.hasError) {
-            return Center(child: Text('Error: \${snap.error}'));
+            return Center(child: CustomLoading());
           }
 
           final order = snap.data!;
@@ -289,7 +345,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         future: _customerFuture,
                         builder: (_, su) {
                           if (su.connectionState == ConnectionState.waiting) {
-                            return const SizedBox.shrink();
+                            return const CustomLoading();
                           }
                           return Text(su.data?.fullname ?? '---');
                         },
@@ -304,7 +360,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                           builder: (_, sd) {
                             if (_domiciliaryFuture != null &&
                                 sd.connectionState == ConnectionState.waiting) {
-                              return const SizedBox.shrink();
+                              return const CustomLoading();
                             }
                             return Text(
                               sd.data?.fullname ?? 'Domiciliario No asignado',
@@ -374,8 +430,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Cambiar estado'),
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      label: const Text('Cambiar estado',
+                          style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: darkBlue,
                         minimumSize: const Size(200, 50),
@@ -535,7 +592,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
             ),
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: const Text('Cancelar', style: TextStyle(color: darkBlue)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -550,7 +607,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   context.read<OrdersBloc>().add(PrepareOrderEvent(order.id!));
                   break;
                 case 'on-the-way':
-                  _confirmOnTheWay(order);
+                  SPLVariables.hasRealTimeTracking
+                      ? _onTheWayBusinessAdminError()
+                      : _confirmOnTheWay(order);
                   return;
                 case 'delivered':
                   context
@@ -560,6 +619,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               }
               Navigator.pop(context);
               setState(_loadOrder);
+              showSuccessDialogStatuses.call(context, widget.userType);
             },
             child:
                 const Text('Confirmar', style: TextStyle(color: Colors.white)),
@@ -585,7 +645,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ),
       );
     } else {
-      final guide = '\$selectedShippingCompany-\${order.id}';
+      final guide = '$selectedShippingCompany-${order.id}';
       context.read<OrdersBloc>().add(
             OnTheWayTransportOrderEvent(
               orderId: order.id!,
@@ -595,6 +655,47 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           );
       Navigator.pop(context);
       setState(_loadOrder);
+      showSuccessDialogStatuses.call(context, widget.userType);
     }
+  }
+
+  void showSuccessDialogStatuses(BuildContext ctx, UserType userType) {
+    showDialog(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: darkBlue, width: 1.5),
+        ),
+        title: const Icon(Icons.check_circle, size: 48, color: darkBlue),
+        content: const Text(
+          'Estado actualizado correctamente',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: darkBlue,
+              minimumSize: const Size(120, 44),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(ctx).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => OrdersPage(userType: userType),
+                ),
+                ModalRoute.withName('/'),
+              );
+            },
+            child: const Text('Aceptar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 }
