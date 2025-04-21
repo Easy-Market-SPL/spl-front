@@ -111,7 +111,7 @@ class ProductCard extends StatelessWidget {
                                 Text(
                                   product.reviews!.isEmpty
                                       ? 'N/A'
-                                      : "${product.rating}",
+                                      : product.rating!.toStringAsFixed(2),
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey,

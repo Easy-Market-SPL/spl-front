@@ -1,44 +1,54 @@
 // lib/widgets/reviews_widget.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/review.dart';
 import 'package:spl_front/services/api/user_service.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
-class ReviewsWidget extends StatefulWidget {
+class ReviewsWidget extends StatelessWidget {
   final Product product;
   const ReviewsWidget({super.key, required this.product});
 
   @override
-  State<ReviewsWidget> createState() => _ReviewsWidgetState();
-}
-
-class _ReviewsWidgetState extends State<ReviewsWidget> {
-  @override
   Widget build(BuildContext context) {
-    final reviews = widget.product.reviews;
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (context, state) {
+        final reviews = state is ProductLoaded
+            ? state.products
+                .firstWhere((p) => p.code == product.code,
+                    orElse: () => product)
+                .reviews
+            : product.reviews;
 
-    if (reviews == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (reviews.isEmpty) {
-      return const Text(
-        'El producto no cuenta con reseñas aún',
-        style: TextStyle(
-          fontSize: 16,
-          fontFamilyFallback: ['Roboto'],
-          fontStyle: FontStyle.italic,
-        ),
-      );
-    }
+        if (reviews == null) {
+          return const Center(child: CustomLoading());
+        }
+        if (reviews.isEmpty) {
+          return const Text(
+            'El producto no cuenta con reseñas aún',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamilyFallback: ['Roboto'],
+              fontStyle: FontStyle.italic,
+            ),
+          );
+        }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Reseñas',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        ...reviews.map((r) => _buildReviewCard(r)),
-      ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Reseñas',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ...reviews.map((r) => _buildReviewCard(r)),
+          ],
+        );
+      },
     );
   }
 
