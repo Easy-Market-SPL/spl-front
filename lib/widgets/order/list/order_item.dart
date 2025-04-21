@@ -91,8 +91,9 @@ class OrderItem extends StatelessWidget {
                           ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: DateHelper.formatDate(
-                                  order.orderStatuses.first.startDate),
+                              text: (order.creationDate == null)
+                                  ? '--'
+                                  : DateHelper.formatDate(order.creationDate!),
                               style: const TextStyle(
                                   fontWeight: FontWeight.normal),
                             ),
