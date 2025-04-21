@@ -141,7 +141,7 @@ class OrderActionButtons extends StatelessWidget {
     Navigator.push(
       ctx,
       MaterialPageRoute(
-        builder: (_) => OrderDetailsScreen(userType: userType, order: o),
+        builder: (_) => OrderDetailsPage(userType: userType, order: o),
       ),
     );
   }

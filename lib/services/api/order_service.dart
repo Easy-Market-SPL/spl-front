@@ -341,7 +341,7 @@ class OrderService {
     required int orderId,
     required double paymentAmount,
   }) async {
-    final url = '$_baseUrl/orders/$orderId/debt';
+    final url = '$_baseUrl/orders/$orderId/debt_payment';
     final body = jsonEncode({"paymentAmount": paymentAmount});
 
     try {
