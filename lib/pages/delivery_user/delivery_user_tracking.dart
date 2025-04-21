@@ -1,3 +1,5 @@
+// lib/pages/order/tracking/delivery_user_tracking.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -45,18 +47,28 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   @override
   void initState() {
     super.initState();
+
+    // Clear any existing markers when the screen loads
+    final mapBloc = context.read<MapBloc>();
+    mapBloc.clearMarkers();
+
+    // Determine if we should trigger the "on the way" event
     isDelivery = widget.isTriggerDelivery ?? false;
+    // Fetch customer info by user ID
     _userFuture = UserService.getUser(widget.order!.idUser!);
 
+    // Ensure the order is loaded into OrdersBloc
     final ordersBloc = context.read<OrdersBloc>();
     if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order!.id!));
     }
 
+    // Start listening to device location and follow user
     final locationBloc = context.read<LocationBloc>();
     final searchBloc = context.read<SearchPlacesBloc>();
     locationBloc.getCurrentPosition();
     locationBloc.startFollowingUser();
+    // Decode address to LatLng
     searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
   }
 
@@ -67,12 +79,13 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
 
     return MultiBlocListener(
       listeners: [
+        // Listen for location updates to redraw the route and send "on the way"
         BlocListener<LocationBloc, LocationState>(
           listener: (context, locState) {
             final loc = locState.lastKnowLocation;
             if (loc == null) return;
 
-            // redibujar ruta siempre que cambie ubicación
+            // redraw the route whenever location changes
             final places = context.read<SearchPlacesBloc>().state.googlePlaces;
             if (places != null && places.isNotEmpty) {
               _drawDestinationRoute(
@@ -83,18 +96,22 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
               );
             }
 
+            // send the "on the way" event only once per session
             if (isDelivery && !_didSendOnTheWay) {
               _didSendOnTheWay = true;
               final userId = context.read<UsersBloc>().state.sessionUser!.id;
-              context.read<OrdersBloc>().add(OnTheWayDomiciliaryOrderEvent(
-                    orderId: widget.order!.id!,
-                    idDomiciliary: userId,
-                    initialLatitude: loc.latitude,
-                    initialLongitude: loc.longitude,
-                  ));
+              context.read<OrdersBloc>().add(
+                    OnTheWayDomiciliaryOrderEvent(
+                      orderId: widget.order!.id!,
+                      idDomiciliary: userId,
+                      initialLatitude: loc.latitude,
+                      initialLongitude: loc.longitude,
+                    ),
+                  );
             }
           },
         ),
+        // Listen for address decoding to redraw route if location is ready
         BlocListener<SearchPlacesBloc, SearchPlacesState>(
           listener: (context, state) {
             final loc = context.read<LocationBloc>().state.lastKnowLocation;
@@ -114,6 +131,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
       child: BlocBuilder<LocationBloc, LocationState>(
         builder: (context, locationState) {
           if (locationState.lastKnowLocation == null) {
+            // show loading while waiting for initial location
             return const Scaffold(
               body: Center(child: CustomLoading()),
             );
@@ -123,54 +141,78 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
             builder: (context, mapState) {
               return Scaffold(
                 appBar: AppBar(
+                  // Back button to return to the orders list
                   leading: IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.black),
                     onPressed: () => Navigator.popAndPushNamed(
-                        context, 'delivery_user_orders'),
+                      context,
+                      'delivery_user_orders',
+                    ),
                   ),
                   title: Text(
-                    OrderStrings.orderNumberString(widget.order!.id.toString()),
+                    OrderStrings.orderNumberString(
+                      widget.order!.id.toString(),
+                    ),
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 20),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    ),
                   ),
                   backgroundColor: Colors.white,
                   elevation: 0,
                 ),
                 body: Stack(
                   children: [
+                    // Display the Google Map with markers
                     Positioned.fill(
-                      child: MapViewAddress(
+                      child: MapView(
                         initialLocation: locationState.lastKnowLocation!,
                         markers: mapState.markers.values.toSet(),
                       ),
                     ),
+
+                    // FAB to center camera on current location
                     Positioned(
                       bottom: _isExpanded
-                          ? MediaQuery.of(context).size.height * 0.33
-                          : MediaQuery.of(context).size.height * 0.15,
+                          ? MediaQuery.of(context).size.height * 0.35
+                          : MediaQuery.of(context).size.height * 0.13,
                       right: 20,
                       child: FloatingActionButton(
+                        heroTag: 'moveCameraFAB', // Unique hero tag
                         backgroundColor: Colors.blue,
-                        onPressed: () =>
-                            mapBloc.moveCamera(locationState.lastKnowLocation!),
-                        child: const Icon(Icons.directions_walk,
-                            color: Colors.white),
+                        onPressed: () => mapBloc.moveCamera(
+                          locationState.lastKnowLocation!,
+                        ),
+                        child: const Icon(
+                          Icons.directions_walk,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
+
+                    // FAB to toggle expand/collapse of info card
                     Positioned(
                       bottom: MediaQuery.of(context).size.height * 0.05,
                       right: 20,
                       child: FloatingActionButton(
+                        heroTag: 'toggleExpandFAB', // Unique hero tag
                         backgroundColor: Colors.blue,
                         onPressed: () =>
                             setState(() => _isExpanded = !_isExpanded),
-                        child:
-                            const Icon(Icons.expand_less, color: Colors.white),
+                        child: Icon(
+                          _isExpanded
+                              ? Icons.expand_more_outlined
+                              : Icons.expand_less,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
+
+                    // Show info card when expanded
                     if (_isExpanded) _buildInfoCard(context, infoTrip),
                   ],
                 ),
+                // Custom bottom navigation bar for delivery role
                 bottomNavigationBar: CustomBottomNavigationBar(
                   userType: UserType.delivery,
                   context: context,
@@ -183,7 +225,11 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, InfoTripProvider tripInfo) =>
+  /// Builds the info card with address, customer, distance, duration, and action
+  Widget _buildInfoCard(
+    BuildContext context,
+    InfoTripProvider tripInfo,
+  ) =>
       Positioned(
         bottom: MediaQuery.of(context).size.height * 0.05,
         left: 20,
@@ -195,41 +241,50 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2)
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                spreadRadius: 2,
+              )
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header with collapse button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     OrderStrings.deliverAt,
                     style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600),
+                      fontSize: 18,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.expand_more_outlined,
-                        color: Colors.blue),
+                    icon: const Icon(
+                      Icons.expand_more_outlined,
+                      color: Colors.blue,
+                    ),
                     onPressed: () => setState(() => _isExpanded = false),
                   ),
                 ],
               ),
 
-              // Address
+              // Delivery address line
               Text(
                 widget.order?.address ?? OrderStrings.notAvailable,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 5),
 
-              // Customer Info
+              // Customer name fetched via FutureBuilder
               FutureBuilder<UserModel?>(
                 future: _userFuture,
                 builder: (context, snap) {
@@ -239,13 +294,16 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                   final name = snap.data?.fullname ?? '';
                   return Text(
                     name.isNotEmpty ? OrderStrings.nameOrder(name) : 'Cliente:',
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   );
                 },
               ),
               const SizedBox(height: 10),
 
-              // Distance
+              // Distance row
               Row(
                 children: [
                   const Icon(Icons.route, color: Colors.blue),
@@ -255,28 +313,34 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                         ? OrderStrings.estimatedDistanceMeters(
                             tripInfo.distance)
                         : OrderStrings.estimatedDistanceKms(tripInfo.distance),
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 5),
 
-              // Duration
+              // Duration row
               Row(
                 children: [
                   const Icon(Icons.timer, color: Colors.blue),
                   const SizedBox(width: 8),
                   Text(
-                    OrderStrings.estimatedDeliveryMinutes(tripInfo.duration),
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    OrderStrings.estimatedDeliveryMinutes(
+                      tripInfo.duration,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
 
-              // ════════════════════════════════════════════
-              // Text or Botton according with last status
+              // Show button or delivered date depending on last status
               Builder(
                 builder: (_) {
                   final lastStatus = widget.order!.orderStatuses.last.status;
@@ -285,16 +349,19 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
+                          // Add delivered status locally and fire event
                           setState(() {
                             final now = DateTime.now();
-                            widget.order!.orderStatuses.add(OrderStatus(
-                              status: 'delivered',
-                              startDate: now,
-                            ));
+                            widget.order!.orderStatuses.add(
+                              OrderStatus(
+                                status: 'delivered',
+                                startDate: now,
+                              ),
+                            );
                           });
-                          context
-                              .read<OrdersBloc>()
-                              .add(DeliveredOrderEvent(widget.order!.id!));
+                          context.read<OrdersBloc>().add(
+                                DeliveredOrderEvent(widget.order!.id!),
+                              );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
@@ -305,11 +372,15 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                         ),
                         child: const Text(
                           'Entregar Orden',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     );
                   } else {
+                    // Display the delivered date
                     final deliveredStatus = widget.order!.orderStatuses
                         .lastWhere((s) => s.status == 'delivered');
                     final dateText = DateFormat('dd/MM/yyyy')
@@ -336,25 +407,29 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                     );
                   }
                 },
-              )
+              ),
             ],
           ),
         ),
       );
 
+  /// Draws route polyline and markers, then updates distance and duration.
   Future<void> _drawDestinationRoute(
     LatLng start,
     dynamic destinationPlace,
     MapBloc mapBloc,
     InfoTripProvider infoTripProvider,
   ) async {
+    // Compute destination LatLng
     final end = LatLng(
       destinationPlace.geometry.location.lat,
       destinationPlace.geometry.location.lng,
     );
+    // Draw markers & polyline and retrieve distance info
     final travelAnswer =
         await mapBloc.drawMarkersAndGetDistanceBetweenPoints(start, end);
 
+    // Update provider with calculated metrics
     infoTripProvider.setDistance(travelAnswer.item1);
     infoTripProvider.setMeters(travelAnswer.item2);
     infoTripProvider.setDuration(
@@ -362,6 +437,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     );
   }
 
+  /// Converts distance (meters or kms) into estimated time in minutes.
   int _calculateMinutes(double distance, bool isMeters) {
     final timeInMinutes = isMeters ? (distance / 1000) * 3.5 : distance * 3.5;
     return timeInMinutes.round();

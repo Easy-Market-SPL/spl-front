@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_model.dart';
@@ -153,7 +154,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         future: _orderFuture,
         builder: (ctx, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CustomLoading());
           }
           if (snap.hasError) {
             return const Center(child: Text('Error cargando orden'));

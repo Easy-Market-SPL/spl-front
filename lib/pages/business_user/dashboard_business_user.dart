@@ -10,6 +10,7 @@ import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
@@ -118,7 +119,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
 
   Widget _buildProductContent(ProductState state) {
     if (state is ProductInitial || state is ProductLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CustomLoading());
     } else if (state is ProductError) {
       return Center(
         child: Column(

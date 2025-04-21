@@ -74,6 +74,30 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _mapController?.animateCamera(cameraUpdate);
   }
 
+  Future<void> drawDestinationMarker(LatLng destinationPoint) async {
+    final destinationMarkerIcon =
+        await getCustomMarkerIcon('delivery-destination.png');
+
+    final destinationMarker = Marker(
+      icon: destinationMarkerIcon,
+      markerId: const MarkerId('end'),
+      position: destinationPoint,
+    );
+
+    final updatedMarkers = Map<String, Marker>.from(state.markers);
+    updatedMarkers['end'] = destinationMarker;
+
+    add(OnUpdateMarkersEvent(updatedMarkers));
+  }
+
+  Future<void> clearMarkers() async {
+    final updatedMarkers = Map<String, Marker>.from(state.markers);
+    updatedMarkers.remove('start');
+    updatedMarkers.remove('end');
+
+    add(OnUpdateMarkersEvent(updatedMarkers));
+  }
+
   Future<Tuple2<double, bool>> drawMarkersAndGetDistanceBetweenPoints(
       LatLng begin, LatLng end) async {
     // Custom Markers

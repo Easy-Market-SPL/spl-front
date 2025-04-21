@@ -6,12 +6,16 @@ class CustomLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: LoadingAnimationWidget.flickr(
-          leftDotColor: Colors.blue,
-          rightDotColor: Colors.lightBlue,
-          size: 65,
+    return Container(
+      color: Colors.white,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: LoadingAnimationWidget.flickr(
+            leftDotColor: Colors.blue,
+            rightDotColor: Colors.lightBlue,
+            size: 65,
+          ),
         ),
       ),
     );

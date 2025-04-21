@@ -16,6 +16,7 @@ import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
+import '../../widgets/helpers/custom_loading.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
@@ -54,7 +55,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
         if (usersSstate.sessionUser == null) {
           return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CustomLoading(),
             ),
           );
         }

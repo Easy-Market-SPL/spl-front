@@ -77,8 +77,7 @@ class OrdersPage extends StatelessWidget {
                     child: BlocBuilder<OrdersBloc, OrdersState>(
                       builder: (context, state) {
                         if (state is OrdersLoading) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: CustomLoading());
                         } else if (state is OrdersLoaded) {
                           return ListView.builder(
                             itemCount: state.filteredOrders.length,
