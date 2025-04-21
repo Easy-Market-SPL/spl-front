@@ -11,6 +11,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<LoadProducts>(_onLoadProducts);
     on<FilterProductsByCategory>(_onFilterProductsByCategory);
     on<RefreshProducts>(_onRefreshProducts);
+    on<RemoveReview>(_onRemoveReview);
   }
 
   Future<void> _onLoadProducts(
@@ -75,6 +76,22 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       }
     } else {
       add(LoadProducts());
+    }
+  }
+
+  Future<void> _onRemoveReview(
+      RemoveReview event, Emitter<ProductState> emit) async {
+    if (state is ProductLoaded) {
+      final curr = state as ProductLoaded;
+      final updatedProducts = curr.products.map((p) {
+        if (p.code == event.productCode) {
+          final newReviews =
+              p.reviews?.where((r) => r.id != event.reviewId).toList() ?? [];
+          return p.copyWith(reviews: newReviews);
+        }
+        return p;
+      }).toList();
+      emit(ProductLoaded(updatedProducts, activeCategory: curr.activeCategory));
     }
   }
 }

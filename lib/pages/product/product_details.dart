@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/products/product_add_to_cart.dart';
 import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
@@ -59,7 +60,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
         builder: (context, state) {
           if (state is ProductDetailsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CustomLoading());
           } else if (state is ProductDetailsError) {
             return Center(child: Text(state.message));
           } else if (state is ProductDetailsLoaded) {
@@ -113,7 +114,8 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   const SizedBox(height: 16),
                 ],
                 if (SPLVariables.isRated) ...[
-                  ReviewsWidget(product: widget.product),
+                  ReviewsWidget(
+                      product: widget.product, userType: widget.userType),
                   const SizedBox(height: 16),
                   if (isCustomer) WriteReviewWidget(product: widget.product),
                 ],

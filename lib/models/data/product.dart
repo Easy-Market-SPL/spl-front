@@ -27,6 +27,29 @@ class Product {
     this.reviews,
   });
 
+  // CopyWith
+  Product copyWith({
+    String? code,
+    String? name,
+    String? description,
+    double? price,
+    String? imagePath,
+    List<Label>? labels,
+    double? rating,
+    List<Review>? reviews,
+  }) {
+    return Product(
+      code: code ?? this.code,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      imagePath: imagePath ?? this.imagePath,
+      labels: labels ?? this.labels,
+      rating: rating ?? this.rating,
+      reviews: reviews ?? this.reviews,
+    );
+  }
+
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
       code: map['code'] ?? '',

@@ -5,6 +5,7 @@ import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart'
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/spl/spl_variables.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 class ProductDetailsInfo extends StatelessWidget {
   final Product product;
@@ -15,67 +16,47 @@ class ProductDetailsInfo extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProductBloc, ProductState>(
       builder: (context, state) {
-        final double? rating = state is ProductLoaded
-            ? state.products
-                .firstWhere(
-                  (p) => p.code == product.code,
-                  orElse: () => product,
-                )
-                .rating
-            : product.rating;
-        final reviews = state is ProductLoaded
-            ? state.products
-                .firstWhere(
-                  (p) => p.code == product.code,
-                  orElse: () => product,
-                )
-                .reviews
-            : product.reviews;
+        if (state is ProductLoading) {
+          return const CustomLoading();
+        }
+        final productInState = (state is ProductLoaded
+            ? state.products.firstWhere((p) => p.code == product.code,
+                orElse: () => product)
+            : product);
+
+        final double? rating = productInState.rating;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              product.name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(product.name,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(
-              'REF: ${product.code}',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
+            Text('REF: ${product.code}',
+                style: const TextStyle(fontSize: 16, color: Colors.grey)),
             if (SPLVariables.isRated) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
+                  // Solo N/A si rating es null
                   Text(
-                    (rating == null || reviews == null || reviews.isEmpty)
-                        ? 'N/A'
-                        : rating.toStringAsFixed(2),
+                    rating == null ? 'N/A' : rating.toStringAsFixed(2),
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 4),
-
-                  // Pintar estrellas solo si hay rating
-                  if (rating != null && reviews != null && reviews.isNotEmpty)
-                    ..._buildStarIcons(rating),
+                  // Pinta estrellas solo si rating existe
+                  if (rating != null) ..._buildStarIcons(rating),
                 ],
               ),
             ],
             const SizedBox(height: 12),
-            Text(
-              product.description,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(product.description, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 16),
           ],
         );
@@ -86,8 +67,7 @@ class ProductDetailsInfo extends StatelessWidget {
   List<Widget> _buildStarIcons(double rating) {
     final int fullStars = rating.floor();
     final bool halfStar = (rating - fullStars) >= 0.5;
-    final List<Widget> stars = [];
-
+    final stars = <Widget>[];
     for (var i = 0; i < fullStars; i++) {
       stars.add(const Icon(Icons.star, color: Colors.amber, size: 18));
     }
@@ -97,7 +77,6 @@ class ProductDetailsInfo extends StatelessWidget {
     while (stars.length < 5) {
       stars.add(const Icon(Icons.star_border, color: Colors.amber, size: 18));
     }
-
     return stars;
   }
 }
