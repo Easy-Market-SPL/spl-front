@@ -33,8 +33,6 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   void initState() {
     super.initState();
     usersBloc = BlocProvider.of<UsersBloc>(context);
-    context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
 
     // Fetch the current user's orders, passing role=consumer
     final userId = usersBloc.state.sessionUser?.id ?? '';
@@ -46,10 +44,15 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
             ),
           );
     }
+
+    context.read<ProductBloc>().add(LoadProducts());
+    context.read<LabelBloc>().add(LoadDashboardLabels());
   }
 
   @override
   Widget build(BuildContext context) {
+    context.read<ProductBloc>().add(LoadProducts());
+
     return BlocBuilder<UsersBloc, UsersState>(
       builder: (context, usersSstate) {
         if (usersSstate.sessionUser == null) {

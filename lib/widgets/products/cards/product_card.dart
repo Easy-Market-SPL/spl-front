@@ -8,25 +8,29 @@ class ProductCard extends StatelessWidget {
   final UserType userType;
   final Product product;
   final Widget? priceButton;
-  
+
   const ProductCard({
     super.key,
     required this.userType,
     required this.product,
     this.priceButton,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double aspectRatio = SPLVariables.isRated && product.rating != null ? 0.60 : 0.65;
-    
+    final double aspectRatio =
+        SPLVariables.isRated && product.rating != null ? 0.60 : 0.65;
+
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ViewProductDetailsPage(product: product, userType: userType,),
+            builder: (context) => ViewProductDetailsPage(
+              product: product,
+              userType: userType,
+            ),
           ),
         );
       },
@@ -42,7 +46,8 @@ class ProductCard extends StatelessWidget {
             children: [
               // Product Image
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
                 child: product.imagePath.isNotEmpty
                     ? Image.network(
                         product.imagePath,
@@ -57,10 +62,11 @@ class ProductCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
               ),
-              
+
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 6.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -74,7 +80,7 @@ class ProductCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       // Product Reference + Rating
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -91,16 +97,21 @@ class ProductCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          
+
                           // Product Rating
-                          if (SPLVariables.isRated && product.rating != null)
+                          if (SPLVariables.isRated &&
+                              product.rating != null &&
+                              product.reviews != null)
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.star, color: Colors.amber, size: 14),
+                                const Icon(Icons.star,
+                                    color: Colors.amber, size: 14),
                                 const SizedBox(width: 2),
                                 Text(
-                                  "${product.rating}",
+                                  product.reviews!.isEmpty
+                                      ? 'N/A'
+                                      : product.rating!.toStringAsFixed(2),
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey,
@@ -110,9 +121,9 @@ class ProductCard extends StatelessWidget {
                             ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Description
                       Expanded(
                         child: Text(
@@ -129,7 +140,7 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Price Button (customizable per card type)
               priceButton ?? const SizedBox(),
             ],
