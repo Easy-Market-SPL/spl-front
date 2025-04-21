@@ -9,14 +9,17 @@ import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../models/logic/user_type.dart';
+import '../../../models/order_models/order_status.dart';
+import '../../../pages/order/order_tracking.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
 
-class Total extends StatelessWidget {
+class PaymentTotal extends StatelessWidget {
   final double total;
   final PaymentCardModel? card;
   final Address? address;
 
-  const Total({super.key, required this.total, this.card, this.address});
+  const PaymentTotal({super.key, required this.total, this.card, this.address});
 
   void _showSelectAddressDialog(BuildContext context) {
     showDialog(
@@ -235,6 +238,9 @@ class Total extends StatelessWidget {
   }
 
   void _processPayment(BuildContext context) async {
+    var order = BlocProvider.of<OrdersBloc>(context).state.currentCartOrder;
+    final orderBloc = BlocProvider.of<OrdersBloc>(context);
+
     if (address == null) {
       _showSelectAddressDialog(context);
       return;
@@ -246,8 +252,20 @@ class Total extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
 
-      // TODO: Update on API and DB the order status
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+      // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed
+      orderBloc.add(ConfirmOrderEvent(
+          orderId: orderBloc.state.currentCartOrder!.id!,
+          shippingCost: 0,
+          paymentAmount: total));
+
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) =>
+                OrderTrackingPage(userType: UserType.customer, order: order)),
+        (Route<dynamic> route) => false,
+      );
       return;
     }
 
@@ -271,15 +289,20 @@ class Total extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
 
-      final orderBloc = BlocProvider.of<OrdersBloc>(context);
-
       // In this case, the payment is done with card in one installment, so it's neccesary update the order status to confirmed
       orderBloc.add(ConfirmOrderEvent(
           orderId: orderBloc.state.currentCartOrder!.id!,
           shippingCost: 0,
           paymentAmount: total));
 
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) =>
+                OrderTrackingPage(userType: UserType.customer, order: order)),
+        (Route<dynamic> route) => false,
+      );
     } else {
       // Mostrar mensaje de error
       _showErrorPaymentDialog(context, response);

@@ -19,6 +19,7 @@ import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 
 import '../../../bloc/users_blocs/users/users_bloc.dart';
 import '../../../models/order_models/order_product.dart';
+import '../../../utils/strings/cart_strings.dart';
 import '../../../widgets/payment/process/payment_total.dart';
 
 class PaymentScreen extends StatelessWidget {
@@ -155,7 +156,6 @@ class PaymentPageState extends State<PaymentPage> {
               setState(() {
                 selectedCard = selected;
 
-                // TODO: Change for save the selected card in order
                 final userId = context.read<UsersBloc>().state.sessionUser?.id;
                 if (userId != null) {
                   context.read<OrdersBloc>().add(
@@ -269,7 +269,7 @@ class PaymentPageState extends State<PaymentPage> {
                     card: selectedCard,
                     address: selectedAddress,
                   )
-                : Total(
+                : PaymentTotal(
                     total: subtotal,
                     address: selectedAddress,
                     card: selectedCard,
@@ -367,8 +367,31 @@ class PaymentPageState extends State<PaymentPage> {
   }
 
   Widget _buildEmptyCart() {
-    return Center(
-      child: Text('No items in your cart.'),
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: Colors.grey),
+                  const SizedBox(height: 24),
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 300),
+                    child: Text(
+                      CartStrings.emptyCartMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

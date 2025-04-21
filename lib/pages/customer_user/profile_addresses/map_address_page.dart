@@ -46,7 +46,7 @@ class _MapAddressPageState extends State<MapAddressPage> {
                     child: Stack(
                       children: [
                         // Google Map View
-                        MapViewAddress(
+                        MapView(
                           initialLocation: locationState.lastKnowLocation!,
                           markers: markers.values.toSet(),
                         ),

@@ -30,7 +30,6 @@ class OnAddMarkerEvent extends MapEvent {
   List<Object> get props => [markerId, marker];
 }
 
-// Nuevo evento para actualizar los marcadores
 class OnUpdateMarkersEvent extends MapEvent {
   final Map<String, Marker> newMarkers;
 
@@ -38,4 +37,9 @@ class OnUpdateMarkersEvent extends MapEvent {
 
   @override
   List<Object> get props => [newMarkers];
+}
+
+class UpdateUserMarkerEvent extends MapEvent {
+  final LatLng position;
+  const UpdateUserMarkerEvent(this.position);
 }

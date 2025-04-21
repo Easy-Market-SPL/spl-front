@@ -1,7 +1,11 @@
+// lib/pages/order/order_details.dart
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
+import 'package:spl_front/pages/order/orders_list.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_model.dart';
@@ -9,30 +13,19 @@ import '../../../models/user.dart';
 import '../../../services/api/order_service.dart';
 import '../../../services/api/user_service.dart';
 import '../../../spl/spl_variables.dart';
-import '../../../utils/ui/order_statuses.dart'; // normalizeOnTheWay
+import '../../../utils/ui/format_currency.dart';
+import '../../../widgets/helpers/custom_loading.dart';
 import '../../../widgets/navigation_bars/nav_bar.dart';
+import '../../bloc/ui_management/address/address_bloc.dart';
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
-import '../../utils/ui/format_currency.dart';
+import '../../models/ui/stripe/stripe_custom_response.dart';
+import '../../utils/strings/payment_strings.dart';
+import '../../utils/ui/order_statuses.dart';
 import '../../widgets/order/list/products_popup.dart';
 import '../../widgets/order/tracking/modify_order_status_options.dart';
 import '../../widgets/order/tracking/shipping_company_selection.dart';
-import 'orders_list.dart';
-
-class OrderDetailsScreen extends StatelessWidget {
-  final UserType userType;
-  final OrderModel order;
-
-  const OrderDetailsScreen({
-    super.key,
-    required this.userType,
-    required this.order,
-  });
-
-  @override
-  Widget build(BuildContext context) =>
-      OrderDetailsPage(userType: userType, order: order);
-}
+import '../../widgets/payment/process/payment_credit_dialog.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
@@ -58,27 +51,20 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   late final Future<UserModel?>? _domiciliaryFuture;
   late String selectedShippingCompany;
 
-  static const List<String> _flow = [
-    'confirmed',
-    'preparing',
-    'on-the-way',
-    'delivered',
-  ];
-
-  int _idx(String s) => _flow.indexOf(s);
-
   @override
   void initState() {
     super.initState();
+    // Fetch customer and domiciliary data
     _customerFuture = UserService.getUser(widget.order.idUser!);
     _domiciliaryFuture = widget.order.idDomiciliary?.isNotEmpty == true
         ? UserService.getUser(widget.order.idDomiciliary!)
         : null;
-    _loadOrder();
     selectedShippingCompany =
         widget.order.transportCompany ?? 'Sin seleccionar';
+    _loadOrder();
   }
 
+  /// Load order details from service
   void _loadOrder() {
     _orderFuture = OrderService.getOrderById(widget.order.id!).then((res) {
       final (fresh, err) = res;
@@ -89,181 +75,378 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     });
   }
 
+  /// Calculate next order status in flow
+  int _idx(String s) => ['confirmed', 'preparing', 'on-the-way', 'delivered']
+      .indexOf(normalizeOnTheWay(s));
+
   String _computeNextStatus(OrderModel order) {
     final rawLast = order.orderStatuses.isNotEmpty
         ? normalizeOnTheWay(order.orderStatuses.last.status)
         : 'confirmed';
-    final lastIdx = _flow.indexOf(rawLast);
-    return (lastIdx + 1 < _flow.length) ? _flow[lastIdx + 1] : rawLast;
+    final lastIdx = _idx(rawLast);
+    return lastIdx + 1 < 4
+        ? ['confirmed', 'preparing', 'on-the-way', 'delivered'][lastIdx + 1]
+        : rawLast;
   }
 
-  /* ----------  UI helpers ---------- */
-  Widget _sectionTitle(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text,
-            style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: darkBlue)),
-      );
+  /// Show credit payment dialog when customer has pending debt
+  void _showPaymentDialog(double total) {
+    // Take the address that match with widget.order
+    final address = context
+        .read<AddressBloc>()
+        .state
+        .addresses
+        .firstWhere((a) => a.address == widget.order.address);
+    final card = context.read<PaymentBloc>().state.cards.first;
 
-  Widget _subTitle(String text) => Padding(
-        padding: const EdgeInsets.only(top: 24, bottom: 8),
-        child: Text(text,
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: darkBlue)),
-      );
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => CreditPaymentDialog(
+        total: total,
+        address: address,
+        card: card,
+        onLoadingDialog: _onLoadingDialog,
+        onSuccessPaymentDialog: _onSuccessPaymentDialog,
+        onErrorPaymentDialog: _onErrorPaymentDialog,
+        orderParameter: widget.order,
+      ),
+    );
+  }
 
-  Widget infoRow(String label, String value,
-          {VoidCallback? onTap, bool withArrow = false}) =>
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: InkWell(
-          onTap: onTap,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label,
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black)),
-                    const SizedBox(height: 4),
-                    Text(value,
-                        style:
-                            const TextStyle(fontSize: 15, color: Colors.black)),
-                  ],
-                ),
+  /// Display loading indicator during payment
+  void _onLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.processingPayment,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-              if (withArrow)
-                const Icon(Icons.chevron_right, color: Colors.black)
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(height: 10),
+              CircularProgressIndicator(color: Colors.blue),
+              SizedBox(height: 20),
+              Text(
+                PaymentStrings.waitAMoment,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
-        ),
-      );
+        );
+      },
+    );
+  }
+
+  /// Handle successful payment
+  void _onSuccessPaymentDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.successPayment,
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.blue, size: 50),
+              SizedBox(height: 10),
+              Text(
+                PaymentStrings.confirmPaymentAssertion,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Handle payment errors
+  void _onErrorPaymentDialog(StripeCustomReponse response) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              PaymentStrings.errorInPayment,
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text(
+                response.msg ?? PaymentStrings.unknownError,
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show forbidden on the way business/admin
+  void _onTheWayBusinessAdminError() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 50),
+                const SizedBox(height: 10),
+                Text(
+                  'Contacta a un domiciliario de tu empresa para que realice el envío hacía el cliente.',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: widget.backgroundColor,
       bottomNavigationBar: CustomBottomNavigationBar(
-          userType: widget.userType, context: context),
+        userType: widget.userType,
+        context: context,
+      ),
       body: FutureBuilder<OrderModel>(
         future: _orderFuture,
         builder: (ctx, snap) {
+          // ---------- AQUI SE HIZO EL CAMBIO ----------
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            // Mientras carga, mostramos el loading spinner
+            return const Center(child: CustomLoading());
           }
           if (snap.hasError) {
-            return const Center(child: Text('Error cargando orden'));
+            // En caso de error, mostramos mensaje y dejamos de renderizar infinitamente
+            return Center(
+              child: Text(
+                'Error al cargar la orden:\n${snap.error}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
+          // ------------------------------------------
 
           final order = snap.data!;
           final nextStatus = _computeNextStatus(order);
-
-          /* --- estado actual normalizado --- */
           final lastStatus = order.orderStatuses.isNotEmpty
               ? normalizeOnTheWay(order.orderStatuses.last.status)
               : 'confirmed';
-          final bool shippedOrAfter = _idx(lastStatus) >= _idx('on-the-way');
-
-          /* --- refresca company local por si cambió --- */
-          selectedShippingCompany =
-              order.transportCompany ?? selectedShippingCompany;
+          final shippedOrAfter = _idx(lastStatus) >= _idx('on-the-way');
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!kIsWeb) _buildHeader(context),
+              if (!kIsWeb) _buildHeader(),
               Expanded(
-                child: SingleChildScrollView(
+                child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _sectionTitle('Detalles de la Orden'),
-                      _buildStaticInfo(order),
-                      const SizedBox(height: 12),
-                      _sectionTitle('Cliente'),
-                      FutureBuilder<UserModel?>(
-                        future: _customerFuture,
-                        builder: (_, su) {
-                          if (su.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          return Text(su.data?.fullname ?? '---',
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.black));
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      /* -------- reparto / compañía -------- */
-                      if (SPLVariables.hasRealTimeTracking) ...[
-                        _sectionTitle('Reparto'),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionTitle('Detalles de la Orden'),
+                        _buildStaticInfo(order),
+                        const SizedBox(height: 12),
+                        _sectionTitle('Cliente'),
                         FutureBuilder<UserModel?>(
-                          future: _domiciliaryFuture,
-                          builder: (_, sd) {
-                            if (_domiciliaryFuture != null &&
-                                sd.connectionState == ConnectionState.waiting) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
+                          future: _customerFuture,
+                          builder: (_, su) {
+                            if (su.connectionState == ConnectionState.waiting) {
+                              return const SizedBox.shrink();
                             }
-                            return Text(
-                                sd.data?.fullname ?? 'Domiciliario No asignado',
-                                style: const TextStyle(
-                                    fontSize: 14, color: Colors.black));
+                            return Text(su.data?.fullname ?? '---');
                           },
                         ),
-                      ] else ...[
-                        _subTitle('Compañía de Envío'),
-                        if (widget.userType == UserType.customer)
-                          Text(
-                            order.transportCompany ?? 'Sin asignar',
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.black),
-                          )
-                        else if (widget.userType == UserType.business ||
-                            widget.userType == UserType.admin)
-                          shippedOrAfter
-                              ? Text(
-                                  selectedShippingCompany,
-                                  style: const TextStyle(
-                                      fontSize: 14, color: Colors.black),
-                                )
-                              : InkWell(
-                                  onTap: () => _showShippingPopup(context),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          selectedShippingCompany,
-                                          style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
+                        const SizedBox(height: 16),
+
+                        // Shipping / delivery section
+                        if (SPLVariables.hasRealTimeTracking) ...[
+                          _sectionTitle('Reparto'),
+                          FutureBuilder<UserModel?>(
+                            future: _domiciliaryFuture,
+                            builder: (_, sd) {
+                              if (_domiciliaryFuture != null &&
+                                  sd.connectionState ==
+                                      ConnectionState.waiting) {
+                                return const CustomLoading();
+                              }
+                              return Text(
+                                sd.data?.fullname ?? 'Domiciliario No asignado',
+                              );
+                            },
+                          ),
+                        ] else ...[
+                          _subTitle('Compañía de Envío'),
+                          if (widget.userType == UserType.customer)
+                            Text(
+                              order.transportCompany ?? 'Sin asignar',
+                            )
+                          else if (widget.userType == UserType.business ||
+                              widget.userType == UserType.admin)
+                            shippedOrAfter
+                                ? Text(selectedShippingCompany)
+                                : InkWell(
+                                    onTap: () => _showShippingPopup(),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            selectedShippingCompany,
+                                          ),
                                         ),
-                                      ),
-                                      const Icon(Icons.arrow_drop_down,
-                                          color: Colors.black),
-                                    ],
+                                        const Icon(
+                                          Icons.arrow_drop_down,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                        ],
+
+                        const SizedBox(height: 16),
+
+                        // Pending debt payment button for customer
+                        if (widget.userType == UserType.customer &&
+                            order.debt! > 0) ...[
+                          SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.2),
+                          ElevatedButton.icon(
+                            icon:
+                                const Icon(Icons.payment, color: Colors.white),
+                            label: Text(
+                              'Pagar deuda: ${formatCurrency(order.debt!)}',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: darkBlue,
+                              minimumSize:
+                                  Size(MediaQuery.of(context).size.width, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => _showPaymentDialog(order.debt!),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
 
-              /* ------- botón Cambiar estado ------- */
+              // Change status for business/admin
               if (widget.userType == UserType.business ||
                   widget.userType == UserType.admin)
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
-                    width: double.infinity,
+                    width: MediaQuery.of(context).size.width,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.edit, color: Colors.white),
                       label: const Text('Cambiar estado',
@@ -272,10 +455,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         backgroundColor: darkBlue,
                         minimumSize: const Size(200, 50),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      onPressed: () =>
-                          _showStatusDialog(context, order, nextStatus),
+                      onPressed: () => _showStatusDialog(order, nextStatus),
                     ),
                   ),
                 ),
@@ -286,60 +469,125 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  /* ---------- header, static info, popups … (sin cambios) ---------- */
-  Widget _buildHeader(BuildContext ctx) => Container(
+  Widget _buildHeader() => Container(
         padding: EdgeInsets.only(
-            top: MediaQuery.of(ctx).size.height * .05, left: 10, right: 10),
+          top: MediaQuery.of(context).size.height * .05,
+          left: 10,
+          right: 10,
+        ),
         height: 80,
         alignment: Alignment.centerLeft,
         child: IconButton(
           icon: const Icon(Icons.arrow_back, color: darkBlue),
-          onPressed: () => Navigator.pop(ctx),
+          onPressed: () => Navigator.pop(context),
         ),
       );
 
-  Widget _buildStaticInfo(OrderModel order) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        infoRow('Número de Orden', '${order.id}'),
-        infoRow(
-          'Fecha',
-          DateFormat('dd/MM/yyyy').format(order.creationDate!),
+  Widget _sectionTitle(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: darkBlue,
+          ),
         ),
-        infoRow(
-          'Productos',
-          '${order.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity)} ítems',
-          onTap: () => _showProductPopup(context, order),
-          withArrow: true,
+      );
+
+  Widget _subTitle(String text) => Padding(
+        padding: const EdgeInsets.only(top: 24, bottom: 8),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: darkBlue,
+          ),
         ),
-        infoRow('Total', formatCurrency(order.total!)),
-      ],
-    );
-  }
+      );
 
-  void _showProductPopup(BuildContext ctx, OrderModel order) =>
-      showDialog(context: ctx, builder: (_) => ProductPopup(orderModel: order));
+  Widget _buildStaticInfo(OrderModel order) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _infoRow('Número de Orden', '${order.id}'),
+          _infoRow(
+            'Fecha',
+            DateFormat('dd/MM/yyyy').format(order.creationDate!),
+          ),
+          _infoRow(
+            'Productos',
+            '${order.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity)} ítems',
+            onTap: () => showDialog(
+              context: context,
+              builder: (_) => ProductPopup(orderModel: order),
+            ),
+            withArrow: true,
+          ),
+          _infoRow('Total', formatCurrency(order.total!)),
+        ],
+      );
 
-  void _showShippingPopup(BuildContext ctx) => showDialog(
-        context: ctx,
-        barrierDismissible: true,
+  Widget _infoRow(
+    String label,
+    String value, {
+    VoidCallback? onTap,
+    bool withArrow = false,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: InkWell(
+          onTap: onTap,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (withArrow) const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      );
+
+  void _showShippingPopup() => showDialog(
+        context: context,
         builder: (_) => ShippingCompanyPopup(
           selectedCompany: selectedShippingCompany,
-          onCompanySelected: (c) => setState(() => selectedShippingCompany = c),
+          onCompanySelected: (c) {
+            setState(() => selectedShippingCompany = c);
+          },
         ),
       );
 
-  void _showStatusDialog(
-      BuildContext ctx, OrderModel order, String nextStatus) {
+  void _showStatusDialog(OrderModel order, String nextStatus) {
     showDialog(
-      context: ctx,
+      context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: darkBlue, width: 1.5),
+          side: BorderSide(color: darkBlue, width: 1.5),
         ),
         title: const Text(
           'Cambiar estado',
@@ -350,28 +598,23 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ),
         content: SizedBox(
-          height: MediaQuery.of(ctx).size.height * 0.35,
+          height: MediaQuery.of(context).size.height * 0.35,
           child: ModifyOrderStatusOptions(selectedStatus: nextStatus),
         ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         actions: [
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: darkBlue),
+              side: BorderSide(color: darkBlue),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(color: darkBlue, fontSize: 16),
-            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: darkBlue)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: darkBlue,
-              minimumSize: const Size(100, 44),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -379,18 +622,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             onPressed: () {
               switch (nextStatus) {
                 case 'preparing':
-                  ctx.read<OrdersBloc>().add(PrepareOrderEvent(order.id!));
+                  context.read<OrdersBloc>().add(PrepareOrderEvent(order.id!));
                   break;
                 case 'on-the-way':
-                  handleConfirmShippingCompany(ctx, selectedShippingCompany);
+                  SPLVariables.hasRealTimeTracking
+                      ? _onTheWayBusinessAdminError()
+                      : _confirmOnTheWay(order);
                   return;
                 case 'delivered':
-                  ctx.read<OrdersBloc>().add(DeliveredOrderEvent(order.id!));
+                  context
+                      .read<OrdersBloc>()
+                      .add(DeliveredOrderEvent(order.id!));
                   break;
               }
-              Navigator.pop(ctx);
-              setState(() => _loadOrder());
-              showSuccessDialogStatuses.call(ctx, widget.userType);
+              Navigator.pop(context);
+              setState(_loadOrder);
+              showSuccessDialogStatuses.call(context, widget.userType);
             },
             child:
                 const Text('Confirmar', style: TextStyle(color: Colors.white)),
@@ -400,63 +647,33 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
-  void handleConfirmShippingCompany(BuildContext ctx, String company) {
-    if (company == 'Sin seleccionar') {
+  void _confirmOnTheWay(OrderModel order) {
+    if (selectedShippingCompany == 'Sin seleccionar') {
       showDialog(
-        context: ctx,
-        barrierDismissible: false,
+        context: context,
         builder: (_) => AlertDialog(
-          backgroundColor: Colors.white,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
-          contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: darkBlue, width: 1.5),
-          ),
-          title: const Text(
-            'Error',
-            style: TextStyle(
-              color: darkBlue,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          content: const Text(
-            'Por favor, seleccione una compañía de envío.',
-            style: TextStyle(fontSize: 16),
-          ),
-          actionsPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          title: const Text('Error'),
+          content: const Text('Seleccione una compañía de envío.'),
           actions: [
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: darkBlue),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text(
-                'Aceptar',
-                style: TextStyle(color: darkBlue, fontSize: 16),
-              ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
             ),
           ],
         ),
       );
     } else {
-      final guide = '$company-${widget.order.id}';
-      ctx.read<OrdersBloc>().add(
+      final guide = '$selectedShippingCompany-${order.id}';
+      context.read<OrdersBloc>().add(
             OnTheWayTransportOrderEvent(
-              orderId: widget.order.id!,
-              transportCompany: company,
+              orderId: order.id!,
+              transportCompany: selectedShippingCompany,
               shippingGuide: guide,
             ),
           );
-      Navigator.pop(ctx); // cierra el dialog de estado
-      setState(() => _loadOrder());
-      showSuccessDialogStatuses.call(ctx, widget.userType);
+      Navigator.pop(context);
+      setState(_loadOrder);
+      showSuccessDialogStatuses.call(context, widget.userType);
     }
   }
 

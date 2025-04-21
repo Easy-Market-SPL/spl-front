@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../models/logic/user_type.dart';
+import '../../../models/order_models/order_status.dart';
 import '../../../models/ui/credit_card/credit_card_model.dart';
 import '../../../models/ui/stripe/stripe_custom_response.dart';
+import '../../../pages/order/order_tracking.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
 
 class CreditPaymentDialog extends StatefulWidget {
   final double total;
   final Address? address;
   final PaymentCardModel? card;
+  final OrderModel? orderParameter;
 
   // References to the dialog methods in the parent widget
   final VoidCallback onLoadingDialog;
@@ -28,6 +33,7 @@ class CreditPaymentDialog extends StatefulWidget {
     required this.onLoadingDialog,
     required this.onSuccessPaymentDialog,
     required this.onErrorPaymentDialog,
+    this.orderParameter,
   });
 
   @override
@@ -83,6 +89,11 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
     // Show loading dialog
     widget.onLoadingDialog();
 
+    var order = widget.orderParameter ??
+        BlocProvider.of<OrdersBloc>(context).state.currentCartOrder;
+
+    late OrderModel orderModified;
+
     // Payment amount = monthlyPayment (first installment)
     final amount = (_monthlyPayment * 100).round().toString();
 
@@ -105,14 +116,33 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
 
       final ordersBloc = BlocProvider.of<OrdersBloc>(context);
 
-      // Update the order status to confirmed
-      ordersBloc.add(ConfirmOrderEvent(
-        orderId: ordersBloc.state.currentCartOrder!.id!,
-        shippingCost: 0,
-        paymentAmount: _monthlyPayment,
-      ));
+      if (widget.orderParameter != null) {
+        ordersBloc.add(UpdateDebtEvent(
+            orderId: order!.id!,
+            paymentAmount: _monthlyPayment)); // Update the order's debt
 
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+        orderModified = order.copyWith(
+          debt: _remainingDebt,
+        );
+      } else {
+        // Update the order status to confirmed
+        ordersBloc.add(ConfirmOrderEvent(
+          orderId: ordersBloc.state.currentCartOrder!.id!,
+          shippingCost: 0,
+          paymentAmount: _monthlyPayment,
+        ));
+
+        order!.orderStatuses
+            .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      }
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) => OrderTrackingPage(
+                userType: UserType.customer,
+                order: widget.orderParameter == null ? order : orderModified)),
+        (Route<dynamic> route) => false,
+      );
     } else {
       widget.onErrorPaymentDialog(response);
     }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/pages/order/order_map_following.dart';
 
 import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
@@ -82,23 +83,19 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
     }
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: SPLVariables.hasRealTimeTracking
-            ? _buildRealTimeMap()
-            : Column(
-                children: [
-                  // Le damos a la columna _buildNonRealTime() un height finito
-                  Expanded(child: _buildNonRealTime()),
-                ],
-              ),
-      ),
+      body: SPLVariables.hasRealTimeTracking
+          ? _buildRealTimeMap()
+          : Column(
+              children: [
+                // Le damos a la columna _buildNonRealTime() un height finito
+                Expanded(child: _buildNonRealTime()),
+              ],
+            ),
       bottomNavigationBar:
           CustomBottomNavigationBar(userType: _userType, context: context),
     );
   }
 
-  /* ────────────── 1. tracking en tiempo real ────────────── */
   Widget _buildRealTimeMap() {
     return Stack(
       children: [
@@ -107,12 +104,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
             OrderTrackingHeader(userType: _userType),
             HorizontalOrderStatus(order: widget.order!),
             Expanded(
-              child: Container(
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: const Text('Mapa aquí'),
-              ),
-            ),
+                child: OrderMapFollowing(
+                    order: widget.order!, userType: widget.userType)),
           ],
         ),
         Positioned(
@@ -149,7 +142,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
 
         final order = widget.order!;
 
-        /* ---- Business / Admin / Delivery ---- */
         final isBusinessLike = (_userType == UserType.business ||
                 _userType == UserType.admin ||
                 _userType == UserType.delivery) &&
@@ -179,10 +171,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           );
         }
 
-        /* ---- Customer sin tracking ---- */
         if (_userType == UserType.customer &&
             !SPLVariables.hasRealTimeTracking) {
-          // 1️⃣ calcular ETA = creationDate + 5 días, o la fecha real si ya está entregada
           DateTime eta = order.creationDate!.add(const Duration(days: 5));
           final deliveredStatus = order.orderStatuses.lastWhere(
             (s) => normalizeOnTheWay(s.status) == 'delivered',
@@ -193,7 +183,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           if (hasDelivered) eta = deliveredStatus.startDate;
           final String etaText = DateFormat('dd/MM/yyyy').format(eta);
 
-          // 2️⃣ layout casi idéntico a admin/business sin tracking
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -219,7 +208,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           );
         }
 
-        /* ---- Fallback (no debería ocurrir) ---- */
+        // ---- Fallback
         return Column(
           children: [
             OrderTrackingHeader(userType: _userType),

@@ -6,19 +6,16 @@ import 'package:spl_front/bloc/ui_management/product/form/labels/label_state.dar
 class LabelsWidget extends StatelessWidget {
   final String activeLabel;
   final Function(String) onLabelSelected;
-  
-  const LabelsWidget({
-    super.key, 
-    required this.activeLabel, 
-    required this.onLabelSelected
-  });
+
+  const LabelsWidget(
+      {super.key, required this.activeLabel, required this.onLabelSelected});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LabelBloc, LabelState>(
       builder: (context, state) {
         if (state is LabelInitial || state is LabelLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox.shrink());
         } else if (state is LabelDashboardLoaded) {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -35,7 +32,8 @@ class LabelsWidget extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                     ),
                     child: Text(
                       label.name,

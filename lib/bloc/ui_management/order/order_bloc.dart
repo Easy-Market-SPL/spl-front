@@ -44,6 +44,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<AddProductToOrderEvent>(_onAddProduct);
     on<RemoveProductFromOrderEvent>(_onRemoveProduct);
     on<ClearCartEvent>(_onClearCart);
+
+    // Dispose orders
+    on<ClearOrdersEvent>(_onClearOrders);
   }
 
   //
@@ -649,6 +652,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       emit(current.copyWith(
           isLoading: false)); // Revert loading on generic error
     }
+  }
+
+  /// PUBLIC METHOD FOR DISPOSE THE ORDERS
+  Future<void> _onClearOrders(
+      ClearOrdersEvent event, Emitter<OrdersState> emit) async {
+    emit(OrdersInitial());
   }
 
   //

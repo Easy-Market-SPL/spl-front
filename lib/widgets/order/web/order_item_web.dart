@@ -19,15 +19,14 @@ class OrderItemWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Calcular la suma de ítems a partir de orderProducts
-    final itemsCount = (order.orderProducts ?? [])
-        .fold<int>(0, (sum, op) => sum + op.quantity);
+    final itemsCount =
+        (order.orderProducts).fold<int>(0, (sum, op) => sum + op.quantity);
 
     // Determinar el estado actual de manera placeholder
     // Si existe al menos un OrderStatus, tomamos el último
-    final placeholderStatus =
-        (order.orderStatuses != null && order.orderStatuses!.isNotEmpty)
-            ? order.orderStatuses!.last.status
-            : '(no status)';
+    final placeholderStatus = (order.orderStatuses.isNotEmpty)
+        ? order.orderStatuses.last.status
+        : '(no status)';
 
     // Fecha de la orden (o '--' si es null)
     final creationDate = (order.creationDate == null)

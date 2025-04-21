@@ -9,9 +9,9 @@ class ModifyOrderStatusOptions extends StatelessWidget {
   final String selectedStatus;
 
   const ModifyOrderStatusOptions({
-    Key? key,
+    super.key,
     required this.selectedStatus,
-  }) : super(key: key);
+  });
 
   static const List<String> _order = [
     'confirmed',
@@ -64,7 +64,7 @@ class ModifyOrderStatusOptions extends StatelessWidget {
               controlAffinity: ListTileControlAffinity.trailing,
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

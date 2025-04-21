@@ -191,6 +191,10 @@ class DeliveredOrderEvent extends OrdersEvent {
   List<Object?> get props => [orderId];
 }
 
+class ClearOrdersEvent extends OrdersEvent {
+  const ClearOrdersEvent();
+}
+
 /// Deletes an order entirely.
 class DeleteOrderEvent extends OrdersEvent {
   final int orderId;

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_event.dart';
+import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/services/supabase/auth/auth_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 
+import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
 
 class LogOutButton extends StatelessWidget {
@@ -15,10 +18,14 @@ class LogOutButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () async {
           final usersBloc = context.read<UsersBloc>();
+          final searchPlacesBloc = context.read<SearchPlacesBloc>();
+          final ordersBloc = context.read<OrdersBloc>();
 
-          // Do the signout process and clear the status user from Bloc
           await SupabaseAuth.signOut();
           usersBloc.clearUser();
+          searchPlacesBloc.emptyGooglePlaces();
+          searchPlacesBloc.clearSelectedPlace();
+          ordersBloc.add(ClearOrdersEvent());
 
           if (context.mounted) {
             Navigator.of(context).pushNamedAndRemoveUntil(
