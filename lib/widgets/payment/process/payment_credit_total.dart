@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_event.dart';
+import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
+import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_dialog.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../models/logic/user_type.dart';
 
 class PaymentCreditTotal extends StatelessWidget {
   final double total;
@@ -309,6 +312,8 @@ class PaymentCreditTotal extends StatelessWidget {
   /// THE SHIPPING COST FOR ALL ORDERS WILL BE 0.00
   // Processes the payment
   Future<void> _processPayment(BuildContext context) async {
+    var order = BlocProvider.of<OrdersBloc>(context).state.currentCartOrder;
+
     if (address == null) {
       _showSelectAddressDialog(context);
       return;
@@ -326,9 +331,17 @@ class PaymentCreditTotal extends StatelessWidget {
           shippingCost: 0,
           paymentAmount: total));
 
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) =>
+                OrderTrackingPage(userType: UserType.customer, order: order)),
+        (Route<dynamic> route) => false,
+      );
       return;
     }
+
     _showLoadingDialog(context);
     final stripeService = StripeService();
     final amountInCents = (total * 100).round().toString();
@@ -352,7 +365,14 @@ class PaymentCreditTotal extends StatelessWidget {
           shippingCost: 0,
           paymentAmount: total));
 
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) =>
+                OrderTrackingPage(userType: UserType.customer, order: order)),
+        (Route<dynamic> route) => false,
+      );
     } else {
       _showErrorPaymentDialog(context, response);
     }
