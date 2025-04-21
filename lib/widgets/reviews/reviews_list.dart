@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/data/product.dart';
 
-class ReviewsWidget extends StatelessWidget {
-  const ReviewsWidget({super.key});
+class ReviewsWidget extends StatefulWidget {
+  Product product;
+  ReviewsWidget({super.key, required this.product});
+
+  @override
+  State<ReviewsWidget> createState() => _ReviewsWidgetState();
+}
+
+class _ReviewsWidgetState extends State<ReviewsWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,12 +22,14 @@ class ReviewsWidget extends StatelessWidget {
       {
         'userName': 'Nombre de usuario',
         'rating': 4.5,
-        'review': 'Reseña del producto Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+        'review':
+            'Reseña del producto Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
       },
       {
         'userName': 'Otro usuario',
         'rating': 5.0,
-        'review': 'Otra reseña, lorem ipsum dolor sit amet, consectetur adipiscing elit...',
+        'review':
+            'Otra reseña, lorem ipsum dolor sit amet, consectetur adipiscing elit...',
       },
     ];
 
@@ -26,7 +40,8 @@ class ReviewsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Reseñas", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const Text("Reseñas",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Column(
           children: reviews.map((r) => _buildReviewCard(r)).toList(),

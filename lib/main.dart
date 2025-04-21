@@ -27,6 +27,7 @@ import 'package:spl_front/services/api/color_service.dart';
 import 'package:spl_front/services/api/label_service.dart';
 import 'package:spl_front/services/api/order_service.dart';
 import 'package:spl_front/services/api/product_service.dart';
+import 'package:spl_front/services/api/review_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
@@ -42,6 +43,7 @@ Future main() async {
   await ColorService.initializeProductService();
   await UserService.initializeUserService();
   await OrderService.initializeOrderService();
+  await ReviewService.initializeReviewService();
   runApp(MyApp());
 }
 

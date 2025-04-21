@@ -13,7 +13,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   // Handle loading products
-  Future<void> _onLoadProducts(LoadProducts event, Emitter<ProductState> emit) async {
+  Future<void> _onLoadProducts(
+      LoadProducts event, Emitter<ProductState> emit) async {
     emit(ProductLoading());
     try {
       await ProductService.initializeProductService();
@@ -23,6 +24,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (products == null || products.isEmpty) {
         emit(ProductError(ProductStrings.productLoadingError));
       } else {
+        for (final product in products) {
+          await product.fetchReviewsProduct(product.code);
+          await product.fetchReviewAverage(product.code);
+        }
+
         emit(ProductLoaded(products));
       }
     } catch (e) {
@@ -33,24 +39,26 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   // Handle filtering products by category
   Future<void> _onFilterProductsByCategory(
-    FilterProductsByCategory event, 
-    Emitter<ProductState> emit
-  ) async {
+      FilterProductsByCategory event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       try {
         emit(ProductLoading());
         final products = await ProductService.getProducts();
-        
+
         if (event.category == "Todos") {
           // No need to filter, just change category
           emit(ProductLoaded(products ?? [], activeCategory: event.category));
           return;
         }
 
-        final filteredProducts = products?.where(
-          (product) => product.labels?.any((category) => category.name == event.category) ?? false
-        ).toList() ?? [];
-        
+        final filteredProducts = products
+                ?.where((product) =>
+                    product.labels
+                        ?.any((category) => category.name == event.category) ??
+                    false)
+                .toList() ??
+            [];
+
         emit(ProductLoaded(filteredProducts, activeCategory: event.category));
       } catch (e) {
         debugPrint(e.toString());
@@ -60,14 +68,16 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   // Handle refreshing products
-  Future<void> _onRefreshProducts(RefreshProducts event, Emitter<ProductState> emit) async {
+  Future<void> _onRefreshProducts(
+      RefreshProducts event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       final currentState = state as ProductLoaded;
       emit(ProductLoading());
       try {
         final products = await ProductService.getProducts();
         if (products != null) {
-          emit(ProductLoaded(products, activeCategory: currentState.activeCategory));
+          emit(ProductLoaded(products,
+              activeCategory: currentState.activeCategory));
         } else {
           emit(ProductLoaded([], activeCategory: currentState.activeCategory));
         }

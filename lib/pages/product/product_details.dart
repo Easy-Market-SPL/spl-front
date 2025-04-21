@@ -113,7 +113,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   const SizedBox(height: 16),
                 ],
                 if (SPLVariables.isRated) ...[
-                  const ReviewsWidget(),
+                  ReviewsWidget(product: widget.product),
                   const SizedBox(height: 16),
                   if (isCustomer) const WriteReviewWidget(),
                 ],

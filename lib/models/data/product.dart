@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:spl_front/models/data/label.dart';
+import 'package:spl_front/models/data/review.dart';
+
+import '../../services/api/review_service.dart';
 
 class Product {
   final String code;
@@ -9,18 +12,20 @@ class Product {
   final double price;
   final String imagePath;
   final List<Label>? labels;
-  final double? rating;
+  List<Review>? reviews;
+  double? rating;
 
   Product({
     required this.code,
-    required this.name, 
+    required this.name,
     required this.description,
     required this.price,
     required this.imagePath,
     this.labels,
     this.rating,
+    this.reviews,
   });
-  
+
   // Factory method to create a Product from a Map (useful for API responses)
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
@@ -31,6 +36,8 @@ class Product {
       imagePath: map['imgUrl'] ?? '',
       labels: map['labels'] != null ? Label.fromMapList(map['labels']) : [],
       rating: map['rating'] != null ? (map['rating'] as num).toDouble() : null,
+      reviews:
+          map['reviews'] != null ? Review.fromJsonList(map['reviews']) : [],
     );
   }
 
@@ -56,8 +63,21 @@ class Product {
     };
   }
 
+  // Fetch reviews asynchronously
+  Future<void> fetchReviewsProduct(String productCode) async {
+    reviews = await ReviewService.getReviewsByProduct(productCode);
+  }
+
+  // Fetch review average asynchronously
+  Future<void> fetchReviewAverage(String productCode) async {
+    final reviewAverage = await ReviewService.getReviewAverage(productCode);
+    if (reviewAverage != null) {
+      rating = reviewAverage.average;
+    }
+  }
+
   // Method to convert a Product to JSON
-  String toJson(){
+  String toJson() {
     return jsonEncode(toMap(this));
   }
 }
