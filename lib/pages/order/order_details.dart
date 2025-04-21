@@ -262,21 +262,23 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
             ),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error, color: Colors.red, size: 50),
-              const SizedBox(height: 10),
-              Text(
-                'Contacta a un domiciliario de tu empresa para que realice el envío hacía el cliente.',
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+          content: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 50),
+                const SizedBox(height: 10),
+                Text(
+                  'Contacta a un domiciliario de tu empresa para que realice el envío hacía el cliente.',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             Center(
@@ -312,12 +314,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       body: FutureBuilder<OrderModel>(
         future: _orderFuture,
         builder: (ctx, snap) {
+          // ---------- AQUI SE HIZO EL CAMBIO ----------
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: SizedBox.shrink());
+            // Mientras carga, mostramos el loading spinner
+            return const Center(child: CustomLoading());
           }
           if (snap.hasError) {
-            return Center(child: CustomLoading());
+            // En caso de error, mostramos mensaje y dejamos de renderizar infinitamente
+            return Center(
+              child: Text(
+                'Error al cargar la orden:\n${snap.error}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
+          // ------------------------------------------
 
           final order = snap.data!;
           final nextStatus = _computeNextStatus(order);
@@ -331,93 +343,99 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             children: [
               if (!kIsWeb) _buildHeader(),
               Expanded(
-                child: SingleChildScrollView(
+                child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _sectionTitle('Detalles de la Orden'),
-                      _buildStaticInfo(order),
-                      const SizedBox(height: 12),
-                      _sectionTitle('Cliente'),
-                      FutureBuilder<UserModel?>(
-                        future: _customerFuture,
-                        builder: (_, su) {
-                          if (su.connectionState == ConnectionState.waiting) {
-                            return const CustomLoading();
-                          }
-                          return Text(su.data?.fullname ?? '---');
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Shipping / delivery section
-                      if (SPLVariables.hasRealTimeTracking) ...[
-                        _sectionTitle('Reparto'),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionTitle('Detalles de la Orden'),
+                        _buildStaticInfo(order),
+                        const SizedBox(height: 12),
+                        _sectionTitle('Cliente'),
                         FutureBuilder<UserModel?>(
-                          future: _domiciliaryFuture,
-                          builder: (_, sd) {
-                            if (_domiciliaryFuture != null &&
-                                sd.connectionState == ConnectionState.waiting) {
-                              return const CustomLoading();
+                          future: _customerFuture,
+                          builder: (_, su) {
+                            if (su.connectionState == ConnectionState.waiting) {
+                              return const SizedBox.shrink();
                             }
-                            return Text(
-                              sd.data?.fullname ?? 'Domiciliario No asignado',
-                            );
+                            return Text(su.data?.fullname ?? '---');
                           },
                         ),
-                      ] else ...[
-                        _subTitle('Compañía de Envío'),
-                        if (widget.userType == UserType.customer)
-                          Text(
-                            order.transportCompany ?? 'Sin asignar',
-                          )
-                        else if (widget.userType == UserType.business ||
-                            widget.userType == UserType.admin)
-                          shippedOrAfter
-                              ? Text(selectedShippingCompany)
-                              : InkWell(
-                                  onTap: () => _showShippingPopup(),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          selectedShippingCompany,
+                        const SizedBox(height: 16),
+
+                        // Shipping / delivery section
+                        if (SPLVariables.hasRealTimeTracking) ...[
+                          _sectionTitle('Reparto'),
+                          FutureBuilder<UserModel?>(
+                            future: _domiciliaryFuture,
+                            builder: (_, sd) {
+                              if (_domiciliaryFuture != null &&
+                                  sd.connectionState ==
+                                      ConnectionState.waiting) {
+                                return const CustomLoading();
+                              }
+                              return Text(
+                                sd.data?.fullname ?? 'Domiciliario No asignado',
+                              );
+                            },
+                          ),
+                        ] else ...[
+                          _subTitle('Compañía de Envío'),
+                          if (widget.userType == UserType.customer)
+                            Text(
+                              order.transportCompany ?? 'Sin asignar',
+                            )
+                          else if (widget.userType == UserType.business ||
+                              widget.userType == UserType.admin)
+                            shippedOrAfter
+                                ? Text(selectedShippingCompany)
+                                : InkWell(
+                                    onTap: () => _showShippingPopup(),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            selectedShippingCompany,
+                                          ),
                                         ),
-                                      ),
-                                      const Icon(
-                                        Icons.arrow_drop_down,
-                                      ),
-                                    ],
+                                        const Icon(
+                                          Icons.arrow_drop_down,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                      ],
+                        ],
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      // Pending debt payment button for customer
-                      if (widget.userType == UserType.customer &&
-                          order.debt! > 0) ...[
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.2),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.payment, color: Colors.white),
-                          label: Text(
-                            'Pagar deuda: ${formatCurrency(order.debt!)}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: darkBlue,
-                            minimumSize: const Size(double.infinity, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        // Pending debt payment button for customer
+                        if (widget.userType == UserType.customer &&
+                            order.debt! > 0) ...[
+                          SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.2),
+                          ElevatedButton.icon(
+                            icon:
+                                const Icon(Icons.payment, color: Colors.white),
+                            label: Text(
+                              'Pagar deuda: ${formatCurrency(order.debt!)}',
+                              style: TextStyle(color: Colors.white),
                             ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: darkBlue,
+                              minimumSize:
+                                  Size(MediaQuery.of(context).size.width, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => _showPaymentDialog(order.debt!),
                           ),
-                          onPressed: () => _showPaymentDialog(order.debt!),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -428,7 +446,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
-                    width: double.infinity,
+                    width: MediaQuery.of(context).size.width,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.edit, color: Colors.white),
                       label: const Text('Cambiar estado',

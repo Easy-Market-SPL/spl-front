@@ -15,7 +15,7 @@ class Subtotal extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        final double subtotal = state.currentCartOrder?.orderProducts?.fold(0.0,
+        final double subtotal = state.currentCartOrder?.orderProducts.fold(0.0,
                 (sum, item) => sum! + item.product!.price * item.quantity) ??
             0.0;
         return Column(
