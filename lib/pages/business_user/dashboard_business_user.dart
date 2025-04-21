@@ -29,13 +29,14 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
   @override
   void initState() {
     super.initState();
-    // Load products on initialization
-    context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
   }
 
   @override
   Widget build(BuildContext context) {
+    // Load products on initialization
+    context.read<ProductBloc>().add(LoadProducts());
+    context.read<LabelBloc>().add(LoadDashboardLabels());
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: BusinessUserAppBar(

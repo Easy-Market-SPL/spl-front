@@ -1,9 +1,12 @@
+// lib/widgets/reviews_widget.dart
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
+import 'package:spl_front/models/data/review.dart';
+import 'package:spl_front/services/api/user_service.dart';
 
 class ReviewsWidget extends StatefulWidget {
-  Product product;
-  ReviewsWidget({super.key, required this.product});
+  final Product product;
+  const ReviewsWidget({super.key, required this.product});
 
   @override
   State<ReviewsWidget> createState() => _ReviewsWidgetState();
@@ -11,49 +14,38 @@ class ReviewsWidget extends StatefulWidget {
 
 class _ReviewsWidgetState extends State<ReviewsWidget> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Dummy data for demonstration
-    final reviews = [
-      {
-        'userName': 'Nombre de usuario',
-        'rating': 4.5,
-        'review':
-            'Reseña del producto Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
-      },
-      {
-        'userName': 'Otro usuario',
-        'rating': 5.0,
-        'review':
-            'Otra reseña, lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-      },
-    ];
+    final reviews = widget.product.reviews;
 
+    if (reviews == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     if (reviews.isEmpty) {
-      return const Text("Sin reseñas aún");
+      return const Text(
+        'El producto no cuenta con reseñas aún',
+        style: TextStyle(
+          fontSize: 16,
+          fontFamilyFallback: ['Roboto'],
+          fontStyle: FontStyle.italic,
+        ),
+      );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Reseñas",
+        const Text('Reseñas',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Column(
-          children: reviews.map((r) => _buildReviewCard(r)).toList(),
-        ),
+        ...reviews.map((r) => _buildReviewCard(r)),
       ],
     );
   }
 
-  Widget _buildReviewCard(Map<String, dynamic> data) {
-    final userName = data['userName'] ?? "Desconocido";
-    final double rating = data['rating'] ?? 0.0;
-    final reviewText = data['review'] ?? "";
+  Widget _buildReviewCard(Review review) {
+    final userId = review.idUser ?? '';
+    final rating = review.calification ?? 0.0;
+    final commentary = review.commentary ?? '';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -64,7 +56,6 @@ class _ReviewsWidgetState extends State<ReviewsWidget> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Optionally an avatar or icon
             Container(
               width: 40,
               height: 40,
@@ -75,28 +66,39 @@ class _ReviewsWidgetState extends State<ReviewsWidget> {
               child: const Icon(Icons.person, color: Colors.grey),
             ),
             const SizedBox(width: 12),
-            // Review content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Username + star rating
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        userName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      FutureBuilder(
+                        future: UserService.getUser(userId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState !=
+                                  ConnectionState.done ||
+                              !snapshot.hasData) {
+                            return const SizedBox.shrink();
+                          }
+                          final fullName =
+                              snapshot.data?.fullname ?? 'Desconocido';
+                          return Flexible(
+                            child: Text(
+                              fullName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        },
                       ),
                       _buildStarRating(rating),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  // Review text
-                  Text(
-                    reviewText,
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                  Text(commentary, style: const TextStyle(fontSize: 14)),
                 ],
               ),
             ),
@@ -107,22 +109,18 @@ class _ReviewsWidgetState extends State<ReviewsWidget> {
   }
 
   Widget _buildStarRating(double rating) {
-    // e.g., 4.5 => 4 full stars + 1 half star
-    final int fullStars = rating.floor();
-    final bool hasHalfStar = (rating - fullStars) >= 0.5;
-
+    final full = rating.floor();
+    final half = (rating - full) >= 0.5;
     List<Widget> stars = [];
-    for (int i = 0; i < fullStars; i++) {
+    for (var i = 0; i < full; i++) {
       stars.add(const Icon(Icons.star, color: Colors.amber, size: 18));
     }
-    if (hasHalfStar) {
+    if (half) {
       stars.add(const Icon(Icons.star_half, color: Colors.amber, size: 18));
     }
-    // If less than 5 stars total, fill the rest with empty
     while (stars.length < 5) {
       stars.add(const Icon(Icons.star_border, color: Colors.amber, size: 18));
     }
-
     return Row(children: stars);
   }
 }
