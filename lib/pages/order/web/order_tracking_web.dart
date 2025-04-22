@@ -100,8 +100,8 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                                   ] else ...[
                                     const SizedBox(height: 24.0),
                                     ModifyOrderStatusOptions(
-                                      selectedStatus:
-                                          lastStatus, // el raw normalizado
+                                      selectedStatus: lastStatus,
+                                      order: order,
                                     ),
                                     const SizedBox(height: 24.0),
                                     OrderActionButtons(

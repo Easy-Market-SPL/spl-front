@@ -87,7 +87,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
           ? _buildRealTimeMap()
           : Column(
               children: [
-                // Le damos a la columna _buildNonRealTime() un height finito
                 Expanded(child: _buildNonRealTime()),
               ],
             ),
@@ -142,32 +141,36 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
 
         final order = widget.order!;
 
-        final isBusinessLike = (_userType == UserType.business ||
-                _userType == UserType.admin ||
-                _userType == UserType.delivery) &&
-            !SPLVariables.hasRealTimeTracking;
+        final isBusinessLike =
+            (_userType == UserType.business || _userType == UserType.admin) &&
+                !SPLVariables.hasRealTimeTracking;
 
         if (isBusinessLike) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              OrderTrackingHeader(userType: _userType),
-              const SizedBox(height: 24),
-              HorizontalOrderStatus(order: order),
-              const SizedBox(height: 24),
-              ModifyOrderStatusOptions(selectedStatus: _selectedStatus),
+          return Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OrderTrackingHeader(userType: _userType),
+                const SizedBox(height: 24),
+                HorizontalOrderStatus(order: order),
+                const SizedBox(height: 24),
+                ModifyOrderStatusOptions(
+                    selectedStatus: _selectedStatus, order: order),
+                const Spacer(), // empuja los botones al fondo
 
-              const Spacer(), // empuja los botones al fondo
-
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: OrderActionButtons(
-                  selectedStatus: _selectedStatus,
-                  userType: _userType,
-                  order: order,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: OrderActionButtons(
+                    selectedStatus: _selectedStatus,
+                    userType: _userType,
+                    order: order,
+                    showConfirmButton: !(_selectedStatus != 'delivered' &&
+                        order.orderStatuses.last.status != 'delivered'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }
 
@@ -194,7 +197,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
                 orderNumber: '${order.id!}',
                 estimatedDeliveryDate: etaText,
               ),
-              const Spacer(), // empuja el botón al fondo
+              const Spacer(),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: OrderActionButtons(

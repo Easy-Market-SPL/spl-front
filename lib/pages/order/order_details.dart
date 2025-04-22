@@ -441,8 +441,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
 
               // Change status for business/admin
-              if (widget.userType == UserType.business ||
-                  widget.userType == UserType.admin)
+              if ((widget.userType == UserType.business ||
+                      widget.userType == UserType.admin) &&
+                  widget.order.orderStatuses.last.status != 'delivered')
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -599,7 +600,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ),
         content: SizedBox(
           height: MediaQuery.of(context).size.height * 0.35,
-          child: ModifyOrderStatusOptions(selectedStatus: nextStatus),
+          child: ModifyOrderStatusOptions(
+              selectedStatus: nextStatus, order: widget.order),
         ),
         actions: [
           OutlinedButton(

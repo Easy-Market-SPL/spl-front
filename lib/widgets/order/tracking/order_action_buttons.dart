@@ -160,7 +160,6 @@ class OrderActionButtons extends StatelessWidget {
           builder: (_) => ShippingCompanyPopup(
             selectedCompany: o.transportCompany ?? 'Sin seleccionar',
             onCompanySelected: (company) {
-              Navigator.pop(ctx);
               _handleConfirmShippingCompany(ctx, o, company);
             },
           ),
