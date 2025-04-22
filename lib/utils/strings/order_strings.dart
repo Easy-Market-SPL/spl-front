@@ -10,6 +10,7 @@ class OrderStrings {
   static const String dateRange = 'Fechas';
   static const String orderDetailsTitle = 'Detalles de la orden';
   static const String orderNumber = 'Número de orden';
+  static const String idOrder = 'ID de Orden';
   static const String deliveryIn = 'Hacía';
   static const String noLocation = 'Dirección Mapa';
   static const String orderDate = 'Fecha';
