@@ -198,6 +198,13 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       }
 
       // Reapply filters
+
+      // Remove the cart order from the filtered list
+      final cartOrder = current.currentCartOrder;
+      if (cartOrder != null && cartOrder.id != null) {
+        current.allOrders.removeWhere((order) => order.id == cartOrder.id);
+      }
+
       final newFiltered = _applyFilters(
         orders: current.allOrders,
         selectedFilters: updatedFilters,
@@ -270,6 +277,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         additionalFilters: [],
         dateRange: null,
       );
+
+      // Filter out the cart order if it exists
+      final cartOrder = current.currentCartOrder;
+
+      if (cartOrder != null && cartOrder.id != null) {
+        newFiltered.removeWhere((order) => order.id == cartOrder.id);
+      }
+
       emit(current.copyWith(
         filteredOrders: newFiltered,
         additionalFilters: [],
