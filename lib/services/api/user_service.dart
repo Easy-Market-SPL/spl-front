@@ -126,7 +126,8 @@ class UserService {
           'longitude': longitude,
         }),
       );
-      final addressResponse = Address.fromJson(response.body);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final addressResponse = Address.fromJson(decodedBody);
       return addressResponse;
     } catch (e) {
       debugPrint('❌ Error creating user address: $e');
@@ -144,7 +145,8 @@ class UserService {
         body: address.toJson(),
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final addressResponse = Address.fromJson(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final addressResponse = Address.fromJson(decodedBody);
         return addressResponse;
       } else {
         debugPrint('❌ updateUserAddress failed: ${response.statusCode}');
@@ -160,7 +162,7 @@ class UserService {
     final url = '$_url/users/$idUser/addresses/$addressId';
     try {
       final response = await _client.delete(Uri.parse(url));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 204) {
         return true;
       } else {
         debugPrint('❌ deleteUserAddress failed: ${response.statusCode}');
