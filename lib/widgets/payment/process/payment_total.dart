@@ -301,7 +301,6 @@ class PaymentTotal extends StatelessWidget {
         (Route<dynamic> route) => false,
       );
     } else {
-      // Mostrar mensaje de error
       _showErrorPaymentDialog(context, response);
     }
   }

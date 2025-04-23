@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 
 import '../../../models/logic/user_type.dart';
@@ -19,6 +18,7 @@ import '../../../widgets/navigation_bars/nav_bar.dart';
 import '../../bloc/ui_management/address/address_bloc.dart';
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/ui_management/payment/payment_bloc.dart';
 import '../../models/ui/stripe/stripe_custom_response.dart';
 import '../../utils/strings/payment_strings.dart';
 import '../../utils/ui/order_statuses.dart';
