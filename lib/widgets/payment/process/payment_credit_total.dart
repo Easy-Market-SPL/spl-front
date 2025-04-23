@@ -5,14 +5,13 @@ import 'package:spl_front/bloc/ui_management/order/order_event.dart';
 import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
-import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_dialog.dart';
 
 import '../../../models/logic/address.dart';
-import '../../../models/logic/user_type.dart';
+import '../../../pages/customer_user/dashboard_customer_user.dart';
 
 class PaymentCreditTotal extends StatelessWidget {
   final double total;
@@ -334,9 +333,7 @@ class PaymentCreditTotal extends StatelessWidget {
       order!.orderStatuses
           .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (context) =>
-                OrderTrackingPage(userType: UserType.customer, order: order)),
+        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
         (Route<dynamic> route) => false,
       );
       return;
@@ -368,9 +365,7 @@ class PaymentCreditTotal extends StatelessWidget {
       order!.orderStatuses
           .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (context) =>
-                OrderTrackingPage(userType: UserType.customer, order: order)),
+        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
         (Route<dynamic> route) => false,
       );
     } else {
