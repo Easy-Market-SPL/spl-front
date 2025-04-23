@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:spl_front/models/user.dart';
 
 import '../../models/logic/address.dart';
+import '../util/retry_request.dart';
 
 class UserService {
   static final UserService _instance = UserService._internal();
@@ -95,10 +96,11 @@ class UserService {
   static Future<List<Address>?> getUserAddresses(String id) async {
     final url = '$_url/users/$id/addresses';
     try {
-      final response = await _client.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = json.decode(response.body);
-        return jsonList.map((json) => Address.fromJson(json)).toList();
+      final response = await fetchWithRetry(url);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final addresses = Address.fromJsonList(decodedBody);
+        return addresses;
       } else {
         debugPrint('❌ getUserAddresses failed: ${response.statusCode}');
         return null;
@@ -124,30 +126,26 @@ class UserService {
           'longitude': longitude,
         }),
       );
-      if (response.statusCode == 201) {
-        final map = json.decode(utf8.decode(response.bodyBytes));
-        return Address.fromJson(map);
-      } else {
-        debugPrint('❌ createUserAddress failed: ${response.statusCode}');
-        throw Exception('Failed to create user address');
-      }
+      final addressResponse = Address.fromJson(response.body);
+      return addressResponse;
     } catch (e) {
       debugPrint('❌ Error creating user address: $e');
       throw Exception('Failed to create user address');
     }
   }
 
-  static Future<Address?> updateUserAddress(String id, Address address) async {
-    final url = '$_url/users/$id/addresses/${address.id}';
+  static Future<Address?> updateUserAddress(
+      String idUser, Address address) async {
+    final url = '$_url/users/$idUser/addresses/${address.id}';
     try {
       final response = await _client.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: address.toJson(),
       );
-      if (response.statusCode == 200) {
-        final map = json.decode(utf8.decode(response.bodyBytes));
-        return Address.fromJson(map);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final addressResponse = Address.fromJson(response.body);
+        return addressResponse;
       } else {
         debugPrint('❌ updateUserAddress failed: ${response.statusCode}');
         throw Exception('Failed to update user address');
@@ -158,8 +156,8 @@ class UserService {
     }
   }
 
-  static Future<bool> deleteUserAddress(String id, int addressId) async {
-    final url = '$_url/users/$id/addresses/$addressId';
+  static Future<bool> deleteUserAddress(String idUser, int addressId) async {
+    final url = '$_url/users/$idUser/addresses/$addressId';
     try {
       final response = await _client.delete(Uri.parse(url));
       if (response.statusCode == 200) {

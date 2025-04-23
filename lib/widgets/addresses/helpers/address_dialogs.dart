@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
 import '../../../models/logic/address.dart';
@@ -71,9 +72,13 @@ void showDeleteConfirmationDialog(
 
           ElevatedButton(
             onPressed: () {
+              final currentUserId =
+                  BlocProvider.of<UsersBloc>(context).state.sessionUser!.id;
               // Dispatch Delete Address event
-              addressBloc.add(
-                  DeleteAddress(id: addressBloc.state.addresses[index].id));
+              addressBloc.add(DeleteAddress(
+                userId: currentUserId,
+                id: addressBloc.state.addresses[index].id,
+              ));
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
@@ -162,7 +167,11 @@ void showEditDialog(BuildContext context, Address address, int index) {
               final details =
                   detailsController.text; // Fetch details from input
 
+              final userId =
+                  BlocProvider.of<UsersBloc>(context).state.sessionUser!.id;
+
               BlocProvider.of<AddressBloc>(context).add(EditAddress(
+                userId: userId,
                 id: address.id,
                 name: name,
                 address: address.address,

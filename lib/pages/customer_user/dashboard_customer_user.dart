@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
@@ -44,6 +45,9 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
             ),
           );
     }
+
+    // Fetch the current user's addresses
+    context.read<AddressBloc>().add(LoadAddresses(userId));
 
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());

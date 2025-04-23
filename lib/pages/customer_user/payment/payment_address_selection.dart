@@ -29,7 +29,13 @@ class SelectAddressScreen extends StatelessWidget {
           builder: (context, state) {
             if (state.addresses.isEmpty) {
               return const Center(
-                child: Text(AddressStrings.notAvailableAddresses),
+                child: Text(AddressStrings.notAvailableAddresses,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    )),
               );
             }
 
