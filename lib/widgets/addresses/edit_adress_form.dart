@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 
-import '../../bloc/ui_management/address/address_bloc.dart';
+import '../../models/logic/address.dart';
 
 class EditAddressForm extends StatelessWidget {
   final Address address;

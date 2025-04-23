@@ -1,60 +1,81 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:spl_front/services/api/user_service.dart';
+
+import '../../../models/logic/address.dart';
 
 part 'address_event.dart';
 part 'address_state.dart';
 
 class AddressBloc extends Bloc<AddressEvent, AddressState> {
-  AddressBloc()
-      // TODO: LOAD FROM PERSISTENCE
-      : super(AddressState(addresses: [
-          Address(
-            name: 'Casa Principal',
-            address: 'Calle 26 # 92-32',
-            details: 'Casa con jardín grande',
-            location: LatLng(4.6097100, -74.0817500), // Coordenadas de Bogotá
-          ),
-          Address(
-            name: 'Oficina Central',
-            address: 'Calle 13 # 52-21',
-            details: 'Oficina corporativa principal',
-            location: LatLng(4.6097100, -74.0817500), // Coordenadas de Bogotá
-          ),
-          Address(
-            name: 'Centro Comercial Andino',
-            address: 'Carrera 11 # 82-20',
-            details: 'Centro comercial con tiendas de lujo',
-            location: LatLng(4.663428, -74.045435), // Coordenadas de Bogotá
-          ),
-        ])) {
+  AddressBloc() : super(AddressState(addresses: const [])) {
+    on<LoadAddresses>((event, emit) async {
+      try {
+        final addresses = await UserService.getUserAddresses(event.userId);
+        if (addresses == null || addresses.isEmpty) {
+          emit(state.copyWith(addresses: []));
+        } else {
+          emit(state.copyWith(addresses: addresses));
+        }
+      } catch (e) {
+        emit(state.copyWith(error: e.toString()));
+      }
+    });
+
     on<AddAddress>((event, emit) {
       final newAddress = Address(
+        id: event.id,
         name: event.name,
         address: event.address,
         details: event.details,
-        location: event.location,
+        latitude: event.latitude,
+        longitude: event.longitude,
       );
       final updatedAddresses = List<Address>.from(state.addresses)
         ..add(newAddress);
       emit(state.copyWith(addresses: updatedAddresses));
     });
 
-    on<EditAddress>((event, emit) {
+    on<EditAddress>((event, emit) async {
+      int index =
+          state.addresses.indexWhere((address) => address.id == event.id);
+
+      // Make the call to the API to update the address
+      // If the call is successful, update the state
+      // Otherwise, handle the error as needed
+
+      await UserService.updateUserAddress(
+        event.userId,
+        Address(
+          id: event.id,
+          name: event.name,
+          address: event.address,
+          details: event.details,
+          latitude: event.latitude,
+          longitude: event.longitude,
+        ),
+      );
+
       final updatedAddress = Address(
+        id: event.id,
         name: event.name,
-        address: state.addresses[event.index].address,
+        address: event.address,
         details: event.details,
-        location: state.addresses[event.index].location,
+        latitude: event.latitude,
+        longitude: event.longitude,
       );
       final updatedAddresses = List<Address>.from(state.addresses);
-      updatedAddresses[event.index] = updatedAddress;
+      updatedAddresses[index] = updatedAddress;
       emit(state.copyWith(addresses: updatedAddresses));
     });
 
-    on<DeleteAddress>((event, emit) {
+    on<DeleteAddress>((event, emit) async {
+      await UserService.deleteUserAddress(event.userId, event.id);
+
       final updatedAddresses = List<Address>.from(state.addresses);
-      updatedAddresses.removeAt(event.index);
+      int index =
+          updatedAddresses.indexWhere((address) => address.id == event.id);
+      updatedAddresses.removeAt(index);
       emit(state.copyWith(addresses: updatedAddresses));
     });
   }

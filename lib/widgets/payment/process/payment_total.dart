@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
@@ -9,6 +8,7 @@ import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../models/logic/address.dart';
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_status.dart';
 import '../../../pages/order/order_tracking.dart';
