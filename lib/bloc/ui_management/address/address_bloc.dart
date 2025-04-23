@@ -1,39 +1,21 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../../../models/logic/address.dart';
 
 part 'address_event.dart';
 part 'address_state.dart';
 
 class AddressBloc extends Bloc<AddressEvent, AddressState> {
-  AddressBloc()
-      // TODO: LOAD FROM PERSISTENCE
-      : super(AddressState(addresses: [
-          Address(
-            name: 'Casa Principal',
-            address: 'Calle 26 # 92-32',
-            details: 'Casa con jardín grande',
-            location: LatLng(4.6097100, -74.0817500), // Coordenadas de Bogotá
-          ),
-          Address(
-            name: 'Oficina Central',
-            address: 'Calle 13 # 52-21',
-            details: 'Oficina corporativa principal',
-            location: LatLng(4.6097100, -74.0817500), // Coordenadas de Bogotá
-          ),
-          Address(
-            name: 'Centro Comercial Andino',
-            address: 'Carrera 11 # 82-20',
-            details: 'Centro comercial con tiendas de lujo',
-            location: LatLng(4.663428, -74.045435), // Coordenadas de Bogotá
-          ),
-        ])) {
+  AddressBloc() : super(AddressState(addresses: [])) {
     on<AddAddress>((event, emit) {
       final newAddress = Address(
+        id: event.id,
         name: event.name,
         address: event.address,
         details: event.details,
-        location: event.location,
+        latitude: event.latitude,
+        longitude: event.longitude,
       );
       final updatedAddresses = List<Address>.from(state.addresses)
         ..add(newAddress);
@@ -41,20 +23,27 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     });
 
     on<EditAddress>((event, emit) {
+      int index =
+          state.addresses.indexWhere((address) => address.id == event.id);
+
       final updatedAddress = Address(
+        id: event.id,
         name: event.name,
-        address: state.addresses[event.index].address,
+        address: event.address,
         details: event.details,
-        location: state.addresses[event.index].location,
+        latitude: event.latitude,
+        longitude: event.longitude,
       );
       final updatedAddresses = List<Address>.from(state.addresses);
-      updatedAddresses[event.index] = updatedAddress;
+      updatedAddresses[index] = updatedAddress;
       emit(state.copyWith(addresses: updatedAddresses));
     });
 
     on<DeleteAddress>((event, emit) {
       final updatedAddresses = List<Address>.from(state.addresses);
-      updatedAddresses.removeAt(event.index);
+      int index =
+          updatedAddresses.indexWhere((address) => address.id == event.id);
+      updatedAddresses.removeAt(index);
       emit(state.copyWith(addresses: updatedAddresses));
     });
   }

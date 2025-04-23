@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/widgets/addresses/helpers/address_dialogs.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
 import '../../../bloc/ui_management/gps/gps_bloc.dart';
+import '../../../bloc/users_blocs/users/users_bloc.dart';
+import '../../../models/logic/address.dart';
 import 'add_address.dart';
 
 class ConfirmAddressPage extends StatefulWidget {
@@ -183,60 +185,79 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                             BlocProvider.of<AddressBloc>(context);
                         final searchBloc =
                             BlocProvider.of<SearchPlacesBloc>(context);
-                        addressBloc.add(
-                          AddAddress(
-                            name: labelController.text,
-                            address: state.selectedPlace!.formattedAddress,
-                            details: detailsController.text,
-                            location: LatLng(
-                              state.selectedPlace!.geometry.location.lat,
-                              state.selectedPlace!.geometry.location.lng,
-                            ),
-                          ),
-                        );
+                        final userId = BlocProvider.of<UsersBloc>(context)
+                            .state
+                            .sessionUser!
+                            .id;
 
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext dialogContext) {
-                            return AlertDialog(
-                              title: const Center(
-                                child: Text(
-                                  AddressStrings.addressCreated,
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              content: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.check_circle,
-                                      color: Colors.blue, size: 50),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    AddressStrings.successAddressCreation,
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                        final Future<Address?> address =
+                            UserService.createUserAddress(
+                                userId,
+                                labelController.text,
+                                state.selectedPlace!.formattedAddress,
+                                detailsController.text,
+                                state.selectedPlace!.geometry.location.lat,
+                                state.selectedPlace!.geometry.location.lng);
+
+                        // Espera al Future y pasa la dirección al AddressBloc
+                        address.then((createdAddress) {
+                          if (createdAddress != null) {
+                            addressBloc.add(AddAddress(
+                              id: createdAddress.id,
+                              name: createdAddress.name,
+                              address: createdAddress.address,
+                              details: createdAddress.details,
+                              latitude: createdAddress.latitude,
+                              longitude: createdAddress.longitude,
+                            ));
+
+                            // Mostrar el diálogo de éxito
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext dialogContext) {
+                                return AlertDialog(
+                                  title: const Center(
+                                    child: Text(
+                                      AddressStrings.addressCreated,
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
-                                ],
-                              ),
+                                  content: const Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check_circle,
+                                          color: Colors.blue, size: 50),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        AddressStrings.successAddressCreation,
+                                        style: TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             );
-                          },
-                        );
 
-                        await Future.delayed(
-                            const Duration(seconds: 1, milliseconds: 500));
-                        searchBloc.add(OnClearSelectedPlaceEvent());
-                        Navigator.of(context).pop(); // Close the dialog
-
-                        Navigator.of(context).pop(); // Close the page
+                            // Esperar un momento antes de cerrar el diálogo y la página
+                            Future.delayed(
+                                const Duration(seconds: 1, milliseconds: 500),
+                                () {
+                              searchBloc.add(OnClearSelectedPlaceEvent());
+                              Navigator.of(context).pop(); // Cerrar el diálogo
+                              Navigator.of(context).pop(); // Cerrar la página
+                            });
+                          }
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(

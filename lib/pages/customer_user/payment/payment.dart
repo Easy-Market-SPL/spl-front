@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_event.dart';
 import 'package:spl_front/bloc/ui_management/order/order_state.dart';
@@ -18,6 +17,7 @@ import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 
 import '../../../bloc/users_blocs/users/users_bloc.dart';
+import '../../../models/logic/address.dart';
 import '../../../models/order_models/order_product.dart';
 import '../../../utils/strings/cart_strings.dart';
 import '../../../widgets/payment/process/payment_total.dart';

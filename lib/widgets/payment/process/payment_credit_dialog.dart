@@ -4,9 +4,9 @@ import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 
-import '../../../bloc/ui_management/address/address_bloc.dart';
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../models/logic/address.dart';
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_status.dart';
 import '../../../models/ui/credit_card/credit_card_model.dart';

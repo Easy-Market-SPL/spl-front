@@ -11,7 +11,7 @@ import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_dialog.dart';
 
-import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../models/logic/address.dart';
 import '../../../models/logic/user_type.dart';
 
 class PaymentCreditTotal extends StatelessWidget {
