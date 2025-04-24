@@ -13,6 +13,7 @@ import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.
 import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
@@ -76,6 +77,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
         BlocProvider(create: (context) => ProductDetailsBloc()),
+        BlocProvider<ProductFilterBloc>(
+          create: (context) => ProductFilterBloc(
+            productBloc: context.read<ProductBloc>(),
+          ),
+        ),
         BlocProvider(create: (context) => LabelBloc()),
 
         // Provider for Payment Management

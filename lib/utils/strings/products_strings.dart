@@ -18,6 +18,7 @@ class ProductStrings {
   static const initializingForm = "Inicializando formulario...";
   static const editProduct = "Editar Producto";
   static const createProduct = "Crear Producto";
+  static const productDetails = "Detalles del Producto";
   static const productSaved = "Producto guardado correctamente";
   static const productDeleted = "Producto eliminado correctamente";
   static const productSaveError = "Error al guardar el producto";

@@ -7,9 +7,8 @@ import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
+import 'package:spl_front/widgets/app_bars/product_view_app_bar.dart';
 import 'package:spl_front/widgets/products/product_add_to_cart.dart';
 import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
@@ -53,9 +52,9 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
     final bool isCustomer = widget.userType == UserType.customer;
 
     return Scaffold(
-      appBar: CustomerUserAppBar(
-        hintText: BusinessStrings.searchHint,
-        onFilterPressed: () {},
+      appBar: ProductViewAppBar(
+        appBarTittle: ProductStrings.productDetails,
+        userType: widget.userType,
       ),
       backgroundColor: Colors.white,
       body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(

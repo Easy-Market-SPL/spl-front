@@ -5,6 +5,7 @@ import 'package:spl_front/bloc/ui_management/product/products/product_event.dart
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
+import 'package:spl_front/utils/prices/price_formatter.dart';
 import 'package:spl_front/widgets/products/cards/product_card.dart';
 
 class BusinessProductCard extends StatelessWidget {
@@ -50,7 +51,7 @@ class BusinessProductCard extends StatelessWidget {
             children: [
               // Price Text
               Text(
-                '\$ ${product.price}',
+                PriceFormatter.formatPrice(product.price),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

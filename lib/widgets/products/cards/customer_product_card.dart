@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/product/product_details.dart';
+import 'package:spl_front/utils/prices/price_formatter.dart';
 import 'package:spl_front/widgets/products/cards/product_card.dart';
 
 class CustomerProductCard extends StatelessWidget {
@@ -38,7 +39,7 @@ class CustomerProductCard extends StatelessWidget {
             ),
           ),
           child: Text(
-            '\$ ${product.price}',
+            PriceFormatter.formatPrice(product.price),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
