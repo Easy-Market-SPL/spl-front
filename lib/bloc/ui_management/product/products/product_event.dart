@@ -36,3 +36,9 @@ class FilterProducts extends ProductEvent {
 }
 
 class RefreshProducts extends ProductEvent {}
+
+class RemoveReview extends ProductEvent {
+  final String productCode;
+  final int reviewId;
+  const RemoveReview(this.productCode, this.reviewId);
+}

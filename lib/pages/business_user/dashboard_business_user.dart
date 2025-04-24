@@ -14,6 +14,7 @@ import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/dashboard_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/business_user_app_bar.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/dashboard/active_filters_dashboard.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
@@ -24,7 +25,8 @@ class BusinessUserMainDashboard extends StatefulWidget {
   const BusinessUserMainDashboard({super.key});
 
   @override
-  State<BusinessUserMainDashboard> createState() => _BusinessUserMainDashboardState();
+  State<BusinessUserMainDashboard> createState() =>
+      _BusinessUserMainDashboardState();
 }
 
 class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
@@ -120,7 +122,8 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
 
                 // Add new Product button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28.0, vertical: 4.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -128,7 +131,8 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ProductFormPage(isEditing: false),
+                            builder: (context) =>
+                                const ProductFormPage(isEditing: false),
                           ),
                         ).then((result) {
                           if (result == true) {
@@ -161,13 +165,14 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
           },
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: UserType.business, context: context),
+      bottomNavigationBar: CustomBottomNavigationBar(
+          userType: UserType.business, context: context),
     );
   }
 
   Widget _buildProductContent(ProductState state) {
     if (state is ProductInitial || state is ProductLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CustomLoading());
     } else if (state is ProductError) {
       return Center(
         child: Column(
@@ -195,7 +200,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
           ),
         );
       }
-      
+
       return SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -205,7 +210,7 @@ class _BusinessUserMainDashboardState extends State<BusinessUserMainDashboard> {
         ),
       );
     }
-    
+
     // Fallback
     return const Center(child: Text(ProductStrings.productLoadingError));
   }

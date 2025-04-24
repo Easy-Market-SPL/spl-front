@@ -1,37 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_state.dart';
 import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/pages/delivery_user/delivery_user_tracking.dart';
+import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
-import '../../../bloc/ui_management/gps/gps_bloc.dart';
-import '../../../bloc/ui_management/orders_list/orders_list_event.dart';
-import '../../../bloc/ui_management/orders_list/orders_list_state.dart';
 import '../../../pages/customer_user/profile_addresses/add_address.dart';
 
 class OrderItem extends StatelessWidget {
-  final Order order;
+  final OrderModel order;
   final UserType userType;
+  final bool? triggerFollow;
 
-  const OrderItem({super.key, required this.order, required this.userType});
+  const OrderItem(
+      {super.key,
+      required this.order,
+      required this.userType,
+      this.triggerFollow});
 
   @override
   Widget build(BuildContext context) {
+    // If you need GPS logic
     final gpsBloc = BlocProvider.of<GpsBloc>(context);
 
-    return BlocBuilder<OrderListBloc, OrderListState>(
+    final itemsCount =
+        (order.orderProducts).fold<int>(0, (sum, op) => sum + op.quantity);
+
+    // Determine the current (placeholder) status from the last OrderStatus
+    // If there are none, we default to something like '(no status)'
+    // Determine the current (placeholder) status from the last OrderStatus
+    final placeholderStatus = (order.orderStatuses.isNotEmpty)
+        ? order.orderStatuses.last.status
+        : 'Sin Estado';
+
+    final statusMap = {
+      'confirmed': 'Confirmada',
+      'preparing': 'Preparando',
+      'on the way': 'En Camino',
+      'delivered': 'Entregada',
+    };
+
+    // Get the translated status or default to 'Sin Estado'
+    final placeHolderStatusShow = statusMap[placeholderStatus] ?? 'Sin Estado';
+
+    return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         return Card(
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
           child: Padding(
-            padding: EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(12.0),
             child: Row(
               children: [
+                // Icon on the left
                 Container(
                   width: 50,
                   height: 50,
@@ -39,92 +68,114 @@ class OrderItem extends StatelessWidget {
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  child:
-                      Icon(Icons.shopping_bag, size: 30, color: Colors.black54),
+                  child: const Icon(
+                    Icons.shopping_bag,
+                    size: 30,
+                    color: Colors.black54,
+                  ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
+
+                // Main info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Date
+                      RichText(
+                        text: TextSpan(
+                          text: '${OrderStrings.idOrder}: ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: order.id.toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      // Creation Date
                       RichText(
                         text: TextSpan(
                           text: '${OrderStrings.date}: ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.black),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: DateHelper.formatDate(order.date),
-                              style: TextStyle(fontWeight: FontWeight.normal),
+                              text: (order.creationDate == null)
+                                  ? '--'
+                                  : DateHelper.formatDate(order.creationDate!),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
 
-                      // Client
-                      if (userType == UserType.business)
-                        RichText(
-                          text: TextSpan(
-                            text: '${OrderStrings.client}: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: order.clientName,
-                                style: TextStyle(fontWeight: FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      if (userType == UserType.delivery)
+                      // Address if user is delivery, as an example
+                      if (userType == UserType.delivery &&
+                          order.address != null)
                         RichText(
                           text: TextSpan(
                             text: '${OrderStrings.deliveryIn}: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                             children: <TextSpan>[
                               TextSpan(
                                 text: order.address,
-                                style: TextStyle(fontWeight: FontWeight.normal),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.normal),
                               ),
                             ],
                           ),
                         ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
 
-                      // Status
+                      // The placeholderStatus determined from last OrderStatus
                       RichText(
                         text: TextSpan(
                           text: '${OrderStrings.status}: ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.black),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: order.status,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.black),
+                              text: placeHolderStatusShow,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
 
-                      // Items
+                      // Items from orderProducts
                       RichText(
                         text: TextSpan(
                           text: '${OrderStrings.items}: ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.black),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: order.items.toString(),
-                              style: TextStyle(fontWeight: FontWeight.normal),
+                              text: '$itemsCount',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
                           ],
                         ),
@@ -132,41 +183,37 @@ class OrderItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-                //Order tracking button
+                // Button for viewing/tracking
                 ElevatedButton(
                   onPressed: () {
-                    final orderListBloc = BlocProvider.of<OrderListBloc>(context);
-                    final updatedOrder = order.copyWith(deliveryName: "Felipe Valero");
-
-                    orderListBloc.add(
-                      UpdateDeliveryInformationOrderEvent(order.id!, "Felipe Valero Agudelo"),
-                    );
-
+                    // Then navigate:
                     void navigateToTracking() {
                       if (userType == UserType.delivery) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DeliveryUserTracking(order: updatedOrder),
+                            builder: (context) => DeliveryUserTracking(
+                              order: order,
+                              isTriggerDelivery: triggerFollow,
+                            ),
                           ),
                         );
-                      } else if (userType == UserType.business) {
-                        Navigator.pushNamed(
-                          context,
-                          'business_user_order_tracking',
-                          arguments: updatedOrder,
-                        );
                       } else {
-                        Navigator.pushNamed(
+                        Navigator.push(
                           context,
-                          'customer_user_order_tracking',
-                          arguments: updatedOrder,
+                          MaterialPageRoute(
+                            builder: (context) => OrderTrackingPage(
+                              userType: userType,
+                              order: order,
+                            ),
+                          ),
                         );
                       }
                     }
 
+                    // If the app requires real-time tracking with GPS
                     if (SPLVariables.hasRealTimeTracking) {
                       handleWaitGpsStatus(context, () {
                         if (handleGpsAnswer(context, gpsBloc)) {
@@ -184,8 +231,16 @@ class OrderItem extends StatelessWidget {
                     ),
                   ),
                   child: userType == UserType.delivery
-                      ? Text(OrderStrings.takeOrder, style: TextStyle(color: Colors.white))
-                      : Text(OrderStrings.viewOrder, style: TextStyle(color: Colors.white)),
+                      ? Text(
+                          triggerFollow!
+                              ? OrderStrings.takeOrder
+                              : OrderStrings.viewOrder,
+                          style: const TextStyle(color: Colors.white),
+                        )
+                      : Text(
+                          OrderStrings.viewOrder,
+                          style: const TextStyle(color: Colors.white),
+                        ),
                 ),
               ],
             ),

@@ -129,6 +129,7 @@ class SelectPaymentMethodScreen extends StatelessWidget {
       child: InkWell(
         onTap: () {
           Navigator.pop(context, card);
+          Future.delayed(Duration(seconds: 1));
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(

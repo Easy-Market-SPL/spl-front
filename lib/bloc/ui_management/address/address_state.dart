@@ -26,18 +26,3 @@ class AddressState extends Equatable {
   @override
   List<Object> get props => [addresses, isLoading, error];
 }
-
-// Address Model
-class Address {
-  final String name;
-  final String address;
-  final String details;
-  final LatLng location;
-
-  Address({
-    required this.name,
-    required this.address,
-    required this.details,
-    required this.location,
-  });
-}

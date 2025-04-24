@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
+import '../../../pages/order/orders_list.dart';
+
 class OrderTrackingHeader extends StatelessWidget {
-  const OrderTrackingHeader({super.key});
+  final UserType userType;
+  const OrderTrackingHeader({super.key, required this.userType});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +23,12 @@ class OrderTrackingHeader extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => OrdersPage(userType: userType),
+                  ),
+                  ModalRoute.withName('/'),
+                );
               },
             ),
           ),

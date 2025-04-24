@@ -34,7 +34,7 @@ class MenuPage extends StatelessWidget {
                   leading: Icon(menuItem.icon),
                   title: Text(menuItem.label),
                   onTap: () {
-                    Navigator.pushNamed(context, menuItem.route);
+                    Navigator.pushReplacementNamed(context, menuItem.route);
                   },
                 );
               }).toList(),

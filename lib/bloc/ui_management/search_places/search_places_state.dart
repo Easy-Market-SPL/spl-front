@@ -2,7 +2,7 @@ part of 'search_places_bloc.dart';
 
 class SearchPlacesState extends Equatable {
   final bool displayManualMarker;
-  final List<Result> googlePlaces;
+  final List<Result>? googlePlaces;
   final Result? selectedPlace;
 
   const SearchPlacesState({

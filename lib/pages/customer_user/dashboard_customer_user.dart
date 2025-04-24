@@ -5,6 +5,7 @@ import 'package:spl_front/bloc/ui_management/product/filter/product_filter_event
 import 'package:spl_front/bloc/ui_management/product/filter/product_filter_state.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
@@ -19,6 +20,10 @@ import 'package:spl_front/widgets/products/dashboard/active_filters_dashboard.da
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
 import 'package:spl_front/widgets/products/dashboard/products_filters_dialog.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
+
+import '../../bloc/ui_management/order/order_bloc.dart';
+import '../../bloc/ui_management/order/order_event.dart';
+import '../../widgets/helpers/custom_loading.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
   const CustomerMainDashboard({super.key});
@@ -41,6 +46,21 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   void initState() {
     super.initState();
     usersBloc = BlocProvider.of<UsersBloc>(context);
+
+    // Fetch the current user's orders, passing role=consumer
+    final userId = usersBloc.state.sessionUser?.id ?? '';
+    if (userId.isNotEmpty) {
+      context.read<OrdersBloc>().add(
+            LoadOrdersEvent(
+              userId: userId,
+              userRole: 'customer',
+            ),
+          );
+    }
+
+    // Fetch the current user's addresses
+    context.read<AddressBloc>().add(LoadAddresses(userId));
+
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());
     context.read<ProductFilterBloc>().add(InitFilters());
@@ -56,12 +76,14 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    context.read<ProductBloc>().add(LoadProducts());
+
     return BlocBuilder<UsersBloc, UsersState>(
       builder: (context, usersSstate) {
         if (usersSstate.sessionUser == null) {
           return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CustomLoading(),
             ),
           );
         }
@@ -174,7 +196,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
           ),
         );
       }
-      
+
       return SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -184,7 +206,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
         ),
       );
     }
-    
+
     // Fallback
     return const Center(child: Text(ProductStrings.productLoadingError));
   }

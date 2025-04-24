@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_event.dart';
+import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
+import 'package:spl_front/utils/ui/format_currency.dart';
 import 'package:spl_front/widgets/payment/process/payment_credit_dialog.dart';
 
-import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../models/logic/address.dart';
+import '../../../pages/customer_user/dashboard_customer_user.dart';
 
 class PaymentCreditTotal extends StatelessWidget {
   final double total;
@@ -302,8 +308,11 @@ class PaymentCreditTotal extends StatelessWidget {
     );
   }
 
-  // Processes the normal payment (with card)
+  /// THE SHIPPING COST FOR ALL ORDERS WILL BE 0.00
+  // Processes the payment
   Future<void> _processPayment(BuildContext context) async {
+    var order = BlocProvider.of<OrdersBloc>(context).state.currentCartOrder;
+
     if (address == null) {
       _showSelectAddressDialog(context);
       return;
@@ -313,17 +322,30 @@ class PaymentCreditTotal extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close dialog
 
-      // TODO: Update order status in API/DB
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+      final orderBloc = BlocProvider.of<OrdersBloc>(context);
+
+      // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed
+      orderBloc.add(ConfirmOrderEvent(
+          orderId: orderBloc.state.currentCartOrder!.id!,
+          shippingCost: 0,
+          paymentAmount: total));
+
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
+        (Route<dynamic> route) => false,
+      );
       return;
     }
+
     _showLoadingDialog(context);
     final stripeService = StripeService();
-    final amount = (total * 100).round().toString();
+    final amountInCents = (total * 100).round().toString();
     final StripeCustomReponse response =
         await stripeService.payWithExistingCard(
-      amount: amount,
-      currency: 'usd',
+      amount: amountInCents,
+      currency: 'cop',
       card: card!,
     );
     Navigator.pop(context); // Close loading dialog
@@ -331,8 +353,21 @@ class PaymentCreditTotal extends StatelessWidget {
       _showSuccessfullPaymentDialog(context);
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close success dialog
-      // TODO: Update order status in API/DB
-      Navigator.of(context).popAndPushNamed('customer_user_order_tracking');
+
+      final orderBloc = BlocProvider.of<OrdersBloc>(context);
+
+      // In this case, the payment is done with card in one installment, so it's neccesary update the order status to confirmed
+      orderBloc.add(ConfirmOrderEvent(
+          orderId: orderBloc.state.currentCartOrder!.id!,
+          shippingCost: 0,
+          paymentAmount: total));
+
+      order!.orderStatuses
+          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
+        (Route<dynamic> route) => false,
+      );
     } else {
       _showErrorPaymentDialog(context, response);
     }
@@ -370,7 +405,7 @@ class PaymentCreditTotal extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "\$${total.toStringAsFixed(2)}",
+                    formatCurrency(total),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

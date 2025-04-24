@@ -1,110 +1,176 @@
+// lib/widgets/order/tracking/vertical_order_status.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_state.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
 class VerticalOrderStatus extends StatelessWidget {
-  const VerticalOrderStatus({super.key});
+  final OrderModel order;
+  const VerticalOrderStatus({super.key, required this.order});
+
+  static const _blue = Color(0xFF00498F);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OrderStatusBloc, OrderStatusState>(
-      builder: (context, state) {
-        if (state is OrderStatusLoaded) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildStatusItem(
-                context,
-                icon: Icons.store,
-                title: OrderStrings.orderConfirmed,
-                description: OrderStrings.orderConfirmedDescription,
-                notReachedTitle: OrderStrings.notConfirmed,
-                notReachedDescription: OrderStrings.notConfirmedDescription,
-                isActive: state.currentStatus == OrderStrings.orderConfirmed || state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
-              ),
-              _buildStatusLine(state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
-              _buildStatusItem(
-                context,
-                icon: Icons.access_time,
-                title: OrderStrings.preparingOrder,
-                description: OrderStrings.preparingOrderDescription,
-                notReachedTitle: OrderStrings.notPrepared,
-                notReachedDescription: OrderStrings.notPreparedDescription,
-                isActive: state.currentStatus == OrderStrings.preparingOrder || state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
-              ),
-              _buildStatusLine(state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered),
-              _buildStatusItem(
-                context,
-                icon: Icons.local_shipping,
-                title: OrderStrings.onTheWay,
-                description: OrderStrings.onTheWayDescription,
-                notReachedTitle: OrderStrings.notOnTheWay,
-                notReachedDescription: OrderStrings.notOnTheWayDescription,
-                isActive: state.currentStatus == OrderStrings.onTheWay || state.currentStatus == OrderStrings.delivered,
-              ),
-              _buildStatusLine(state.currentStatus == OrderStrings.delivered),
-              _buildStatusItem(
-                context,
-                icon: Icons.check,
-                title: OrderStrings.delivered,
-                description: OrderStrings.deliveredDescription,
-                notReachedTitle: OrderStrings.notDelivered,
-                notReachedDescription: OrderStrings.notDeliveredDescription,
-                isActive: state.currentStatus == OrderStrings.delivered,
-              ),
-            ],
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
-  }
+    final currentStatus = _extractLastStatus(order);
+    final currentDescription = _extractLastStatusDescription(order);
 
-  Widget _buildStatusItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required String notReachedTitle,
-    required String notReachedDescription,
-    required bool isActive,
-  }) {
+    // Cada “paso” con su icono y label
+    final steps = <_StepData>[
+      _StepData(
+        icon: Icons.store,
+        label: OrderStrings.orderConfirmed,
+        description: OrderStrings.orderConfirmedDescription,
+      ),
+      _StepData(
+        icon: Icons.access_time,
+        label: OrderStrings.preparingOrder,
+        description: OrderStrings.preparingOrderDescription,
+      ),
+      _StepData(
+        icon: Icons.local_shipping,
+        label: OrderStrings.onTheWay,
+        description: OrderStrings.onTheWayDescription,
+      ),
+      _StepData(
+        icon: Icons.check,
+        label: OrderStrings.delivered,
+        description: OrderStrings.deliveredDescription,
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, color: isActive ? const Color.fromARGB(255, 0, 73, 143) : Colors.grey, size: 45),
-            const SizedBox(width: 8.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isActive ? title : notReachedTitle,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isActive ? Colors.black : Colors.grey),
-                ),
-                Text(
-                  isActive ? description : notReachedDescription,
-                  style: TextStyle(fontSize: 14, color: isActive ? Colors.black : Colors.grey),
-                ),
-              ],
-            ),
-          ],
+        Center(
+          child: Column(
+            children: [
+              Text(
+                '${OrderStrings.status}: $currentStatus',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                currentDescription,
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            ],
+          ),
         ),
-        //const SizedBox(height: 8.0),
+        const SizedBox(height: 24),
+        // timeline vertical
+        for (int i = 0; i < steps.length; i++) ...[
+          _buildStatusItem(
+            icon: steps[i].icon,
+            title: steps[i].label,
+            description: steps[i].description,
+            isActive: _isActive(currentStatus, steps[i].label),
+          ),
+          if (i != steps.length - 1)
+            _buildStatusLine(
+              _isActive(
+                currentStatus,
+                steps[i + 1].label,
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  /* ──────────── helpers ──────────── */
+
+  String _extractLastStatus(OrderModel order) {
+    if (order.orderStatuses.isEmpty) return '';
+    switch (order.orderStatuses.last.status) {
+      case 'confirmed':
+        return OrderStrings.orderConfirmed;
+      case 'preparing':
+        return OrderStrings.preparingOrder;
+      case 'on the way':
+        return OrderStrings.onTheWay;
+      case 'delivered':
+        return OrderStrings.delivered;
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  String _extractLastStatusDescription(OrderModel order) {
+    if (order.orderStatuses.isEmpty) return '';
+    switch (order.orderStatuses.last.status) {
+      case 'confirmed':
+        return OrderStrings.orderConfirmedDescription;
+      case 'preparing':
+        return OrderStrings.preparingOrderDescription;
+      case 'on the way':
+        return OrderStrings.onTheWayDescription;
+      case 'delivered':
+        return OrderStrings.deliveredDescription;
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  bool _isActive(String current, String target) =>
+      current == target ||
+      (current == OrderStrings.delivered && target == OrderStrings.onTheWay) ||
+      (current == OrderStrings.onTheWay &&
+          target == OrderStrings.preparingOrder) ||
+      (current == OrderStrings.preparingOrder &&
+          target == OrderStrings.orderConfirmed);
+
+  /* ──────────── UI helpers ──────────── */
+
+  Widget _buildStatusItem({
+    required IconData icon,
+    required String title,
+    required String description,
+    required bool isActive,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 40, color: isActive ? _blue : Colors.grey),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isActive ? Colors.black : Colors.grey)),
+              Text(description,
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: isActive ? Colors.black : Colors.grey)),
+            ],
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildStatusLine(bool isActive) {
     return Container(
-      margin: const EdgeInsets.only(left: 20.0),
-      height: 50.0,
-      width: 3.0,
-      color: isActive ? const Color.fromARGB(255, 0, 73, 143) : Colors.grey,
+      margin: const EdgeInsets.only(left: 19), // alinea con icono
+      height: 38,
+      width: 3,
+      color: isActive ? _blue : Colors.grey,
     );
   }
+}
+
+/* Helper sencillo para mantener los datos de los pasos */
+class _StepData {
+  final IconData icon;
+  final String label;
+  final String description;
+
+  const _StepData({
+    required this.icon,
+    required this.label,
+    required this.description,
+  });
 }

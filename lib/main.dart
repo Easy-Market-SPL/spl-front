@@ -9,8 +9,7 @@ import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
 import 'package:spl_front/bloc/ui_management/labels_store/labels_store_bloc.dart';
 import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
 import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order_tracking/order_tracking_bloc.dart';
-import 'package:spl_front/bloc/ui_management/orders_list/orders_list_bloc.dart';
+import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
@@ -27,7 +26,9 @@ import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
 import 'package:spl_front/services/api/color_service.dart';
 import 'package:spl_front/services/api/label_service.dart';
+import 'package:spl_front/services/api/order_service.dart';
 import 'package:spl_front/services/api/product_service.dart';
+import 'package:spl_front/services/api/review_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
@@ -39,9 +40,11 @@ Future main() async {
   await dotenv.load(fileName: '.env');
   await SupabaseConfig.initializeSupabase();
   await ProductService.initializeProductService();
-  await LabelService.initializeLabelService(); 
+  await LabelService.initializeLabelService();
   await ColorService.initializeProductService();
   await UserService.initializeUserService();
+  await OrderService.initializeOrderService();
+  await ReviewService.initializeReviewService();
   runApp(MyApp());
 }
 
@@ -71,9 +74,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AddressBloc()),
         BlocProvider(create: (context) => LabelsStoreBloc()),
         BlocProvider(create: (context) => ChatBloc()),
-        BlocProvider(create: (context) => OrderStatusBloc()),
         BlocProvider(create: (context) => ChatsBloc()),
-        BlocProvider(create: (context) => OrderListBloc()),
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
         BlocProvider(create: (context) => ProductDetailsBloc()),
@@ -83,6 +84,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         BlocProvider(create: (context) => LabelBloc()),
+        BlocProvider(create: (context) => OrdersBloc()),
 
         // Provider for Payment Management
         BlocProvider(create: (context) => PaymentBloc()),
@@ -97,13 +99,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => InfoTripProvider()),
       ],
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'SPL Front',
-        home: appRoutes['']!(
-            context), // Wrapper is a widget that manage the auth state
-        routes: appRoutes,
-        theme: appTheme
-      ),
+          debugShowCheckedModeBanner: false,
+          title: 'SPL Front',
+          home: appRoutes['']!(
+              context), // Wrapper is a widget that manage the auth state
+          routes: appRoutes,
+          theme: appTheme),
     );
   }
 }

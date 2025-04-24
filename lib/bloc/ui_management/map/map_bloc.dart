@@ -37,6 +37,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       if (locationState.lastKnowLocation == null) return;
       moveCamera(locationState.lastKnowLocation!);
     });
+
+    on<UpdateUserMarkerEvent>((event, emit) {
+      final newMarkers = Map<String, Marker>.from(state.markers);
+      newMarkers['start'] = Marker(
+        markerId: const MarkerId('start'),
+        position: event.position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueAzure,
+        ),
+      );
+      emit(state.copyWith(markers: newMarkers));
+    });
   }
 
   // Other Dispatches:
@@ -60,6 +72,30 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   void moveCamera(LatLng newLocation) {
     final cameraUpdate = CameraUpdate.newLatLng(newLocation);
     _mapController?.animateCamera(cameraUpdate);
+  }
+
+  Future<void> drawDestinationMarker(LatLng destinationPoint) async {
+    final destinationMarkerIcon =
+        await getCustomMarkerIcon('delivery-destination.png');
+
+    final destinationMarker = Marker(
+      icon: destinationMarkerIcon,
+      markerId: const MarkerId('end'),
+      position: destinationPoint,
+    );
+
+    final updatedMarkers = Map<String, Marker>.from(state.markers);
+    updatedMarkers['end'] = destinationMarker;
+
+    add(OnUpdateMarkersEvent(updatedMarkers));
+  }
+
+  Future<void> clearMarkers() async {
+    final updatedMarkers = Map<String, Marker>.from(state.markers);
+    updatedMarkers.remove('start');
+    updatedMarkers.remove('end');
+
+    add(OnUpdateMarkersEvent(updatedMarkers));
   }
 
   Future<Tuple2<double, bool>> drawMarkersAndGetDistanceBetweenPoints(

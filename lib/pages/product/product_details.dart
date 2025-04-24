@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/details/product_details_event.dart';
-import 'package:spl_front/bloc/ui_management/product/details/product_details_state.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
@@ -15,8 +13,17 @@ import 'package:spl_front/widgets/products/view/details/product_details_image.da
 import 'package:spl_front/widgets/products/view/details/product_details_info.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_labels.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_variants.dart';
-import 'package:spl_front/widgets/reviews/review_creation.dart';
-import 'package:spl_front/widgets/reviews/reviews_list.dart';
+
+import '../../bloc/ui_management/address/address_bloc.dart';
+import '../../bloc/ui_management/order/order_bloc.dart';
+import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/ui_management/product/details/product_details_bloc.dart';
+import '../../bloc/ui_management/product/details/product_details_event.dart';
+import '../../bloc/ui_management/product/details/product_details_state.dart';
+import '../../bloc/users_blocs/users/users_bloc.dart';
+import '../../models/order_models/order_product.dart';
+import '../../widgets/reviews/review_creation.dart';
+import '../../widgets/reviews/reviews_list.dart';
 
 class ViewProductDetailsPage extends StatefulWidget {
   final UserType userType;
@@ -30,25 +37,19 @@ class ViewProductDetailsPage extends StatefulWidget {
 }
 
 class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
-  // Track selected color and variant options
   ProductColor? selectedColor;
   Map<String, String> selectedVariantOptions = {};
 
   @override
   void initState() {
     super.initState();
-    // Load product details when page initializes
-    context.read<ProductDetailsBloc>().add(LoadProductDetails(widget.product.code));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    context
+        .read<ProductDetailsBloc>()
+        .add(LoadProductDetails(widget.product.code));
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check if user is a customer to determine if cart functionality should be shown
     final bool isCustomer = widget.userType == UserType.customer;
 
     return Scaffold(
@@ -60,15 +61,13 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
         builder: (context, state) {
           if (state is ProductDetailsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CustomLoading());
           } else if (state is ProductDetailsError) {
             return Center(child: Text(state.message));
           } else if (state is ProductDetailsLoaded) {
             return _buildProductDetails(context, state, isCustomer);
           } else {
-            // Fallback or initial state
-            return const Center(
-                child: Text(ProductStrings.productLoadingError));
+            return const Center(child: Text("Error loading product details"));
           }
         },
       ),
@@ -79,17 +78,13 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       BuildContext context, ProductDetailsLoaded state, bool isCustomer) {
     return Column(
       children: [
-        // Scrollable part of the screen
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Product Image
                 ProductImageDisplay(imagePath: state.product.imagePath),
-
-                // Color selection (only show if colors are available)
                 if (state.colors.isNotEmpty) ...[
                   ProductColorSelector(
                     colors: state.colors,
@@ -101,19 +96,12 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                     },
                   ),
                 ],
-
                 const SizedBox(height: 16),
-
-                // Product info header (name, code, rating, description)
                 ProductDetailsInfo(product: state.product),
-
-                // Tags (only show if labels are available)
                 if (state.labels.isNotEmpty) ...[
                   ProductDetailsLabels(labels: state.labels),
                   const SizedBox(height: 16),
                 ],
-
-                // Variants (only show if variants are available)
                 if (state.variants.isNotEmpty) ...[
                   ProductDetailsVariants(
                     variants: state.variants,
@@ -126,32 +114,29 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
-                // TODO: (PELADO) Implementar reseñas
+
                 // Reviews section
                 if (SPLVariables.isRated) ...[
-                  const ReviewsWidget(),
+                  ReviewsWidget(
+                      product: widget.product, userType: widget.userType),
                   const SizedBox(height: 16),
-                  
-                  if (isCustomer) const WriteReviewWidget(),
+                  if (isCustomer) WriteReviewWidget(product: widget.product),
                 ],
               ],
             ),
           ),
         ),
-
-        // Add to cart bar - only show for customers
         if (isCustomer)
           AddToCartBar(
-            price: state.product.price.toString(),
+            productPrice: state.product.price,
             onAddToCart: (quantity) => _handleAddToCart(quantity, state),
           ),
       ],
     );
   }
- // TODO: (PELADO) Implementar añadir al carrito
+
+  // Handle Add to Cart functionality
   void _handleAddToCart(int quantity, ProductDetailsLoaded state) {
-    // Verify all required selections are made
     if (state.colors.isNotEmpty && selectedColor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -162,7 +147,6 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       return;
     }
 
-    // Check if all variants have a selection
     for (var variant in state.variants) {
       if (!selectedVariantOptions.containsKey(variant.name)) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -175,11 +159,29 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
       }
     }
 
-    // If we get here, all selections have been made
-    // This is where you would call the backend API to add to cart
+    final userId = context.read<UsersBloc>().state.sessionUser!.id;
+    final addressBloc = BlocProvider.of<AddressBloc>(context);
+    String address = addressBloc.state.addresses.isNotEmpty
+        ? addressBloc.state.addresses.first.address
+        : '';
+
+    context.read<OrdersBloc>().add(
+          AddProductToOrderEvent(
+            OrderProduct(
+              idProduct: state.product.code,
+              quantity: quantity,
+              idOrder: 0, // New order will be created if it doesn't exist
+            ),
+            productCode: state.product.code,
+            quantity: quantity,
+            userId: userId,
+            address: address,
+          ),
+        );
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Producto añadido'),
+        content: Text('Producto añadido al carrito'),
         backgroundColor: Colors.green,
       ),
     );

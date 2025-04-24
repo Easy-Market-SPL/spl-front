@@ -8,11 +8,11 @@ import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.da
 
 import '../../utils/map/map_themes/blue_standard_map_style.dart';
 
-class MapViewAddress extends StatelessWidget {
+class MapView extends StatelessWidget {
   final LatLng initialLocation;
   final Set<Marker> markers;
 
-  const MapViewAddress(
+  const MapView(
       {super.key, required this.initialLocation, required this.markers});
 
   @override
