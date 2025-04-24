@@ -1,4 +1,5 @@
 // lib/pages/order/tracking/order_map_following.dart
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +17,8 @@ import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/services/api/user_service.dart';
+/* Servicio que escucha delivery_tracking */
+import 'package:spl_front/services/supabase/real-time/real_time_tracking_service.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/map/map_view_address.dart';
@@ -35,68 +38,118 @@ class OrderMapFollowing extends StatefulWidget {
 }
 
 class _OrderMapFollowingState extends State<OrderMapFollowing> {
+  /* -------------------- DATA & SERVICIOS -------------------- */
   late final Future<UserModel?> _userFuture;
-  bool _isExpanded = false;
-  LatLng? _endLocation;
+  final _trackingSvc = DeliveryTrackingService();
+  StreamSubscription<List<Map<String, dynamic>>>? _trackingSub;
 
-  // Corporate dark-blue color constant
+  LatLng? _startLocation; // posición dinámica del courier
+  LatLng? _endLocation; // destino (geocoding)
+
+  bool _isExpanded = false;
   static const Color darkBlue = Color(0xFF0D47A1);
 
   @override
   void initState() {
     super.initState();
 
-    // Clear any existing markers when screen loads
-    final mapBloc = context.read<MapBloc>();
-    mapBloc.clearMarkers();
+    /* 1️⃣ Limpiar cualquier marcador previo */
+    context.read<MapBloc>().clearMarkers();
 
-    // Fetch customer info by user ID
+    /* 2️⃣ Cargar datos de usuario-cliente */
     _userFuture = UserService.getUser(widget.order.idUser!);
 
-    // Ensure the order is loaded in OrdersBloc if not already
+    /* 3️⃣ Asegurar la orden dentro del OrdersBloc */
     final ordersBloc = context.read<OrdersBloc>();
     if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order.id!));
     }
 
-    // Kick off address decoding to get destination LatLng
+    /* 4️⃣ Decodificar la dirección para obtener el destino (una sola vez) */
     context
         .read<SearchPlacesBloc>()
         .getPlacesByGoogleQuery(widget.order.address!);
+
+    /* 5️⃣ Escuchar delivery_tracking SOLO si hay domiciliario asignado */
+    if (widget.order.idDomiciliary != null) {
+      _trackingSub = _trackingSvc
+          .watchUser(widget.order.idDomiciliary!)
+          .listen(_handleTrackingRows);
+    }
   }
 
+  @override
+  void dispose() {
+    _trackingSub?.cancel();
+    super.dispose();
+  }
+
+  /* ------------ Manejador de filas del stream ------------- */
+  void _handleTrackingRows(List<Map<String, dynamic>> rows) {
+    if (rows.isEmpty) return;
+
+    final last = rows.last;
+    final lat = (last['latitude'] as num?)?.toDouble();
+    final lng = (last['longitude'] as num?)?.toDouble();
+
+    /* Si alguna coordenada viene null → NO actualizamos origen
+       (se mostrará solo el destino geocodificado). */
+    if (lat == null || lng == null) return;
+
+    final newPos = LatLng(lat, lng);
+    if (_startLocation == null ||
+        _startLocation!.latitude != newPos.latitude ||
+        _startLocation!.longitude != newPos.longitude) {
+      setState(() => _startLocation = newPos);
+
+      // Si ya tenemos destino decodificado → dibujamos ruta y marcadores
+      final places = context.read<SearchPlacesBloc>().state.googlePlaces;
+      if (places != null && places.isNotEmpty) {
+        _drawDestinationRoute(
+          newPos,
+          places.first,
+          context.read<MapBloc>(),
+          Provider.of<InfoTripProvider>(context, listen: false),
+        );
+      }
+    }
+  }
+
+  /* ========================== UI ========================= */
   @override
   Widget build(BuildContext context) {
     final mapBloc = context.read<MapBloc>();
     final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
 
-    // Determine if a start location exists
-    final bool hasStart = widget.order.lat != null && widget.order.lng != null;
-    final LatLng? startLocation =
-        hasStart ? LatLng(widget.order.lat!, widget.order.lng!) : null;
+    // Si no hemos recibido ubicación del courier, intentamos con la fija
+    final hasStart = _startLocation != null ||
+        (widget.order.lat != null && widget.order.lng != null);
+
+    final LatLng? startLocation = _startLocation ??
+        (widget.order.lat != null && widget.order.lng != null
+            ? LatLng(widget.order.lat!, widget.order.lng!)
+            : null);
 
     return MultiBlocListener(
       listeners: [
-        // Listen for address-decoding results
         BlocListener<SearchPlacesBloc, SearchPlacesState>(
           listener: (context, state) {
             if (state.googlePlaces != null && state.googlePlaces!.isNotEmpty) {
-              final dest = LatLng(
+              final destLatLng = LatLng(
                 state.googlePlaces!.first.geometry.location.lat,
                 state.googlePlaces!.first.geometry.location.lng,
               );
-              if (hasStart) {
-                // If start exists, draw full route and compute metrics
+              _endLocation = destLatLng;
+              mapBloc.drawDestinationMarker(destLatLng);
+
+              // Si tenemos origen (del stream o fijo) → dibujamos ruta
+              if (startLocation != null) {
                 _drawDestinationRoute(
-                  startLocation!,
+                  startLocation,
                   state.googlePlaces!.first,
                   mapBloc,
                   infoTrip,
                 );
-              } else {
-                // If no start, store end point and add only a marker
-                setState(() => _endLocation = dest);
-                mapBloc.drawDestinationMarker(dest);
               }
             }
           },
@@ -104,20 +157,16 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
       ],
       child: BlocBuilder<MapBloc, MapState>(
         builder: (context, mapState) {
-          // Show loading if neither start nor end location is ready
-          if (!hasStart && _endLocation == null) {
-            return const Scaffold(
-              body: Center(child: CustomLoading()),
-            );
+          // Pantalla de carga si no hay ni origen ni destino
+          if (startLocation == null && _endLocation == null) {
+            return const Scaffold(body: Center(child: CustomLoading()));
           }
 
-          // Choose initial camera position
-          final LatLng initial = hasStart ? startLocation! : _endLocation!;
+          final LatLng initial = startLocation ?? _endLocation!;
 
           return Scaffold(
             body: Stack(
               children: [
-                // Full-screen Google Map
                 Positioned.fill(
                   child: MapView(
                     initialLocation: initial,
@@ -125,10 +174,11 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                   ),
                 ),
 
+                /* FAB para centrar cámara */
                 Positioned(
-                  bottom: _isExpanded && hasStart
+                  bottom: _isExpanded && startLocation != null
                       ? MediaQuery.of(context).size.height * 0.38
-                      : _isExpanded && !hasStart
+                      : _isExpanded && startLocation == null
                           ? MediaQuery.of(context).size.height * 0.28
                           : MediaQuery.of(context).size.height * 0.15,
                   right: 20,
@@ -136,24 +186,22 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                     heroTag: 'followFAB',
                     backgroundColor: darkBlue,
                     onPressed: () {
-                      final target = hasStart ? startLocation! : _endLocation!;
+                      final target = startLocation ?? _endLocation!;
                       mapBloc.moveCamera(target);
                     },
-                    child: const Icon(
-                      Icons.directions_walk,
-                      color: Colors.white,
-                    ),
+                    child:
+                        const Icon(Icons.directions_walk, color: Colors.white),
                   ),
                 ),
 
-                // Expand/collapse FAB
+                /* FAB expand / collapse */
                 Positioned(
                   bottom: MediaQuery.of(context).size.height * 0.08,
                   right: 20,
                   child: _isExpanded
-                      ? SizedBox.shrink()
+                      ? const SizedBox.shrink()
                       : FloatingActionButton(
-                          heroTag: 'expandFAB', // Unique hero tag
+                          heroTag: 'expandFAB',
                           backgroundColor: darkBlue,
                           onPressed: () =>
                               setState(() => _isExpanded = !_isExpanded),
@@ -166,9 +214,9 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                         ),
                 ),
 
-                // Conditional info card: full if start exists, simplified otherwise
+                /* Tarjeta de información */
                 if (_isExpanded)
-                  hasStart
+                  startLocation != null
                       ? _buildFullInfoCard(context, infoTrip)
                       : _buildSimplifiedInfoCard(context),
               ],
