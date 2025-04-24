@@ -5,6 +5,7 @@ import 'package:spl_front/bloc/ui_management/product/products/product_event.dart
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/services/api/product_service.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
@@ -16,12 +17,29 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<RemoveReview>(_onRemoveReview);
   }
 
+  Future<List<Product>?> _loadProducts() async {
+    await ProductService.initializeProductService();
+    final products = await ProductService.getProducts();
+
+    if (products == null || products.isEmpty) {
+      return null;
+    }
+
+    if (SPLVariables.isRated){
+      for (final product in products) {
+        await product.fetchReviewsProduct(product.code);
+        await product.fetchReviewAverage(product.code);
+      }
+    }
+
+    return products;
+  }
+
   Future<void> _onLoadProducts(
       LoadProducts event, Emitter<ProductState> emit) async {
     emit(ProductLoading());
     try {
-      await ProductService.initializeProductService();
-      final products = await ProductService.getProducts();
+      final products = await _loadProducts();
 
       if (products == null || products.isEmpty) {
         emit(ProductError(ProductStrings.productLoadingError));
@@ -70,11 +88,16 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     try {
       emit(ProductLoading());
-      final products = await ProductService.getProducts();
+      final products = await _loadProducts();
 
       if (products == null || products.isEmpty) {
-        emit(ProductError("No se encontraron productos"));
+        emit(ProductError(ProductStrings.productLoadingError));
         return;
+      } else {
+        for (final product in products) {
+          await product.fetchReviewsProduct(product.code);
+          await product.fetchReviewAverage(product.code);
+        }
       }
 
       List<Product> filteredProducts = List.from(products);
