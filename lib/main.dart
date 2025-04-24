@@ -12,6 +12,7 @@ import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
@@ -77,6 +78,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
         BlocProvider(create: (context) => ProductDetailsBloc()),
+        BlocProvider<ProductFilterBloc>(
+          create: (context) => ProductFilterBloc(
+            productBloc: context.read<ProductBloc>(),
+          ),
+        ),
         BlocProvider(create: (context) => LabelBloc()),
         BlocProvider(create: (context) => OrdersBloc()),
 

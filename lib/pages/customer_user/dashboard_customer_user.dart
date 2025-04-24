@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/product/filter/product_filter_event.dart';
+import 'package:spl_front/bloc/ui_management/product/filter/product_filter_state.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
+import 'package:spl_front/utils/strings/dashboard_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/products/dashboard/active_filters_dashboard.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
+import 'package:spl_front/widgets/products/dashboard/products_filters_dialog.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 import '../../bloc/ui_management/order/order_bloc.dart';
@@ -28,7 +34,13 @@ class CustomerMainDashboard extends StatefulWidget {
 
 class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
   late UsersBloc usersBloc;
-  String activeLabel = "Todos";
+  String activeLabel = DashboardStrings.allLabels;
+  late TextEditingController searchController;
+  String currentSearchQuery = "";
+
+  double? activeMinPrice;
+  double? activeMaxPrice;
+  double? activeMinRating;
 
   @override
   void initState() {
@@ -51,6 +63,15 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
 
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());
+    context.read<ProductFilterBloc>().add(InitFilters());
+
+    searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,30 +91,62 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
           backgroundColor: Colors.white,
           appBar: CustomerUserAppBar(
             hintText: CustomerStrings.searchHint, // Pass custom hint text
+            searchController: searchController,
+            onSearchChanged: (query){
+              context.read<ProductFilterBloc>().add(SetSearchQuery(query));
+            },
             onFilterPressed: () {
-              // TODO: Implement filters action
+              final filterState = context.read<ProductFilterBloc>().state;
+              final productState = context.read<ProductBloc>().state;
+              final products = productState is ProductLoaded ? productState.products : [];
+              showDialog(
+                context: context,
+                builder: (context) => ProductFilterDialog(
+                  initialFilter: ProductFilter(
+                    minPrice: filterState.minPrice,
+                    maxPrice: filterState.maxPrice,
+                    minRating: filterState.minRating,
+                    selectedLabels: filterState.selectedLabels,
+                  ),
+                  maxProductPrice: products.isNotEmpty && filterState.maxPrice == null ? products.map((p) => p.price).reduce((a, b) => a > b ? a : b) : null,
+                  minProductPrice: products.isNotEmpty && filterState.minPrice == null ? products.map((p) => p.price).reduce((a, b) => a < b ? a : b) : null,
+                ),
+              ).then((result) {
+                if (result != null && result is ProductFilter) {
+                  context.read<ProductFilterBloc>().add(
+                    ApplyFiltersFromDialog(
+                      minPrice: result.minPrice,
+                      maxPrice: result.maxPrice,
+                      minRating: result.minRating,
+                      selectedLabels: result.selectedLabels,
+                    ),
+                  );
+                }
+              });
             },
           ),
+
+          // Screen content
           body: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Mostrar etiquetas reales
+                // Labels 
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: LabelsWidget(
-                    activeLabel: activeLabel,
-                    onLabelSelected: (labelName) {
-                      setState(() {
-                        activeLabel = labelName;
-                      });
-                      context
-                          .read<ProductBloc>()
-                          .add(FilterProductsByCategory(labelName));
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: BlocBuilder<ProductFilterBloc, ProductFilterState>(
+                    builder: (context, filterState) {
+                      return LabelsWidget();
                     },
                   ),
                 ),
+
+                // Active filters display
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  child: ActiveFiltersDisplay(),
+                ),
+
                 Expanded(
                   child: BlocBuilder<ProductBloc, ProductState>(
                     builder: (context, productState) {

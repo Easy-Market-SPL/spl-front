@@ -4,9 +4,9 @@ import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart
 import 'package:spl_front/bloc/ui_management/product/form/product_form_event.dart';
 import 'package:spl_front/bloc/ui_management/product/form/product_form_state.dart';
 import 'package:spl_front/models/data/product.dart';
-import 'package:spl_front/utils/strings/business_user_strings.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-import 'package:spl_front/widgets/app_bars/business_user_back_app_bar.dart';
+import 'package:spl_front/widgets/app_bars/product_view_app_bar.dart';
 import 'package:spl_front/widgets/products/business/product_form_buttons.dart';
 import 'package:spl_front/widgets/products/business/product_form_content.dart';
 
@@ -59,27 +59,15 @@ class _ProductFormPageState extends State<ProductFormPage> {
       listener: _productFormListener,
       builder: (context, state) {
         return Scaffold(
-          appBar: BusinessUserBackAppBar(
-            hintText: BusinessStrings.searchHint,
-            onFilterPressed: () {},
+          appBar: ProductViewAppBar(
+            appBarTittle: widget.isEditing
+                ? ProductStrings.editProduct
+                : ProductStrings.createProduct,
+            userType: UserType.business,
           ),
           backgroundColor: Colors.white,
           body: Column(
             children: [
-              // Tittle
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Text(
-                  state is ProductFormLoading
-                      ? "..."
-                      : (state is ProductFormLoaded && state.isEditing)
-                          ? ProductStrings.editProduct
-                          : ProductStrings.createProduct,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              
               // Form content
               if (state is ProductFormSaving)
                 const Expanded(child: Center(child: CircularProgressIndicator()))

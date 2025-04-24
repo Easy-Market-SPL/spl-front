@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/data/product_color.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
+import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/spl/spl_variables.dart';
+import 'package:spl_front/utils/strings/products_strings.dart';
+import 'package:spl_front/widgets/app_bars/product_view_app_bar.dart';
 import 'package:spl_front/widgets/products/product_add_to_cart.dart';
 import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
 import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
@@ -17,10 +21,7 @@ import '../../bloc/ui_management/product/details/product_details_bloc.dart';
 import '../../bloc/ui_management/product/details/product_details_event.dart';
 import '../../bloc/ui_management/product/details/product_details_state.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
-import '../../models/logic/user_type.dart';
 import '../../models/order_models/order_product.dart';
-import '../../spl/spl_variables.dart';
-import '../../widgets/app_bars/customer_user_app_bar.dart';
 import '../../widgets/reviews/review_creation.dart';
 import '../../widgets/reviews/reviews_list.dart';
 
@@ -52,9 +53,9 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
     final bool isCustomer = widget.userType == UserType.customer;
 
     return Scaffold(
-      appBar: CustomerUserAppBar(
-        hintText: "Search...",
-        onFilterPressed: () {},
+      appBar: ProductViewAppBar(
+        appBarTittle: ProductStrings.productDetails,
+        userType: widget.userType,
       ),
       backgroundColor: Colors.white,
       body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
@@ -113,6 +114,8 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
+
+                // Reviews section
                 if (SPLVariables.isRated) ...[
                   ReviewsWidget(
                       product: widget.product, userType: widget.userType),

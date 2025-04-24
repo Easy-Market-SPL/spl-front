@@ -4,11 +4,15 @@ class BusinessUserAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String hintText;
   final VoidCallback onFilterPressed;
+  final TextEditingController searchController;
+  final Function(String)? onSearchChanged;
 
   const BusinessUserAppBar({
     super.key,
     required this.hintText,
     required this.onFilterPressed,
+    required this.searchController,
+    this.onSearchChanged,
   });
 
   @override
@@ -19,11 +23,12 @@ class BusinessUserAppBar extends StatelessWidget
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0), // Add spacing
         child: TextField(
+          textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: hintText,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: IconButton(
-              icon: const Icon(Icons.filter_alt_off, color: Colors.black),
+              icon: const Icon(Icons.filter_alt, color: Colors.black),
               onPressed: onFilterPressed,
             ),
             filled: true,
@@ -42,6 +47,10 @@ class BusinessUserAppBar extends StatelessWidget
                   BorderSide(color: Colors.blue, width: 2), // Blue border
             ),
           ),
+          onTapOutside: (event) {
+            FocusScope.of(context).unfocus(); // Dismiss keyboard on tap outside
+          },
+          onSubmitted: onSearchChanged,
         ),
       ),
     );
