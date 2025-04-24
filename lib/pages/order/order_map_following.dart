@@ -17,7 +17,6 @@ import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/models/user.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/services/api/user_service.dart';
-/* Servicio que escucha delivery_tracking */
 import 'package:spl_front/services/supabase/real-time/real_time_tracking_service.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
@@ -43,8 +42,8 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
   final _trackingSvc = DeliveryTrackingService();
   StreamSubscription<List<Map<String, dynamic>>>? _trackingSub;
 
-  LatLng? _startLocation; // posición dinámica del courier
-  LatLng? _endLocation; // destino (geocoding)
+  LatLng? _startLocation; // Courier location
+  LatLng? _endLocation; // Destination location decoded from Google API
 
   bool _isExpanded = false;
   static const Color darkBlue = Color(0xFF0D47A1);
@@ -53,24 +52,19 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
   void initState() {
     super.initState();
 
-    /* 1️⃣ Limpiar cualquier marcador previo */
     context.read<MapBloc>().clearMarkers();
 
-    /* 2️⃣ Cargar datos de usuario-cliente */
     _userFuture = UserService.getUser(widget.order.idUser!);
 
-    /* 3️⃣ Asegurar la orden dentro del OrdersBloc */
     final ordersBloc = context.read<OrdersBloc>();
     if (ordersBloc.state is! OrdersLoaded) {
       ordersBloc.add(LoadSingleOrderEvent(widget.order.id!));
     }
 
-    /* 4️⃣ Decodificar la dirección para obtener el destino (una sola vez) */
     context
         .read<SearchPlacesBloc>()
         .getPlacesByGoogleQuery(widget.order.address!);
 
-    /* 5️⃣ Escuchar delivery_tracking SOLO si hay domiciliario asignado */
     if (widget.order.idDomiciliary != null) {
       _trackingSub = _trackingSvc
           .watchUser(widget.order.idDomiciliary!)
@@ -84,7 +78,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     super.dispose();
   }
 
-  /* ------------ Manejador de filas del stream ------------- */
   void _handleTrackingRows(List<Map<String, dynamic>> rows) {
     if (rows.isEmpty) return;
 
@@ -92,8 +85,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     final lat = (last['latitude'] as num?)?.toDouble();
     final lng = (last['longitude'] as num?)?.toDouble();
 
-    /* Si alguna coordenada viene null → NO actualizamos origen
-       (se mostrará solo el destino geocodificado). */
     if (lat == null || lng == null) return;
 
     final newPos = LatLng(lat, lng);
@@ -121,10 +112,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     final mapBloc = context.read<MapBloc>();
     final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
 
-    // Si no hemos recibido ubicación del courier, intentamos con la fija
-    final hasStart = _startLocation != null ||
-        (widget.order.lat != null && widget.order.lng != null);
-
     final LatLng? startLocation = _startLocation ??
         (widget.order.lat != null && widget.order.lng != null
             ? LatLng(widget.order.lat!, widget.order.lng!)
@@ -142,7 +129,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
               _endLocation = destLatLng;
               mapBloc.drawDestinationMarker(destLatLng);
 
-              // Si tenemos origen (del stream o fijo) → dibujamos ruta
               if (startLocation != null) {
                 _drawDestinationRoute(
                   startLocation,
@@ -173,8 +159,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                     markers: mapState.markers.values.toSet(),
                   ),
                 ),
-
-                /* FAB para centrar cámara */
                 Positioned(
                   bottom: _isExpanded && startLocation != null
                       ? MediaQuery.of(context).size.height * 0.38
@@ -193,8 +177,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                         const Icon(Icons.directions_walk, color: Colors.white),
                   ),
                 ),
-
-                /* FAB expand / collapse */
                 Positioned(
                   bottom: MediaQuery.of(context).size.height * 0.08,
                   right: 20,
@@ -213,8 +195,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                           ),
                         ),
                 ),
-
-                /* Tarjeta de información */
                 if (_isExpanded)
                   startLocation != null
                       ? _buildFullInfoCard(context, infoTrip)
