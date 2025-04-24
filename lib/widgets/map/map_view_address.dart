@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
 import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
-
-import '../../utils/map/map_themes/blue_standard_map_style.dart';
 
 class MapView extends StatelessWidget {
   final LatLng initialLocation;
@@ -53,7 +49,7 @@ class MapView extends StatelessWidget {
               zoomGesturesEnabled: true,
               myLocationButtonEnabled: false,
               // style: jsonEncode(gtaMapStyle),
-              style: jsonEncode(blueStandardMapStyle),
+              // style: jsonEncode(blueStandardMapStyle),
               markers: markers,
               onMapCreated: (controller) {
                 mapBloc.add(OnMapInitializedEvent(controller));
