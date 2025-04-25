@@ -143,7 +143,7 @@ Stream<List<Map<String, dynamic>>> watchChatMessages(String chatId) {
     // Update chat metadata
     await _client.from('chats').update({
       'sender': senderType.name,
-      'last_message': message,
+      'last_message': messageType == MessageType.text ? message : '[${messageType.name}]',
       'last_message_time': '${now.hour}:${now.minute}',
       'last_message_date': '${now.day}/${now.month}/${now.year}',
       'updated_at': now.toIso8601String(),

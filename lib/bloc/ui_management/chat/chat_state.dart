@@ -8,7 +8,6 @@ abstract class ChatState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Estado inicial, antes de cargar nada
 class ChatInitial extends ChatState {
   const ChatInitial();
 }
@@ -26,6 +25,12 @@ class ChatLoaded extends ChatState {
 
   @override
   List<Object?> get props => [messages];
+}
+
+class ChatFileUploading extends ChatState {
+  final List<ChatMessage> messages;
+  
+  const ChatFileUploading(this.messages);
 }
 
 /// Estado de error con mensaje descriptivo

@@ -30,6 +30,7 @@ class UpdateMessagesEvent extends ChatEvent {
   const UpdateMessagesEvent(this.messages);
 }
 
+
 class SendMessageEvent extends ChatEvent {
   final UserType senderType;
   final String text;
@@ -44,12 +45,14 @@ class SendMessageEvent extends ChatEvent {
 }
 
 class SendFileEvent extends ChatEvent {
-  final String senderType;
+  final UserType senderType;
   final MessageType messageType;
+  final String filePath; // Path to the file to be sent
 
   const SendFileEvent({
     required this.senderType,
     required this.messageType,
+    required this.filePath,
   });
 
   @override
