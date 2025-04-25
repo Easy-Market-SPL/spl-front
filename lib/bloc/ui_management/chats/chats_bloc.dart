@@ -1,38 +1,107 @@
+import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'chats_event.dart';
-import 'chats_state.dart';
+import 'package:spl_front/bloc/ui_management/chats/chats_event.dart';
+import 'package:spl_front/bloc/ui_management/chats/chats_state.dart';
+import 'package:spl_front/models/data/chat.dart';
+import 'package:spl_front/services/supabase/real-time/real_time_chat_service.dart';
 
 class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
-  ChatsBloc() : super(ChatsInitial()) {
+  final RealTimeChatService _chatService;
+  StreamSubscription? _chatsSubscription;
 
+  ChatsBloc({required RealTimeChatService chatService}) 
+      : _chatService = chatService,
+        super(ChatsInitial()) {
+    
     on<LoadChatsEvent>((event, emit) async {
-      await Future.delayed(Duration(seconds: 1));
-      final chats = [
-        Chat("Nombre cliente 1", "¿Pueden hacer domicilios a Medina, Cundinamarca? Me interesan...", "28/01/25 10:30 AM"),
-        Chat("Nombre cliente 2", "Texto ejemplo", "--/--/-- --:-- --"),
-        Chat("Nombre cliente 3", "Texto ejemplo", "--/--/-- --:-- --"),
-      ];
-      emit(ChatsLoaded(chats, chats));
+      emit(ChatsLoading());
+      
+      // Cancel any existing subscription
+      await _chatsSubscription?.cancel();
+      
+      // Subscribe to real-time chat updates
+      _chatsSubscription = _chatService.watchAll().listen(
+        (chatsData) {
+          final chats = chatsData.map((chatData) => Chat(
+            id: chatData['chat_id'],
+            name: chatData['customer_name'] ?? 'Unknown',
+            message: chatData['last_message'] ?? '',
+            date: chatData['last_message_date'] ?? '',
+            time: chatData['last_message_time'] ?? '',
+          )).whereNot((chat) => chat.message.isEmpty).toList();
+          
+          add(ChatsLoadedEvent(chats));
+        },
+        onError: (error) {
+          add(ChatsErrorEvent(error.toString()));
+        }
+      );
     });
 
-    on<SearchChatsEvent>((event, emit) async {
-      final currentState = state;
-      if (currentState is ChatsLoaded) {
-        final filteredChats = currentState.originalChats
-            .where((chat) => chat.name.toLowerCase().contains(event.query.toLowerCase()))
+    on<LoadCustomerChatEvent>((event, emit) async {
+      emit(ChatsLoading());
+      
+      // Cancel any existing subscription
+      await _chatsSubscription?.cancel();
+      
+      // Subscribe to customer's specific chat
+      _chatsSubscription = _chatService.watchChat(event.customerId).listen(
+        (chatsData) {
+          final chats = chatsData.map((chatData) => Chat(
+            name: 'Soporte',  // For customer, chat is always with business support
+            message: chatData['last_message'] ?? '',
+            date: chatData['last_message_date'] ?? '',
+            time: chatData['last_message_time'] ?? '',
+            id: chatData['chat_id'],
+          )).toList();
+          
+          add(ChatsLoadedEvent(chats));
+        },
+        onError: (error) {
+          add(ChatsErrorEvent(error.toString()));
+        }
+      );
+    });
+    
+    on<ChatsLoadedEvent>((event, emit) {
+      emit(ChatsLoaded(
+        allChats: event.chats,
+        filteredChats: event.chats,
+      ));
+    });
+    
+    on<ChatsErrorEvent>((event, emit) {
+      emit(ChatsError(event.message));
+    });
+
+    on<SearchChatsEvent>((event, emit) {
+      if (state is ChatsLoaded) {
+        final currentState = state as ChatsLoaded;
+        final searchQuery = event.query.toLowerCase();
+        
+        if (searchQuery.isEmpty) {
+          emit(ChatsLoaded(
+            allChats: currentState.allChats,
+            filteredChats: currentState.allChats,
+          ));
+        } else {
+          final filteredChats = currentState.allChats
+            .where((chat) => chat.name.toLowerCase().contains(searchQuery))
             .toList();
-        emit(ChatsLoaded(currentState.originalChats, filteredChats));
+            
+          emit(ChatsLoaded(
+            allChats: currentState.allChats,
+            filteredChats: filteredChats,
+          ));
+        }
       }
     });
   }
-}
-
-// Chat model
-class Chat {
-  final String name;
-  final String message;
-  final String date;
-
-  Chat(this.name, this.message, this.date);
+  
+  @override
+  Future<void> close() {
+    _chatsSubscription?.cancel();
+    return super.close();
+  }
 }

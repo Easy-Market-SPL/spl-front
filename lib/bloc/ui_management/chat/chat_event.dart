@@ -1,45 +1,57 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:spl_front/bloc/ui_management/chat/chat_state.dart';
+import 'package:spl_front/models/data/chat_message.dart';
+import 'package:spl_front/models/logic/user_type.dart';
 
 abstract class ChatEvent extends Equatable {
+  const ChatEvent();
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
+}
+
+class LoadMessagesEvent extends ChatEvent {
+  final String? chatId;
+  final String? customerId;
+  final String? customerName;
+
+  const LoadMessagesEvent({
+    this.chatId,
+    this.customerId,
+    this.customerName,
+  });
+
+  @override
+  List<Object?> get props => [chatId, customerId, customerName];
+}
+
+class UpdateMessagesEvent extends ChatEvent {
+  final List<ChatMessage> messages;
+  
+  const UpdateMessagesEvent(this.messages);
 }
 
 class SendMessageEvent extends ChatEvent {
-  final String sender;
+  final UserType senderType;
   final String text;
-  final BuildContext context;
 
-  SendMessageEvent({
-    required this.sender, 
-    required this.text, 
-    required this.context});
+  const SendMessageEvent({
+    required this.senderType,
+    required this.text,
+  });
 
   @override
-  List<Object> get props => [sender, text, context];
+  List<Object?> get props => [senderType, text];
 }
 
 class SendFileEvent extends ChatEvent {
-  final String sender;
-  final String fileUrl;
-  final MessageType fileType;
-  final BuildContext context;
+  final String senderType;
+  final MessageType messageType;
 
-  SendFileEvent({
-    required this.sender, 
-    required this.fileUrl, 
-    required this.fileType, 
-    required this.context});
+  const SendFileEvent({
+    required this.senderType,
+    required this.messageType,
+  });
 
   @override
-  List<Object> get props => [sender, fileUrl, fileType, context];
+  List<Object?> get props => [senderType];
 }
-
-class UploadFileEvent extends ChatEvent {
-  // TODO: Implement event to upload file to the server
-}
-
-// Load initial messages
-class LoadMessagesEvent extends ChatEvent {}

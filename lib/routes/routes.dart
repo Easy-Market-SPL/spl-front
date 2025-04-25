@@ -63,7 +63,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// CHAT PAGES
   'customer_user_chat': (_) => !kIsWeb
-      ? ChatScreen(userType: UserType.customer, userName: "userName")
+      ? ChatScreen(userType: UserType.customer, userName: "Soporte")
       : ChatWeb(
           userType: UserType.customer,
         ),
@@ -73,7 +73,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
           userType: UserType.business,
         ),
   'business_user_chat': (_) =>
-      ChatScreen(userType: UserType.business, userName: "customerName"),
+      ChatScreen(userType: UserType.business),
 
   /// PRODUCTS PAGES
   'add_product': (_) => ProductFormPage(),

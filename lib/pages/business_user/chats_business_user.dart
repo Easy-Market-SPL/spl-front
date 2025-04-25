@@ -122,6 +122,7 @@ class _ChatsPageState extends State<ChatsPage> {
                                   builder: (context) => ChatScreen(
                                     userType: UserType.business,
                                     userName: chat.name,
+                                    customerId: chat.id,
                                   ),
                                 ),
                               );

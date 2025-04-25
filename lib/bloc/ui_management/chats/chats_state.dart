@@ -1,29 +1,39 @@
 import 'package:equatable/equatable.dart';
-
-import 'chats_bloc.dart';
+import 'package:spl_front/models/data/chat.dart';
 
 abstract class ChatsState extends Equatable {
   const ChatsState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class ChatsInitial extends ChatsState {
-  final List<Chat> chats;
+  const ChatsInitial();
+}
 
-  const ChatsInitial({this.chats = const []});
-
-  @override
-  List<Object> get props => [chats];
+class ChatsLoading extends ChatsState {
+  const ChatsLoading();
 }
 
 class ChatsLoaded extends ChatsState {
-  final List<Chat> originalChats;
+  final List<Chat> allChats;
   final List<Chat> filteredChats;
 
-  const ChatsLoaded(this.originalChats, this.filteredChats);
+  const ChatsLoaded({
+    required this.allChats,
+    required this.filteredChats,
+  });
 
   @override
-  List<Object> get props => [originalChats, filteredChats];
+  List<Object?> get props => [allChats, filteredChats];
+}
+
+class ChatsError extends ChatsState {
+  final String message;
+
+  const ChatsError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

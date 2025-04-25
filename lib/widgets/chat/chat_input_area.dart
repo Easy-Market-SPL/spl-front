@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:spl_front/models/data/chat_message.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 
 import '../../bloc/ui_management/chat/chat_bloc.dart';
 import '../../bloc/ui_management/chat/chat_event.dart';
-import '../../bloc/ui_management/chat/chat_state.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatInputField extends StatelessWidget {
@@ -32,9 +32,9 @@ class ChatInputField extends StatelessWidget {
     void sendMessage() {
       if (controller.text.trim().isNotEmpty) {
         context.read<ChatBloc>().add(SendMessageEvent(
-            sender: userType == UserType.customer ? 'cliente' : 'soporte',
+            senderType: userType,
             text: controller.text.trim(),
-            context: context));
+        ));
         controller.clear();
         scrollToBottomPostFrame(scrollController);
       }
@@ -88,10 +88,9 @@ class ChatInputField extends StatelessWidget {
         // Send the file with the correct type
         if (context.mounted) {
           context.read<ChatBloc>().add(SendFileEvent(
-              sender: userType == UserType.customer ? 'cliente' : 'soporte',
-              fileUrl: fileUrl,
-              fileType: messageType,
-              context: context));
+              senderType: userType == UserType.customer ? 'cliente' : 'soporte',
+              messageType: messageType,
+              ));
         }
         scrollToBottomWithDelay(scrollController);
       }
@@ -186,11 +185,17 @@ class ChatInputField extends StatelessWidget {
 }
 
 void scrollToBottom(ScrollController scrollController) {
-  scrollController.animateTo(
-    scrollController.position.maxScrollExtent,
-    duration: const Duration(milliseconds: 150),
-    curve: Curves.easeOut,
-  );
+  try {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+      );
+    }
+  } catch (e) {
+    print('Error scrolling: $e');
+  }
 }
 
 void scrollToBottomPostFrame(ScrollController scrollController) {

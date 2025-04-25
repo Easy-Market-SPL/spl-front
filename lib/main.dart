@@ -32,6 +32,7 @@ import 'package:spl_front/services/api/review_service.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
+import 'package:spl_front/services/supabase/real-time/real_time_chat_service.dart';
 import 'package:spl_front/services/supabase/supabase_config.dart';
 import 'package:spl_front/theme/theme.dart';
 
@@ -73,8 +74,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ProfileTabBloc()),
         BlocProvider(create: (context) => AddressBloc()),
         BlocProvider(create: (context) => LabelsStoreBloc()),
-        BlocProvider(create: (context) => ChatBloc()),
-        BlocProvider(create: (context) => ChatsBloc()),
+        BlocProvider(create: (context) => ChatBloc(chatService: RealTimeChatService())),
+        BlocProvider(create: (context) => ChatsBloc(chatService: RealTimeChatService())),
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
         BlocProvider(create: (context) => ProductDetailsBloc()),
