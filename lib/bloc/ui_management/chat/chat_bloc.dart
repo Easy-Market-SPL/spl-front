@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/models/data/chat_message.dart';
 import 'package:spl_front/services/supabase/real-time/real_time_chat_service.dart';
+import 'package:spl_front/services/supabase/storage/storage_service.dart';
 import 'chat_event.dart';
 import 'chat_state.dart';
 
@@ -74,9 +75,57 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onSendFile(SendFileEvent event, Emitter<ChatState> emit) {
-    debugPrint('File sending not yet implemented');
-    // TODO: Implement file sending logic
+  Future<void> _onSendFile(SendFileEvent event, Emitter<ChatState> emit) async {
+    if (_chatId == null) {
+      debugPrint('Cannot send file: Chat ID is null');
+      return;
+    }
+
+    try {
+      debugPrint('Uploading file for chat: $_chatId');
+      final currentState = state;
+      final List<ChatMessage> currentMessages = currentState is ChatLoaded ? currentState.messages : [];
+
+      emit(ChatFileUploading(currentMessages));
+
+      // Generate a unique identifier for the file
+      final String messageId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Upload the file to storage
+      String? fileUrl;
+      if (event.messageType == MessageType.image) {
+        fileUrl = await StorageService().uploadChatImage(event.filePath, messageId);
+      } else {
+        // Handle other file types in the future
+        debugPrint('Unsupported file type: ${event.messageType}');
+        return;
+      }
+
+      if (fileUrl == null) {
+        debugPrint('Failed to upload file');
+        emit(ChatLoaded(currentMessages));
+        return;
+      }
+
+      // Send a message with the file URL
+      await _chatService.sendMessage(
+        chatId: _chatId!,
+        message: '',
+        senderType: event.senderType,
+        messageType: event.messageType,
+        fileUrl: fileUrl
+      );
+
+      debugPrint('File sent successfully');
+      // The stream will handle updating the chat
+    } catch (e) {
+      debugPrint('Error sending file: ${e.toString()}');
+      // Consider emitting an error state
+      if (state is ChatFileUploading) {
+        final currentMessages = (state as ChatFileUploading).messages;
+        emit(ChatLoaded(currentMessages));
+      }
+    }
   }
 
   // Helper methods
@@ -146,11 +195,22 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final formattedDate = DateFormat('dd/MM/yyyy').format(createdAt);
       final formattedTime = '${createdAt.hour}:${createdAt.minute.toString().padLeft(2, '0')}';
 
+      MessageType messageType = MessageType.text;
+      if (messageData['message_type'] != null) {
+        switch (messageData['message_type']) {
+          case 'image': messageType = MessageType.image; break;
+          case 'video': messageType = MessageType.video; break;
+          default: messageType = MessageType.text;
+        }
+      }
+
       return ChatMessage(
         sender: messageData['sender_type'] ?? 'unknown',
         text: messageData['message'] ?? '',
         time: formattedTime,
         date: formattedDate,
+        fileUrl: messageData['file_url'],
+        type: messageType,
       );
     }).toList();
   }

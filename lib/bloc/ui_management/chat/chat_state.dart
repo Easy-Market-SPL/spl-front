@@ -28,6 +28,12 @@ class ChatLoaded extends ChatState {
   List<Object?> get props => [messages];
 }
 
+class ChatFileUploading extends ChatState {
+  final List<ChatMessage> messages;
+  
+  const ChatFileUploading(this.messages);
+}
+
 /// Estado de error con mensaje descriptivo
 class ChatError extends ChatState {
   final String message;

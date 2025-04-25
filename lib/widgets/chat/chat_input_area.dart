@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:spl_front/bloc/ui_management/chat/chat_state.dart';
 import 'package:spl_front/models/data/chat_message.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 
@@ -29,6 +30,9 @@ class ChatInputField extends StatelessWidget {
       maxInputLines = 4;
     }
 
+    final bool isUploading = context.select(
+      (ChatBloc bloc) => bloc.state is ChatFileUploading);
+
     void sendMessage() {
       if (controller.text.trim().isNotEmpty) {
         context.read<ChatBloc>().add(SendMessageEvent(
@@ -41,6 +45,8 @@ class ChatInputField extends StatelessWidget {
     }
 
     Future<void> handleFileSelection() async {
+      if (isUploading) return;
+
       MessageType fileType = MessageType.image;
       final ImagePicker picker = ImagePicker();
       final XFile? file = await showModalBottomSheet<XFile>(
@@ -88,8 +94,9 @@ class ChatInputField extends StatelessWidget {
         // Send the file with the correct type
         if (context.mounted) {
           context.read<ChatBloc>().add(SendFileEvent(
-              senderType: userType == UserType.customer ? 'cliente' : 'soporte',
+              senderType: userType,
               messageType: messageType,
+              filePath: fileUrl,
               ));
         }
         scrollToBottomWithDelay(scrollController);
@@ -98,87 +105,121 @@ class ChatInputField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey, width: 0.5),
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 2.0,
-              offset: Offset(0, 2),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: isUploading ? Colors.grey[200] : Colors.white,
+              border: Border.all(color: Colors.grey, width: 0.5),
+              borderRadius: BorderRadius.circular(10.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 2.0,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Text input field
-              Expanded(
-                child: Focus(
-                  onKeyEvent: (FocusNode node, KeyEvent event) {
-                    if (event is KeyDownEvent && kIsWeb) {
-                      if (event.logicalKey == LogicalKeyboardKey.enter &&
-                          !HardwareKeyboard.instance.isShiftPressed) {
-                        sendMessage();
-                        return KeyEventResult.handled;
-                      }
-                    }
-                    return KeyEventResult.ignored;
-                  },
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    cursorColor: Colors.black,
-                    keyboardType: TextInputType.multiline,
-                    minLines: 1,
-                    maxLines: maxInputLines,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      hintText: ChatStrings.writeMessageHint,
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  // Text input field
+                  Expanded(
+                    child: Focus(
+                      onKeyEvent: (FocusNode node, KeyEvent event) {
+                        if (event is KeyDownEvent && kIsWeb && !isUploading) {
+                          if (event.logicalKey == LogicalKeyboardKey.enter &&
+                              !HardwareKeyboard.instance.isShiftPressed) {
+                            sendMessage();
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        enabled: !isUploading,
+                        cursorColor: Colors.black,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 1,
+                        maxLines: maxInputLines,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isUploading ? Colors.grey[300] : Colors.grey[100],
+                          hintText: isUploading 
+                              ? ChatStrings.uploadingFile 
+                              : ChatStrings.writeMessageHint,
+                          hintStyle: TextStyle(color: isUploading ? Colors.grey[600] : Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                            borderSide:
+                                const BorderSide(color: Colors.black, width: 1.5),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                        ),
+                        onTap: () {
+                          // Scroll to the bottom when the input field is tapped
+                          scrollToBottomWithDelay(scrollController);
+                        },
+                        onSubmitted: (value) {
+                          if (!isUploading) {
+                            sendMessage();
+                          }
+                        },
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                        borderSide:
-                            const BorderSide(color: Colors.black, width: 1.5),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
                     ),
-                    onTap: () {
-                      // Scroll to the bottom when the input field is tapped
-                      scrollToBottomWithDelay(scrollController);
+                  ),
+
+                  // Attach file button
+                  IconButton(
+                    icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
+                    onPressed: isUploading ? null : () async {
+                      focusNode.unfocus();
+                      await handleFileSelection();
                     },
-                    onSubmitted: (value) {
-                      sendMessage();
-                    },
+                    color: isUploading ? Colors.grey : Colors.blueAccent,
+                  ),
+
+                  // Send message button
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: isUploading ? null : sendMessage,
+                    color: isUploading ? Colors.grey : Colors.blueAccent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Show upload progress indicator
+          if (isUploading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.1),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 20, 
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(ChatStrings.uploadingFile,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[800])),
+                    ],
                   ),
                 ),
               ),
-
-              // Attach file button
-              IconButton(
-                icon: const Icon(Icons.attach_file, color: Colors.blueAccent),
-                onPressed: () async {
-                  focusNode.unfocus();
-                  await handleFileSelection();
-                },
-              ),
-
-              // Send message button
-              IconButton(
-                icon: const Icon(Icons.send, color: Colors.blueAccent),
-                onPressed: sendMessage,
-              ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -194,7 +235,7 @@ void scrollToBottom(ScrollController scrollController) {
       );
     }
   } catch (e) {
-    print('Error scrolling: $e');
+    debugPrint('Error scrolling: $e');
   }
 }
 
