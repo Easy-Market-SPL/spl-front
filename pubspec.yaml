@@ -63,6 +63,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   currency_text_input_formatter: ^2.2.9
   collection: ^1.19.0
+  flutter_stripe_web: ^6.5.0
 
 dev_dependencies:
   flutter_test:

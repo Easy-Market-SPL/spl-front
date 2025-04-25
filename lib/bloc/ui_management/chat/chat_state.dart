@@ -8,7 +8,6 @@ abstract class ChatState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Estado inicial, antes de cargar nada
 class ChatInitial extends ChatState {
   const ChatInitial();
 }
