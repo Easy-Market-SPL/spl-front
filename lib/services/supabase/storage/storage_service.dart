@@ -21,7 +21,7 @@ class StorageService{
       final storageResponse = await storage.from(imagesPath).upload(
         '$productsPath/$productCode', 
         file,
-        fileOptions: const FileOptions(upsert: false)
+        fileOptions: const FileOptions(upsert: true)
       );
       if(storageResponse.isEmpty) return null; 
 

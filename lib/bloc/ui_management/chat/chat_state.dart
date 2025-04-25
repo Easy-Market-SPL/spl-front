@@ -1,46 +1,39 @@
 import 'package:equatable/equatable.dart';
-
-class ChatMessage {
-  final String sender;
-  final String text;
-  final String time;
-  final String date;
-  final String? fileUrl;
-  final MessageType type;
-
-  ChatMessage({
-    required this.sender,
-    required this.text,
-    required this.time,
-    required this.date,
-    this.fileUrl,
-    this.type = MessageType.text,
-  });
-}
-
-enum MessageType { text, image, video }
+import 'package:spl_front/models/data/chat_message.dart';
 
 abstract class ChatState extends Equatable {
+  const ChatState();
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-// Initial state when there are no messages
+/// Estado inicial, antes de cargar nada
 class ChatInitial extends ChatState {
-  final List<ChatMessage> messages;
-
-  ChatInitial({this.messages = const []});
-
-  @override
-  List<Object> get props => [messages];
+  const ChatInitial();
 }
 
-// State when messages are being loaded
+/// Estado de carga en progreso
+class ChatLoading extends ChatState {
+  const ChatLoading();
+}
+
+/// Estado con la lista de mensajes recibidos
 class ChatLoaded extends ChatState {
   final List<ChatMessage> messages;
 
-  ChatLoaded(this.messages);
+  const ChatLoaded(this.messages);
 
   @override
-  List<Object> get props => [messages];
+  List<Object?> get props => [messages];
+}
+
+/// Estado de error con mensaje descriptivo
+class ChatError extends ChatState {
+  final String message;
+
+  const ChatError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

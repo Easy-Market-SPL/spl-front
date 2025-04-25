@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/data/chat_message.dart';
 import 'package:spl_front/widgets/chat/chat_image_manager.dart';
 import 'package:spl_front/widgets/chat/chat_video_player.dart';
-import '../../bloc/ui_management/chat/chat_state.dart';
 import '../../utils/strings/chat_strings.dart';
 
 class ChatMessageBubble extends StatelessWidget {

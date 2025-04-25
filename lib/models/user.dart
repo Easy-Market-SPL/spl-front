@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:spl_front/models/logic/user_type.dart';
+
 /// Parse a JSON string into a List of UserModel
 List<UserModel> userFromJson(String str) =>
     List<UserModel>.from(json.decode(str).map((x) => UserModel.fromJsonMap(x)));
@@ -57,4 +59,16 @@ class UserModel {
         "email": email,
         "rol": rol,
       };
+
+  UserType getUserType() {
+    if (rol == 'customer') {
+      return UserType.customer;
+    } else if (rol == 'business') {
+      return UserType.business;
+    } else if (rol == 'delivery') {
+      return UserType.delivery;
+    } else {
+      return UserType.admin;
+    }
+  }
 }
