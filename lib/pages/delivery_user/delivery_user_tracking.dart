@@ -40,9 +40,7 @@ class DeliveryUserTracking extends StatefulWidget {
 }
 
 class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
-  /* ────────────────────────────  NUEVOS  ──────────────────────────── */
   final _trackingService = DeliveryTrackingService(); // instancia única
-  /* ────────────────────────────────────────────────────────────────── */
 
   late final bool isDelivery;
   late final Future<UserModel?> _userFuture;
@@ -53,11 +51,9 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   void initState() {
     super.initState();
 
-    // 1. Limpiar marcadores.
     final mapBloc = context.read<MapBloc>();
     mapBloc.clearMarkers();
 
-    // 2. Configuración inicial.
     isDelivery = widget.isTriggerDelivery ?? false;
     _userFuture = UserService.getUser(widget.order!.idUser!);
 
@@ -66,12 +62,11 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
       ordersBloc.add(LoadSingleOrderEvent(widget.order!.id!));
     }
 
-    // 3. Comenzar a escuchar ubicación y obtener el destino (una sola vez).
     final locationBloc = context.read<LocationBloc>();
     final searchBloc = context.read<SearchPlacesBloc>();
     locationBloc.getCurrentPosition();
-    locationBloc.startFollowingUser(); // ⬅️ actualizaciones constantes
-    searchBloc.getPlacesByGoogleQuery(widget.order!.address!); // ⬅️ solo 1 vez
+    locationBloc.startFollowingUser();
+    searchBloc.getPlacesByGoogleQuery(widget.order!.address!);
   }
 
   @override
@@ -81,13 +76,11 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
 
     return MultiBlocListener(
       listeners: [
-        /* ───────────────────────  LISTENER UBICACIÓN  ─────────────────────── */
         BlocListener<LocationBloc, LocationState>(
           listener: (context, locState) async {
             final loc = locState.lastKnowLocation;
             if (loc == null) return;
 
-            // 1️⃣  Escribir SIEMPRE la posición actual en la BBDD.
             final userId = context.read<UsersBloc>().state.sessionUser!.id;
             await _trackingService.upsertLocation(
               userId: userId,
@@ -95,13 +88,11 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
               longitude: loc.longitude,
             );
 
-            // 2️⃣  Dibujar ruta cada vez que cambie la ubicación.
             final places = context.read<SearchPlacesBloc>().state.googlePlaces;
             if (places != null && places.isNotEmpty) {
               _drawDestinationRoute(loc, places.first, mapBloc, infoTrip);
             }
 
-            // 3️⃣  Enviar evento “On the way” solo una vez.
             if (isDelivery && !_didSendOnTheWay) {
               _didSendOnTheWay = true;
               context.read<OrdersBloc>().add(
@@ -181,7 +172,6 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   }
 
   /* ─────────────────────────────  UI helpers  ───────────────────────────── */
-
   Widget _buildFloatingButtons(
     BuildContext context,
     MapBloc mapBloc,
@@ -307,15 +297,28 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          widget.order!.orderStatuses.add(
-                            OrderStatus(
-                                status: 'delivered', startDate: DateTime.now()),
-                          );
-                        });
-                        context.read<OrdersBloc>().add(
-                              DeliveredOrderEvent(widget.order!.id!),
+                        final infoTripProvider = Provider.of<InfoTripProvider>(
+                            context,
+                            listen: false);
+
+                        final metersDistance = !infoTripProvider.metersDistance
+                            ? infoTripProvider.distance * 1000
+                            : infoTripProvider.distance;
+
+                        if (metersDistance >= 100) {
+                          _distanceDeliveryError();
+                        } else {
+                          setState(() {
+                            widget.order!.orderStatuses.add(
+                              OrderStatus(
+                                  status: 'delivered',
+                                  startDate: DateTime.now()),
                             );
+                          });
+                          context.read<OrdersBloc>().add(
+                                DeliveredOrderEvent(widget.order!.id!),
+                              );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
@@ -360,8 +363,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
         ),
       );
 
-  /* ──────────────────────  RUTA Y CÁLCULO DE TIEMPO  ───────────────────── */
-
+  /* - ───────────────────────  LOGIC  ────────────────────────── */
   Future<void> _drawDestinationRoute(
     LatLng start,
     dynamic destinationPlace,
@@ -386,5 +388,59 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
   int _calculateMinutes(double distance, bool isMeters) {
     final timeInMinutes = isMeters ? (distance / 1000) * 3.5 : distance * 3.5;
     return timeInMinutes.round();
+  }
+
+  void _distanceDeliveryError() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text(
+                'Debes encontrarte a menos de 100 metros para marcar la orden como entregada.',
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  'Aceptar',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

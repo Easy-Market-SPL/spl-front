@@ -6,7 +6,7 @@ class Review {
   final String? commentary;
   final String? productCode;
   final String? idUser;
-  final bool? purchasedReview;
+  final bool purchasedReview;
 
   Review({
     this.id,
@@ -14,7 +14,7 @@ class Review {
     this.commentary,
     this.productCode,
     this.idUser,
-    this.purchasedReview,
+    required this.purchasedReview,
   });
 
   Review copyWith({
@@ -44,15 +44,15 @@ class Review {
   /// Create a Review from a `Map<String, dynamic>`
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-        id: json["id"] as int?,
-        calification: json["calification"] == null
-            ? null
-            : (json["calification"] as num).toDouble(),
-        commentary: json["commentary"] as String?,
-        productCode: json["productCode"] as String?,
-        idUser: json["idUser"] as String?,
-        purchasedReview: false // json["purchasedReview"] as bool?,
-        );
+      id: json["id"] as int?,
+      calification: json["calification"] == null
+          ? null
+          : (json["calification"] as num).toDouble(),
+      commentary: json["commentary"] as String?,
+      productCode: json["productCode"] as String?,
+      idUser: json["idUser"] as String?,
+      purchasedReview: json["purchasedReview"] as bool? ?? false,
+    );
   }
 
   /// Convert this Review to a `Map<String, dynamic>`
