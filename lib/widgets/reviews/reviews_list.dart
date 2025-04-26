@@ -28,12 +28,19 @@ class ReviewsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductBloc, ProductState>(
       builder: (context, state) {
-        final reviews = state is ProductLoaded
+        var reviews = state is ProductLoaded
             ? state.products
                 .firstWhere((p) => p.code == product.code,
                     orElse: () => product)
                 .reviews
             : product.reviews;
+
+        final purchasedReviews =
+            reviews?.where((review) => review.purchasedReview == true).toList();
+
+        final nonPurchasedReviews = reviews
+            ?.where((review) => review.purchasedReview == false)
+            .toList();
 
         if (reviews == null || state is ProductLoading) {
           return const CustomLoading();
@@ -52,15 +59,46 @@ class ReviewsWidget extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Reseñas',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+            purchasedReviews == null || purchasedReviews.isEmpty
+                ? const SizedBox.shrink()
+                : _buildCustomersReviews(context, purchasedReviews),
             const SizedBox(height: 8),
-            ...reviews.map((r) => _buildReviewCard(context, r)),
+            nonPurchasedReviews == null || nonPurchasedReviews.isEmpty
+                ? const SizedBox.shrink()
+                : _buildVisitorsReviews(context, nonPurchasedReviews),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildCustomersReviews(
+      BuildContext context, List<Review> purchasedReviews) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Clientes: ',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        ...purchasedReviews.map((r) => _buildReviewCard(context, r)),
+      ],
+    );
+  }
+
+  Widget _buildVisitorsReviews(
+      BuildContext context, List<Review> nonPurchasedReviews) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Visitantes: ',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        ...nonPurchasedReviews.map((r) => _buildReviewCard(context, r)),
+      ],
     );
   }
 
