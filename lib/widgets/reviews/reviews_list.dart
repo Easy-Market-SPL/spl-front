@@ -62,7 +62,7 @@ class ReviewsWidget extends StatelessWidget {
             purchasedReviews == null || purchasedReviews.isEmpty
                 ? const SizedBox.shrink()
                 : _buildCustomersReviews(context, purchasedReviews),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             nonPurchasedReviews == null || nonPurchasedReviews.isEmpty
                 ? const SizedBox.shrink()
                 : _buildVisitorsReviews(context, nonPurchasedReviews),
@@ -78,7 +78,7 @@ class ReviewsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Clientes: ',
+          'Reseñas Compradores: ',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -93,7 +93,7 @@ class ReviewsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Visitantes: ',
+          'Reseñas Visitantes: ',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),

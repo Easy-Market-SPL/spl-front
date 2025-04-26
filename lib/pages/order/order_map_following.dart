@@ -321,6 +321,10 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
               final lastStatus = widget.order.orderStatuses.last.status;
               // Show button only if not delivered and user can deliver
               if (lastStatus != 'delivered' &&
+                  widget.userType == UserType.customer) {
+                return const SizedBox.shrink();
+              }
+              if (lastStatus != 'delivered' &&
                   (widget.userType == UserType.admin ||
                       widget.userType == UserType.business)) {
                 return SizedBox(

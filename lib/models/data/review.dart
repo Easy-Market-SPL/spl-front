@@ -51,7 +51,7 @@ class Review {
         commentary: json["commentary"] as String?,
         productCode: json["productCode"] as String?,
         idUser: json["idUser"] as String?,
-        purchasedReview: false //json["purchasedReview"] as bool?,
+        purchasedReview: false // json["purchasedReview"] as bool?,
         );
   }
 
