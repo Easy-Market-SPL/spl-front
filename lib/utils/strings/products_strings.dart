@@ -30,6 +30,7 @@ class ProductStrings {
   static const productDeleteError = "Error al eliminar el producto";
   static const confirmDelete = "¿Está seguro que desea eliminar este producto?";
   static const cancel = "Cancelar";
+  static const tryAgain = "Intentar nuevamente";
   static const descriptionHint = "Descripción general del producto...";
   static const requiredProductName = "El nombre del producto es requerido";
   static const invalidPrice = "Ingrese un precio válido";

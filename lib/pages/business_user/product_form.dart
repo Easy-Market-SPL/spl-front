@@ -81,6 +81,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
                   descriptionController: descriptionController,
                   priceController: priceController,
                 ))
+              else if (state is ProductFormSuccess || state is ProductFormDeleted)
+                Expanded(child: _buildSuccessState())
+              else if (state is ProductFormError)
+                Expanded(child: _buildErrorState(state.error))
               else
                 const Expanded(
                   child: Center(child: Text(ProductStrings.initializingForm)),
@@ -201,6 +205,71 @@ class _ProductFormPageState extends State<ProductFormPage> {
             child: const Text(ProductStrings.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSuccessState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.check_circle_outline,
+            color: Colors.green,
+            size: 60,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            ProductStrings.productSaved,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String errorMessage) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 60,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                context.read<ProductFormBloc>().add(
+                  InitProductForm(
+                    productCode: widget.product?.code,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text(ProductStrings.tryAgain),
+            ),
+          ],
+        ),
       ),
     );
   }
