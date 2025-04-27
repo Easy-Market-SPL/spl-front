@@ -22,6 +22,7 @@ import '../../models/order_models/order_status.dart';
 import '../../providers/info_trip_provider.dart';
 import '../../services/supabase/real-time/real_time_tracking_service.dart';
 import '../../utils/strings/order_strings.dart';
+import '../../utils/ui/format_currency.dart';
 import '../../widgets/map/map_view_address.dart';
 import '../../widgets/navigation_bars/nav_bar.dart';
 
@@ -297,6 +298,7 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
+                        /// Make the distance check
                         final infoTripProvider = Provider.of<InfoTripProvider>(
                             context,
                             listen: false);
@@ -306,18 +308,23 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
                             : infoTripProvider.distance;
 
                         if (metersDistance >= 100) {
-                          _distanceDeliveryError();
+                          _distanceDeliveryErrorDialog();
                         } else {
-                          setState(() {
-                            widget.order!.orderStatuses.add(
-                              OrderStatus(
-                                  status: 'delivered',
-                                  startDate: DateTime.now()),
-                            );
-                          });
-                          context.read<OrdersBloc>().add(
-                                DeliveredOrderEvent(widget.order!.id!),
+                          /// Check if the order has debt that according with the business logic means a payment cash
+                          if (widget.order!.debt != 0) {
+                            _askPaymentCashDebtDialog();
+                          } else {
+                            setState(() {
+                              widget.order!.orderStatuses.add(
+                                OrderStatus(
+                                    status: 'delivered',
+                                    startDate: DateTime.now()),
                               );
+                            });
+                            context.read<OrdersBloc>().add(
+                                  DeliveredOrderEvent(widget.order!.id!),
+                                );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -390,7 +397,68 @@ class DeliveryUserTrackingState extends State<DeliveryUserTracking> {
     return timeInMinutes.round();
   }
 
-  void _distanceDeliveryError() {
+  void _askPaymentCashDebtDialog() {
+    // Show a dialog to confirm the payment with cash
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Confirmar Pago',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              )),
+          content: Text(
+              '¿Deseas confirmar el pago de la orden en efectivo por ${formatCurrency(widget.order!.debt!)}?'),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                minimumSize: const Size(120, 45),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child:
+                  const Text('Cancelar', style: TextStyle(color: Colors.blue)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                minimumSize: const Size(120, 45),
+              ),
+              onPressed: () {
+                /// The delivery is confirmed
+                Navigator.pop(dialogContext);
+                // Call the function to confirm the payment
+                context.read<OrdersBloc>().add(UpdateDebtEvent(
+                    orderId: widget.order!.id!,
+                    paymentAmount: widget.order!.debt!));
+                setState(() {
+                  widget.order!.orderStatuses.add(
+                    OrderStatus(status: 'delivered', startDate: DateTime.now()),
+                  );
+                });
+                context.read<OrdersBloc>().add(
+                      DeliveredOrderEvent(widget.order!.id!),
+                    );
+              },
+              child: const Text('Confirmar',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _distanceDeliveryErrorDialog() {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
