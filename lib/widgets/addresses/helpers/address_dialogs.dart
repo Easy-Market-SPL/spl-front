@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/utils/strings/payment_strings.dart';
 
 import '../../../bloc/ui_management/address/address_bloc.dart';
 import '../../../models/logic/address.dart';
@@ -246,6 +247,53 @@ void showErrorDialog(BuildContext context) {
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void showSelectAddressDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: const Center(
+          child: Text(
+            PaymentStrings.selectAddressBeforePayment,
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        content: const Text(
+          PaymentStrings.selectAddressBeforePaymentDescription,
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                PaymentStrings.accept,
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ),

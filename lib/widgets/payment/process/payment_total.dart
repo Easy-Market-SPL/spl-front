@@ -12,6 +12,7 @@ import '../../../bloc/ui_management/order/order_event.dart';
 import '../../../models/logic/address.dart';
 import '../../../models/order_models/order_status.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
+import '../../addresses/helpers/address_dialogs.dart';
 
 class PaymentTotal extends StatelessWidget {
   final double total;
@@ -19,53 +20,6 @@ class PaymentTotal extends StatelessWidget {
   final Address? address;
 
   const PaymentTotal({super.key, required this.total, this.card, this.address});
-
-  void _showSelectAddressDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              PaymentStrings.selectAddressBeforePayment,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          content: const Text(
-            PaymentStrings.selectAddressBeforePaymentDescription,
-            style: TextStyle(
-              color: Colors.black54,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  PaymentStrings.accept,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showSuccessfullPaymentDialog(BuildContext context) {
     showDialog(
@@ -241,7 +195,7 @@ class PaymentTotal extends StatelessWidget {
     final orderBloc = BlocProvider.of<OrdersBloc>(context);
 
     if (address == null) {
-      _showSelectAddressDialog(context);
+      showSelectAddressDialog(context);
       return;
     }
 
@@ -251,11 +205,11 @@ class PaymentTotal extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
       Navigator.pop(context); // Close the dialog
 
-      // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed
+      // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed and put the paymentAmount on the moment in 0
       orderBloc.add(ConfirmOrderEvent(
           orderId: orderBloc.state.currentCartOrder!.id!,
           shippingCost: 0,
-          paymentAmount: total));
+          paymentAmount: 0));
 
       order!.orderStatuses
           .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/inputs/card_input.dart';
 
 import '../../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../../models/logic/address.dart';
 import '../../../models/ui/credit_card/address_payment_model.dart';
 import '../../../models/ui/credit_card/credit_card_model.dart';
+import '../../../models/ui/google/places_google_response.dart';
 
 class AddPaymentDialog extends StatefulWidget {
-  const AddPaymentDialog({super.key});
+  final Address? address;
+  const AddPaymentDialog({super.key, this.address});
 
   @override
   AddPaymentDialogState createState() => AddPaymentDialogState();
@@ -25,6 +30,7 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
   bool isCardValid = false;
   bool isExpirationValid = false;
   bool isCcvValid = false;
+  late Address? address;
 
   @override
   void initState() {
@@ -35,6 +41,8 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
     nameController.addListener(_updateCard);
     emailController.addListener(_updateCard);
     phoneController.addListener(_updateCard);
+
+    address = widget.address;
   }
 
   @override
@@ -179,24 +187,44 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: isCardValid && isExpirationValid && isCcvValid
-                      ? () {
+                      ? () async {
                           final paymentBloc =
                               BlocProvider.of<PaymentBloc>(context);
+                          late AddressPaymentModel paymentModel;
+                          if (widget.address == null) {
+                            paymentModel = genericPaymentAddress();
+                          } else {
+                            MapService mapServiceInstance = MapService();
+                            final googlePlacesSearch = await mapServiceInstance
+                                .getInformationByCoorsGoogle(LatLng(
+                                    widget.address!.latitude,
+                                    widget.address!.longitude));
 
-                          paymentBloc.add(
-                            AddCardEvent(
-                              PaymentCardModel(
-                                  cardNumber: cardNumberController.text,
-                                  cvv: ccvController.text,
-                                  email: emailController.text,
-                                  phone: '+57${phoneController.text}',
-                                  expiryDate: expirationController.text,
-                                  cardHolderName: nameController.text,
+                            if (googlePlacesSearch.isNotEmpty) {
+                              print('SE ESTA GUARDANDO CON ESTA INFO');
+                              final Result result = googlePlacesSearch.first;
+                              paymentModel = AddressPaymentModel(
+                                  city: result.addressComponents.last.shortName,
+                                  country:
+                                      result.addressComponents.last.longName,
+                                  line1: widget.address!.address,
+                                  line2: widget.address!.details,
+                                  state: 'N/A',
+                                  postalCode: result.plusCode.toString());
+                            }
+                          }
 
-                                  // TODO: This should be the address of the user selected in the UI
-                                  addressPayment: genericPaymentAddress()),
+                          paymentBloc.add(AddCardEvent(
+                            PaymentCardModel(
+                              cardNumber: cardNumberController.text,
+                              cvv: ccvController.text,
+                              email: emailController.text,
+                              phone: '+57${phoneController.text}',
+                              expiryDate: expirationController.text,
+                              cardHolderName: nameController.text,
+                              addressPayment: paymentModel,
                             ),
-                          );
+                          ));
 
                           Navigator.pop(context);
                         }

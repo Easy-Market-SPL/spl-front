@@ -7,19 +7,18 @@ import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
-import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/payment/process/payment_credit_total.dart';
 
 import '../../../bloc/users_blocs/users/users_bloc.dart';
 import '../../../models/logic/address.dart';
 import '../../../models/order_models/order_product.dart';
 import '../../../utils/strings/cart_strings.dart';
+import '../../../widgets/addresses/helpers/address_dialogs.dart';
 import '../../../widgets/payment/process/payment_total.dart';
 
 class PaymentScreen extends StatelessWidget {
@@ -146,31 +145,25 @@ class PaymentPageState extends State<PaymentPage> {
         const SizedBox(height: 15),
         GestureDetector(
           onTap: () async {
+            if (selectedAddress == null) {
+              showSelectAddressDialog(context);
+              return;
+            }
+
             final selected = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const SelectPaymentMethodScreen(),
+                builder: (context) =>
+                    SelectPaymentMethodScreen(address: selectedAddress),
               ),
             );
             if (selected != null) {
               setState(() {
                 selectedCard = selected;
-
-                final userId = context.read<UsersBloc>().state.sessionUser?.id;
-                if (userId != null) {
-                  context.read<OrdersBloc>().add(
-                      LoadOrdersEvent(userId: userId, userRole: 'customer'));
-                }
               });
             } else {
               setState(() {
                 selectedCard = null;
-
-                final userId = context.read<UsersBloc>().state.sessionUser?.id;
-                if (userId != null) {
-                  context.read<OrdersBloc>().add(
-                      LoadOrdersEvent(userId: userId, userRole: 'customer'));
-                }
               });
             }
           },
@@ -211,7 +204,7 @@ class PaymentPageState extends State<PaymentPage> {
                   ],
                 ),
                 Text(
-                  PaymentStrings.change,
+                  'Cambiar',
                   style: TextStyle(
                     color: selectedCard == null ? Colors.green : Colors.blue,
                     fontSize: 14,
@@ -262,18 +255,11 @@ class PaymentPageState extends State<PaymentPage> {
             ),
             _buildPaymentMethodSelection(context),
             const SizedBox(height: 16),
-            // Pass the correctly calculated subtotal
-            SPLVariables.hasCreditPayment
-                ? PaymentCreditTotal(
-                    total: subtotal,
-                    card: selectedCard,
-                    address: selectedAddress,
-                  )
-                : PaymentTotal(
-                    total: subtotal,
-                    address: selectedAddress,
-                    card: selectedCard,
-                  ),
+            PaymentTotal(
+              total: subtotal,
+              address: selectedAddress,
+              card: selectedCard,
+            ),
           ],
         );
       },
