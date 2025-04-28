@@ -30,24 +30,21 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
   final TextEditingController expirationController = TextEditingController();
   final TextEditingController ccvController = TextEditingController();
 
-  // ─────────── Flags de validación ───────────
   bool isCardValid = false;
   bool isExpirationValid = false;
   bool isCcvValid = false;
 
-  // ─────────── Estado para direcciones ───────────
   List<Address> _userAddresses = [];
   Address? _selectedAddress;
   bool _isLoadingAddresses = false;
 
-  late Address? address; // la que llega por parámetro
+  late Address? address;
 
   // ────────────────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
 
-    // Escuchamos cambios para validar o redibujar
     cardNumberController.addListener(_validateCardNumber);
     expirationController.addListener(_formatExpirationDate);
     ccvController.addListener(_validateCcv);
@@ -65,7 +62,6 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
     setState(() => _isLoadingAddresses = false);
   }
 
-  // ─────────── Listeners de validación ───────────
   void _updateCard() => setState(() {});
 
   void _validateCardNumber() {
@@ -149,7 +145,6 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
               ),
               const SizedBox(height: 16),
 
-              // ─── Formulario tarjeta ───
               CardInput(
                   controller: cardNumberController,
                   labelText: ProfileStrings.cardLabel,
@@ -185,7 +180,7 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                   keyboardType: TextInputType.number),
               const SizedBox(height: 24),
 
-              // ─── Desplegable de direcciones ───
+              // ─── Address ───
               if (widget.address == null) ...[
                 const Text('Dirección de envío',
                     style: TextStyle(fontWeight: FontWeight.w600)),
@@ -299,20 +294,80 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
       Navigator.pop(context); // Pop add payment dialog
     } catch (_) {
       _showErrorCreatingDialog(context);
+      Navigator.pop(context); // Pop loading dialog
+      Navigator.pop(context); // Pop add payment dialog
+    } finally {
+      // Close the loading dialog if it is still open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
     }
   }
-}
 
-void _showErrorCreatingDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext dialogContext) {
-      return AlertDialog(
+  void _showErrorCreatingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              'Error en la creación del método de pago',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 50),
+              const SizedBox(height: 10),
+              Text(
+                'No ha sido posible crear el método de pago. Por favor, verifica los datos ingresados.',
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  'Aceptar',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
         title: const Center(
           child: Text(
-            'Error en la creación del método de pago',
+            'Creando Método de Pago...',
             style: TextStyle(
-              color: Colors.red,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -321,10 +376,10 @@ void _showErrorCreatingDialog(BuildContext context) {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error, color: Colors.red, size: 50),
+            const Icon(Icons.payment_rounded, color: Colors.blue, size: 50),
             const SizedBox(height: 10),
             Text(
-              'No ha sido posible crear el método de pago. Por favor, verifica los datos ingresados.',
+              'Por favor, espera un momento.',
               style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
@@ -334,60 +389,7 @@ void _showErrorCreatingDialog(BuildContext context) {
             ),
           ],
         ),
-        actions: [
-          Center(
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'Aceptar',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void _showLoadingDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      title: const Center(
-        child: Text(
-          'Creando Método de Pago...',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.payment_rounded, color: Colors.blue, size: 50),
-          const SizedBox(height: 10),
-          Text(
-            'Por favor, espera un momento.',
-            style: const TextStyle(
-              color: Colors.black54,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    ),
-  );
+    );
+  }
 }
