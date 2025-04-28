@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_event.dart';
+import 'package:spl_front/models/data/payment_method.dart';
 import 'package:spl_front/models/order_models/order_status.dart';
-import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/services/gui/stripe/stripe_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
@@ -15,7 +15,7 @@ import '../../../pages/customer_user/dashboard_customer_user.dart';
 
 class PaymentCreditTotal extends StatelessWidget {
   final double total;
-  final PaymentCardModel? card;
+  final PaymentMethodCard? card;
   final Address? address;
 
   const PaymentCreditTotal({

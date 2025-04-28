@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../ui/credit_card/address_payment_model.dart';
 
-class PaymentMethod {
+class PaymentMethodCard {
   final int? id;
   final String? cardNumber;
   final String? email;
@@ -12,7 +12,7 @@ class PaymentMethod {
   final String? cardHolderName;
   final AddressPaymentModel address;
 
-  PaymentMethod({
+  PaymentMethodCard({
     this.id,
     this.cardNumber,
     this.email,
@@ -24,7 +24,7 @@ class PaymentMethod {
   });
 
   /// ----------- copyWith -----------
-  PaymentMethod copyWith({
+  PaymentMethodCard copyWith({
     int? id,
     String? cardNumber,
     String? email,
@@ -34,7 +34,7 @@ class PaymentMethod {
     String? cardHolderName,
     AddressPaymentModel? address,
   }) {
-    return PaymentMethod(
+    return PaymentMethodCard(
       id: id ?? this.id,
       cardNumber: cardNumber ?? this.cardNumber,
       email: email ?? this.email,
@@ -47,14 +47,14 @@ class PaymentMethod {
   }
 
   /// ----------- String ⇆ JSON helpers -----------
-  factory PaymentMethod.fromRawJson(String str) =>
-      PaymentMethod.fromJson(json.decode(str) as Map<String, dynamic>);
+  factory PaymentMethodCard.fromRawJson(String str) =>
+      PaymentMethodCard.fromJson(json.decode(str) as Map<String, dynamic>);
 
   String toRawJson() => json.encode(toJson());
 
   /// ----------- Map ⇆ Model -----------
-  factory PaymentMethod.fromJson(Map<String, dynamic> json) {
-    return PaymentMethod(
+  factory PaymentMethodCard.fromJson(Map<String, dynamic> json) {
+    return PaymentMethodCard(
       id: json['id'] as int?,
       cardNumber: json['cardNumber'] as String?,
       email: json['email'] as String?,
@@ -90,10 +90,10 @@ class PaymentMethod {
       };
 
   /// ----------- List helper -----------
-  static List<PaymentMethod> fromJsonList(String jsonStr) {
+  static List<PaymentMethodCard> fromJsonList(String jsonStr) {
     final List<dynamic> data = json.decode(jsonStr) as List<dynamic>;
     return data
-        .map((item) => PaymentMethod.fromJson(item as Map<String, dynamic>))
+        .map((item) => PaymentMethodCard.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

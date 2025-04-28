@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
 import 'package:spl_front/bloc/ui_management/order/order_event.dart';
 import 'package:spl_front/bloc/ui_management/order/order_state.dart';
+import 'package:spl_front/models/data/payment_method.dart';
 import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
@@ -39,7 +39,7 @@ class PaymentPage extends StatefulWidget {
 
 class PaymentPageState extends State<PaymentPage> {
   Address? selectedAddress;
-  PaymentCardModel? selectedCard;
+  PaymentMethodCard? selectedCard;
 
   @override
   void initState() {
@@ -194,7 +194,7 @@ class PaymentPageState extends State<PaymentPage> {
                     const SizedBox(width: 12),
                     Text(
                       selectedCard != null
-                          ? "**** ${selectedCard!.cardNumber.substring(selectedCard!.cardNumber.length - 4)}"
+                          ? "**** ${selectedCard!.cardNumber!.substring(selectedCard!.cardNumber!.length - 4)}"
                           : PaymentStrings.cash,
                       style: const TextStyle(
                         fontSize: 16,

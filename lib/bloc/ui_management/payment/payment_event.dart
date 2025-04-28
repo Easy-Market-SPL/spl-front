@@ -8,7 +8,7 @@ abstract class PaymentEvent extends Equatable {
 }
 
 class AddCardEvent extends PaymentEvent {
-  final PaymentCardModel card;
+  final PaymentMethodCard card;
 
   const AddCardEvent(this.card);
 
@@ -23,4 +23,12 @@ class DeleteCardEvent extends PaymentEvent {
 
   @override
   List<Object> get props => [index];
+}
+
+class LoadPaymentMethodsEvent extends PaymentEvent {
+  final String userId;
+  const LoadPaymentMethodsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
 }

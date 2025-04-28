@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/filter/product_filter_event.dart';
 import 'package:spl_front/bloc/ui_management/product/filter/product_filter_state.dart';
 import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/labels/label_event.dart';
-import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_event.dart';
 import 'package:spl_front/bloc/ui_management/product/products/product_state.dart';
@@ -23,6 +22,8 @@ import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../bloc/ui_management/product/form/labels/label_event.dart';
 import '../../widgets/helpers/custom_loading.dart';
 
 class CustomerMainDashboard extends StatefulWidget {
@@ -58,8 +59,9 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
           );
     }
 
-    // Fetch the current user's addresses
+    // Fetch the current user's addresses and payment methods
     context.read<AddressBloc>().add(LoadAddresses(userId));
+    context.read<PaymentBloc>().add(LoadPaymentMethodsEvent(userId));
 
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadDashboardLabels());
@@ -92,13 +94,14 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
           appBar: CustomerUserAppBar(
             hintText: CustomerStrings.searchHint, // Pass custom hint text
             searchController: searchController,
-            onSearchChanged: (query){
+            onSearchChanged: (query) {
               context.read<ProductFilterBloc>().add(SetSearchQuery(query));
             },
             onFilterPressed: () {
               final filterState = context.read<ProductFilterBloc>().state;
               final productState = context.read<ProductBloc>().state;
-              final products = productState is ProductLoaded ? productState.products : [];
+              final products =
+                  productState is ProductLoaded ? productState.products : [];
               showDialog(
                 context: context,
                 builder: (context) => ProductFilterDialog(
@@ -108,19 +111,29 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
                     minRating: filterState.minRating,
                     selectedLabels: filterState.selectedLabels,
                   ),
-                  maxProductPrice: products.isNotEmpty && filterState.maxPrice == null ? products.map((p) => p.price).reduce((a, b) => a > b ? a : b) : null,
-                  minProductPrice: products.isNotEmpty && filterState.minPrice == null ? products.map((p) => p.price).reduce((a, b) => a < b ? a : b) : null,
+                  maxProductPrice:
+                      products.isNotEmpty && filterState.maxPrice == null
+                          ? products
+                              .map((p) => p.price)
+                              .reduce((a, b) => a > b ? a : b)
+                          : null,
+                  minProductPrice:
+                      products.isNotEmpty && filterState.minPrice == null
+                          ? products
+                              .map((p) => p.price)
+                              .reduce((a, b) => a < b ? a : b)
+                          : null,
                 ),
               ).then((result) {
                 if (result != null && result is ProductFilter) {
                   context.read<ProductFilterBloc>().add(
-                    ApplyFiltersFromDialog(
-                      minPrice: result.minPrice,
-                      maxPrice: result.maxPrice,
-                      minRating: result.minRating,
-                      selectedLabels: result.selectedLabels,
-                    ),
-                  );
+                        ApplyFiltersFromDialog(
+                          minPrice: result.minPrice,
+                          maxPrice: result.maxPrice,
+                          minRating: result.minRating,
+                          selectedLabels: result.selectedLabels,
+                        ),
+                      );
                 }
               });
             },
@@ -131,9 +144,10 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Labels 
+                // Labels
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: BlocBuilder<ProductFilterBloc, ProductFilterState>(
                     builder: (context, filterState) {
                       return LabelsWidget();
@@ -143,7 +157,8 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
 
                 // Active filters display
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 4.0),
                   child: ActiveFiltersDisplay(),
                 ),
 

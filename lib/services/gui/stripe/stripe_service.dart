@@ -2,9 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:spl_front/models/data/payment_method.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
-
-import '../../../models/ui/credit_card/credit_card_model.dart';
 
 class StripeService {
   // Singleton
@@ -31,7 +30,7 @@ class StripeService {
   Future<StripeCustomReponse> payWithExistingCard({
     required String amount,
     required String currency,
-    required PaymentCardModel card,
+    required PaymentMethodCard card,
   }) async {
     try {
       final String? clientSecret = await _createPaymentIntent(
@@ -59,12 +58,12 @@ class StripeService {
               email: card.email,
               phone: card.phone,
               address: Address(
-                city: card.addressPayment.city,
+                city: card.address.city,
                 country: 'CO',
-                line1: card.addressPayment.line1,
-                line2: card.addressPayment.line2,
-                state: card.addressPayment.state,
-                postalCode: card.addressPayment.postalCode,
+                line1: card.address.line1,
+                line2: card.address.line2,
+                state: card.address.state,
+                postalCode: card.address.postalCode,
               ),
             ),
           ),

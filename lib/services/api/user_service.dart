@@ -176,13 +176,14 @@ class UserService {
   }
 
   /// PAYMENT METHODS FUNCTIONS
-  static Future<List<PaymentMethod>?> getUserPaymentMethods(String id) async {
+  static Future<List<PaymentMethodCard>?> getUserPaymentMethods(
+      String id) async {
     final url = '$_url/users/$id/payment-methods';
     try {
       final response = await fetchWithRetry(url);
       if (response.statusCode == 200 || response.statusCode == 201) {
         final decodedBody = utf8.decode(response.bodyBytes);
-        final paymentMethods = PaymentMethod.fromJsonList(decodedBody);
+        final paymentMethods = PaymentMethodCard.fromJsonList(decodedBody);
         return paymentMethods;
       } else {
         debugPrint('❌ getUserPaymentMethods failed: ${response.statusCode}');
@@ -194,29 +195,29 @@ class UserService {
     }
   }
 
-  static Future<PaymentMethod?> createUserPaymentMethod(
-      String idUser, PaymentMethod paymentMethod) async {
+  static Future<PaymentMethodCard?> createUserPaymentMethod(
+      String idUser, PaymentMethodCard paymentMethod) async {
     final url = '$_url/users/$idUser/payment-methods';
     try {
       final response = await _client.post(Uri.parse(url),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'cardNumber': paymentMethod.cardNumber,
-            'email': paymentMethod.email,
-            'phone': paymentMethod.phone,
-            'cvv': paymentMethod.cvv,
-            'expiryDate': paymentMethod.expiryDate,
-            'cardHolderName': paymentMethod.cardHolderName,
-            'city': paymentMethod.address.city,
-            'state': paymentMethod.address.state,
-            'country': paymentMethod.address.country,
-            'firstLine': paymentMethod.address.line1,
-            'secondLine': paymentMethod.address.line2,
-            'postalCode': paymentMethod.address.postalCode,
+            'cardNumber': paymentMethod.cardNumber.toString(),
+            'email': paymentMethod.email.toString(),
+            'phone': paymentMethod.phone.toString(),
+            'expiryDate': paymentMethod.expiryDate.toString(),
+            'cardHolderName': paymentMethod.cardHolderName.toString(),
+            'city': paymentMethod.address.city.toString(),
+            'stateName': paymentMethod.address.state.toString(),
+            'country': paymentMethod.address.country.toString(),
+            'firstLine': paymentMethod.address.line1.toString(),
+            'secondLine': paymentMethod.address.line2.toString(),
+            'postalCode': paymentMethod.address.postalCode.toString(),
           }));
       if (response.statusCode == 200 || response.statusCode == 201) {
         final decodedBody = utf8.decode(response.bodyBytes);
-        final paymentMethodResponse = PaymentMethod.fromRawJson(decodedBody);
+        final paymentMethodResponse =
+            PaymentMethodCard.fromRawJson(decodedBody);
         return paymentMethodResponse;
       } else {
         debugPrint('❌ createUserPaymentMethod failed: ${response.statusCode}');

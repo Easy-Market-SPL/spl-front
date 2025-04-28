@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 
 import '../../../bloc/ui_management/payment/payment_bloc.dart';
@@ -8,11 +10,13 @@ class PaymentMethodCard extends StatelessWidget {
   final String details;
   final String iconPath;
   final int index;
+  final int idPaymentMethod;
 
   const PaymentMethodCard({
     super.key,
     required this.details,
     required this.iconPath,
+    required this.idPaymentMethod,
     required this.index,
   });
 
@@ -70,9 +74,16 @@ class PaymentMethodCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // Delete the card from bloc and API
                       BlocProvider.of<PaymentBloc>(context)
                           .add(DeleteCardEvent(index));
+
+                      final userId =
+                          context.read<UsersBloc>().state.sessionUser!.id;
+
+                      await UserService.deleteUserPaymentMethod(
+                          userId, idPaymentMethod);
                       Navigator.pop(dialogContext);
                     },
                     style: ElevatedButton.styleFrom(

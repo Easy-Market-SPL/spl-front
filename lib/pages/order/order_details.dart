@@ -15,17 +15,13 @@ import '../../../spl/spl_variables.dart';
 import '../../../utils/ui/format_currency.dart';
 import '../../../widgets/helpers/custom_loading.dart';
 import '../../../widgets/navigation_bars/nav_bar.dart';
-import '../../bloc/ui_management/address/address_bloc.dart';
 import '../../bloc/ui_management/order/order_bloc.dart';
 import '../../bloc/ui_management/order/order_event.dart';
-import '../../bloc/ui_management/payment/payment_bloc.dart';
-import '../../models/ui/stripe/stripe_custom_response.dart';
 import '../../utils/strings/payment_strings.dart';
 import '../../utils/ui/order_statuses.dart';
 import '../../widgets/order/list/products_popup.dart';
 import '../../widgets/order/tracking/modify_order_status_options.dart';
 import '../../widgets/order/tracking/shipping_company_selection.dart';
-import '../../widgets/payment/process/payment_credit_dialog.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
@@ -87,163 +83,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     return lastIdx + 1 < 4
         ? ['confirmed', 'preparing', 'on-the-way', 'delivered'][lastIdx + 1]
         : rawLast;
-  }
-
-  /// Show credit payment dialog when customer has pending debt
-  void _showPaymentDialog(double total) {
-    // Take the address that match with widget.order
-    final address = context
-        .read<AddressBloc>()
-        .state
-        .addresses
-        .firstWhere((a) => a.address == widget.order.address);
-    final card = context.read<PaymentBloc>().state.cards.first;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => CreditPaymentDialog(
-        total: total,
-        address: address,
-        card: card,
-        onLoadingDialog: _onLoadingDialog,
-        onSuccessPaymentDialog: _onSuccessPaymentDialog,
-        onErrorPaymentDialog: _onErrorPaymentDialog,
-        orderParameter: widget.order,
-      ),
-    );
-  }
-
-  /// Display loading indicator during payment
-  void _onLoadingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              PaymentStrings.processingPayment,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              SizedBox(height: 10),
-              CircularProgressIndicator(color: Colors.blue),
-              SizedBox(height: 20),
-              Text(
-                PaymentStrings.waitAMoment,
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Handle successful payment
-  void _onSuccessPaymentDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              PaymentStrings.successPayment,
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle, color: Colors.blue, size: 50),
-              SizedBox(height: 10),
-              Text(
-                PaymentStrings.confirmPaymentAssertion,
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  /// Handle payment errors
-  void _onErrorPaymentDialog(StripeCustomReponse response) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              PaymentStrings.errorInPayment,
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error, color: Colors.red, size: 50),
-              const SizedBox(height: 10),
-              Text(
-                response.msg ?? PaymentStrings.unknownError,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  PaymentStrings.accept,
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   /// Show forbidden on the way business/admin
@@ -431,7 +270,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () => _showPaymentDialog(order.debt!),
+                            onPressed: () => null,
                           ),
                         ],
                       ],

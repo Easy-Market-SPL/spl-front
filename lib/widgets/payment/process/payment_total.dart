@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/models/ui/credit_card/credit_card_model.dart';
 import 'package:spl_front/models/ui/stripe/stripe_custom_response.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
@@ -9,6 +8,7 @@ import 'package:spl_front/utils/ui/format_currency.dart';
 
 import '../../../bloc/ui_management/order/order_bloc.dart';
 import '../../../bloc/ui_management/order/order_event.dart';
+import '../../../models/data/payment_method.dart';
 import '../../../models/logic/address.dart';
 import '../../../models/order_models/order_status.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
@@ -16,7 +16,7 @@ import '../../addresses/helpers/address_dialogs.dart';
 
 class PaymentTotal extends StatelessWidget {
   final double total;
-  final PaymentCardModel? card;
+  final PaymentMethodCard? card;
   final Address? address;
 
   const PaymentTotal({super.key, required this.total, this.card, this.address});

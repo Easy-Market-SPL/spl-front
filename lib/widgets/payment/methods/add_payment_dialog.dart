@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/services/gui/map/map_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/inputs/card_input.dart';
 
 import '../../../bloc/ui_management/payment/payment_bloc.dart';
+import '../../../bloc/users_blocs/users/users_bloc.dart';
+import '../../../models/data/payment_method.dart';
 import '../../../models/logic/address.dart';
 import '../../../models/ui/credit_card/address_payment_model.dart';
-import '../../../models/ui/credit_card/credit_card_model.dart';
 import '../../../models/ui/google/places_google_response.dart';
 
 class AddPaymentDialog extends StatefulWidget {
@@ -190,6 +192,12 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                       ? () async {
                           final paymentBloc =
                               BlocProvider.of<PaymentBloc>(context);
+
+                          final userId = BlocProvider.of<UsersBloc>(context)
+                              .state
+                              .sessionUser!
+                              .id;
+
                           late AddressPaymentModel paymentModel;
                           if (widget.address == null) {
                             paymentModel = genericPaymentAddress();
@@ -201,7 +209,6 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                                     widget.address!.longitude));
 
                             if (googlePlacesSearch.isNotEmpty) {
-                              print('SE ESTA GUARDANDO CON ESTA INFO');
                               final Result result = googlePlacesSearch.first;
                               paymentModel = AddressPaymentModel(
                                   city: result.addressComponents.last.shortName,
@@ -214,17 +221,22 @@ class AddPaymentDialogState extends State<AddPaymentDialog> {
                             }
                           }
 
-                          paymentBloc.add(AddCardEvent(
-                            PaymentCardModel(
-                              cardNumber: cardNumberController.text,
-                              cvv: ccvController.text,
-                              email: emailController.text,
-                              phone: '+57${phoneController.text}',
-                              expiryDate: expirationController.text,
-                              cardHolderName: nameController.text,
-                              addressPayment: paymentModel,
-                            ),
-                          ));
+                          var paymentMethod = PaymentMethodCard(
+                            cardNumber: cardNumberController.text,
+                            email: emailController.text,
+                            phone: phoneController.text,
+                            cvv: ccvController.text,
+                            expiryDate: expirationController.text,
+                            cardHolderName:
+                                '${nameController.text} ${emailController.text}',
+                            address: paymentModel,
+                          );
+
+                          paymentBloc.add(AddCardEvent(paymentMethod));
+
+                          // Call the API to save the payment method
+                          await UserService.createUserPaymentMethod(
+                              userId, paymentMethod);
 
                           Navigator.pop(context);
                         }

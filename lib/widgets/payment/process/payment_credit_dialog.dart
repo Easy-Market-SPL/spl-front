@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/data/payment_method.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
@@ -9,7 +10,6 @@ import '../../../bloc/ui_management/order/order_event.dart';
 import '../../../models/logic/address.dart';
 import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_status.dart';
-import '../../../models/ui/credit_card/credit_card_model.dart';
 import '../../../models/ui/stripe/stripe_custom_response.dart';
 import '../../../pages/order/order_tracking.dart';
 import '../../../services/gui/stripe/stripe_service.dart';
@@ -17,7 +17,7 @@ import '../../../services/gui/stripe/stripe_service.dart';
 class CreditPaymentDialog extends StatefulWidget {
   final double total;
   final Address? address;
-  final PaymentCardModel? card;
+  final PaymentMethodCard? card;
   final OrderModel? orderParameter;
 
   // References to the dialog methods in the parent widget
@@ -151,7 +151,7 @@ class _CreditPaymentDialogState extends State<CreditPaymentDialog> {
   @override
   Widget build(BuildContext context) {
     final paymentMethodLabel =
-        PaymentStrings.prefixCard(widget.card!.cardNumber);
+        PaymentStrings.prefixCard(widget.card!.cardNumber!);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

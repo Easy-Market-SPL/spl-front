@@ -1,17 +1,17 @@
 part of 'payment_bloc.dart';
 
 class PaymentState extends Equatable {
-  final List<PaymentCardModel> cards;
+  final List<PaymentMethodCard> cards;
 
   const PaymentState({
     this.cards = const [],
   });
 
   PaymentState copyWith({
-    List<PaymentCardModel>? cards,
+    required List<PaymentMethodCard> cards,
   }) {
     return PaymentState(
-      cards: cards ?? this.cards,
+      cards: cards,
     );
   }
 
