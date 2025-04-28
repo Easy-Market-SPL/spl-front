@@ -18,9 +18,9 @@ class AddressPaymentModel {
 
 AddressPaymentModel genericPaymentAddress() {
   return AddressPaymentModel(
-    city: 'Bogota',
-    line1: 'Calle 22A #52 - 79',
-    line2: 'Torre 3 - Apto 212',
+    city: 'Bogota D.C.',
+    line1: 'Cra. 71D # 2 - 17 sur',
+    line2: ' ',
     country: 'Colombia',
     postalCode: '110221',
     state: 'Cundinamarca',

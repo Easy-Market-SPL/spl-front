@@ -42,8 +42,8 @@ class ProfileStrings {
   static const addPaymentCard = "Agregar Tarjeta de Pago";
   static const cardLabel = "Número de Tarjeta";
   static const cardHint = "XXXX XXXX XXXX XXXX";
-  static const lastNameLabel = "Email";
-  static const lastNameHint = "Email";
+  static const emailCreateLabel = "Email";
+  static const emailCreateHint = "Email";
   static const expirationDateLabel = "Fecha de Expiración";
   static const expirationDateHint = "MM/AA";
   static const phoneLabel = "Teléfono (+57)";

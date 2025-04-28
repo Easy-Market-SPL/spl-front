@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/payment/methods/add_payment_dialog.dart';
 import 'package:spl_front/widgets/payment/methods/payment_method_card.dart';
@@ -71,10 +72,16 @@ class PaymentMethodsSection extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => AddPaymentDialog(),
-                );
+                final addresses = context.read<AddressBloc>().state.addresses;
+
+                if (addresses.isEmpty) {
+                  _showErrorCreatingDialog(context);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AddPaymentDialog(),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
@@ -94,4 +101,58 @@ class PaymentMethodsSection extends StatelessWidget {
       ],
     );
   }
+}
+
+void _showErrorCreatingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: const Center(
+          child: Text(
+            'Error para crear método de pago',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 50),
+            const SizedBox(height: 10),
+            Text(
+              'Debes registrar una dirección antes de añadir un método de pago.',
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Aceptar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

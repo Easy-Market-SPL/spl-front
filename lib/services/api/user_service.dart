@@ -220,8 +220,11 @@ class UserService {
             PaymentMethodCard.fromRawJson(decodedBody);
         return paymentMethodResponse;
       } else {
-        debugPrint('❌ createUserPaymentMethod failed: ${response.statusCode}');
-        throw Exception('Failed to create user payment method');
+        debugPrint('❌ createUserPaymentMethod failed: '
+            '${response.statusCode}\n${response.body}');
+        throw Exception(response.body.isNotEmpty
+            ? jsonDecode(response.body)['message'] ?? 'Error 400'
+            : 'Error 400');
       }
     } catch (e) {
       debugPrint('❌ Error creating user payment method: $e');
