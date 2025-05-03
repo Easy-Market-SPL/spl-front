@@ -76,13 +76,14 @@ class SoftDeleteUserDialog extends StatelessWidget {
                 OnSoftDeleteUserEvent(user),
               );
 
-              /// Show the successful changes dialog
               _showSuccessfulDeleteDialog(context);
-              await Future.delayed(
-                  const Duration(seconds: 1, milliseconds: 500));
-              Navigator.pop(context); // Close the dialog
 
-              Navigator.of(context).pop(); // Close the external Dialog
+              /// Show the successful changes dialog
+              await Future.delayed(
+                const Duration(seconds: 1),
+              );
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             } else {
               // Error Message
               ScaffoldMessenger.of(context).showSnackBar(

@@ -68,13 +68,20 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
               ),
               const SizedBox(height: 20),
               // Users List Title
-              const Text(
-                ProfileStrings.userList,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+              Row(
+                children: [
+                  const Text(
+                    ProfileStrings.userList,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  // Button for view the soft deleted users
+                  ButtonSoftDeletedUsers()
+                ],
               ),
               const SizedBox(height: 10),
               // BlocBuilder that manage the list of users, and if is empty or loading show a loading widget
@@ -88,9 +95,6 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                   }
                   return Column(
                     children: [
-                      // Button for view the soft deleted users
-                      ButtonSoftDeletedUsers(),
-
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -154,8 +158,18 @@ class ButtonSoftDeletedUsers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () async {
+    return ChoiceChip(
+      label: const Text('Eliminados Parcialmente'),
+      selected: false,
+      selectedColor: Colors.blue,
+      backgroundColor: Colors.grey[200],
+      showCheckmark: false,
+      labelStyle: const TextStyle(
+        color: Colors.black,
+        fontSize: 12,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onSelected: (_) async {
         /// Load all users soft deleted
         final List<UserModel> usersDeleted =
             await UserService.getSoftDeletedUsers();
@@ -176,7 +190,11 @@ class ButtonSoftDeletedUsers extends StatelessWidget {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Usuarios Eliminados'),
+              title: const Text('Usuarios Eliminados\nParcialmente',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
               content: SizedBox(
                 height: 400,
                 width: 300,
@@ -213,17 +231,30 @@ class ButtonSoftDeletedUsers extends StatelessWidget {
           },
         );
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
-      ),
-      child: Text('Ver usuarios eliminados'),
     );
   }
 }
+
+/*
+ChoiceChip(
+                      label: const Text('Mis Entregas'),
+                      selected: !_deliveryPreparacion,
+                      onSelected: (_) {
+                        setState(() => _deliveryPreparacion = false);
+                        context.read<OrdersBloc>().add(
+                              FilterDeliveryOrdersEvent(
+                                  preparacion: false, userId: userId),
+                            );
+                      },
+                      selectedColor: Colors.blue,
+                      backgroundColor: Colors.grey[200],
+                      showCheckmark: false,
+                      labelStyle: TextStyle(
+                        color:
+                            !_deliveryPreparacion ? Colors.white : Colors.black,
+                      ),
+                    ),
+ */
 
 class AddUserButton extends StatelessWidget {
   final VoidCallback onPressed;

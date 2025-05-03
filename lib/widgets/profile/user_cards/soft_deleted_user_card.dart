@@ -36,10 +36,12 @@ class SoftDeletedUserCard extends StatelessWidget {
         ),
         title: Text(
           name,
+          maxLines: 2,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.black,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         subtitle: Text(

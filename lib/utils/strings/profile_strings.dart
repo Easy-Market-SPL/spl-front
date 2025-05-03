@@ -60,7 +60,7 @@ class ProfileStrings {
   static const successFullUserCreatedDescription =
       'El usuario ha sido creado correctamente';
   static const editUserTitle = 'Editar Datos de Usuario';
-  static const confirmDeleteTitle = 'Eliminar Usuario';
+  static const confirmDeleteTitle = 'Eliminar Usuario Parcialmente';
   static const confirmPermanentlyDeleteTitle =
       'Eliminar Usuario Permanentemente';
   static const confirmDeletePermanentlyDescription =

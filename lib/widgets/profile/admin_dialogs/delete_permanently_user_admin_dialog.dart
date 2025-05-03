@@ -24,6 +24,7 @@ class DeletePermanentlyUserDialog extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
       content: const Column(
@@ -79,9 +80,10 @@ class DeletePermanentlyUserDialog extends StatelessWidget {
               _showSuccessfulDeleteDialog(context);
               await Future.delayed(
                   const Duration(seconds: 1, milliseconds: 500));
-              Navigator.pop(context); // Close the dialog
-
+              Navigator.of(context).pop(); // Close the dialog
               Navigator.of(context).pop(); // Close the external Dialog
+              Navigator.of(context)
+                  .pop(); // Close the dialog of soft-deleted users
             } else {
               // Error Message
               ScaffoldMessenger.of(context).showSnackBar(

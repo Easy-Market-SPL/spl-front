@@ -77,11 +77,15 @@ class RestoreUserAdminDialog extends StatelessWidget {
 
               /// Show the successful changes dialog
               _showSuccessfulRestoreDialog(context);
+
               await Future.delayed(
                   const Duration(seconds: 1, milliseconds: 500));
-              Navigator.pop(context); // Close the dialog
 
+              // Close the dialog
+              Navigator.of(context).pop(); // Close the dialog
               Navigator.of(context).pop(); // Close the external Dialog
+              Navigator.of(context)
+                  .pop(); // Close the dialog of soft-deleted users
             } else {
               // Error Message
               ScaffoldMessenger.of(context).showSnackBar(
