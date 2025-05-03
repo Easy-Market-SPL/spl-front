@@ -1,28 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/models/data/chat.dart';
 
-Widget chatItem(String name, String message, String date) {
+Widget chatItem(Chat chat) {
+  final fromCustomer = chat.sender == 'customer';
+
   return Column(
     children: [
       ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.grey[300],
           radius: 25,
+          backgroundColor: fromCustomer ? Colors.blue[200] : Colors.grey[300],
+          child: Icon(
+            fromCustomer ? Icons.person : Icons.support_agent,
+            color: Colors.white,
+          ),
         ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          chat.name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: fromCustomer ? Colors.blue[800] : Colors.black,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(message, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              chat.message,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontStyle: fromCustomer ? FontStyle.italic : FontStyle.normal,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              '${chat.date} ${chat.time}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
-        tileColor: Colors.white,
-        hoverColor: Colors.blueGrey,
-        splashColor: Colors.blueGrey,
-        selectedColor: Colors.blueGrey,
+        tileColor: fromCustomer ? Colors.blue[50] : Colors.white,
+        selectedTileColor: fromCustomer ? Colors.blue[100] : null,
       ),
-      const Divider(),
+      const Divider(height: 1),
     ],
   );
 }

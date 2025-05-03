@@ -29,7 +29,14 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
             message: chatData['last_message'] ?? '',
             date: chatData['last_message_date'] ?? '',
             time: chatData['last_message_time'] ?? '',
-          )).whereNot((chat) => chat.message.isEmpty).toList();
+            sender: chatData['sender'] ?? 'customer',
+          )).whereNot((chat) => chat.message.isEmpty)
+          .sorted(
+            (a, b) => b.date.compareTo(a.date) != 0 
+              ? b.date.compareTo(a.date) 
+              : b.time.compareTo(a.time)
+          )
+          .toList();
           
           add(ChatsLoadedEvent(chats));
         },

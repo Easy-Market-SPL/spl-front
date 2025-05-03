@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/models/data/chat.dart';
 import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/chat/chat.dart';
@@ -16,15 +19,23 @@ class ChatWeb extends StatefulWidget {
 }
 
 class _ChatWebState extends State<ChatWeb> {
-  String? selectedChatUserName;
+  Chat? selectedChat;
   var backgroundColor = PrimaryColors.blueWeb;
 
   @override
   void initState() {
     super.initState();
     if (widget.userType == UserType.customer) {
-      //TODO: Change the way customer chat with business loads
-      selectedChatUserName = 'empresa';
+      final user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser!;
+
+      selectedChat = Chat(
+        date: '', 
+        id: user.id, 
+        name: "Soporte",
+        message: '',
+        time: '',
+      );
     }
   }
 
@@ -41,7 +52,7 @@ class _ChatWebState extends State<ChatWeb> {
               ? ChatsScreen(
                 onChatSelected: (userName) {
                   setState(() {
-                    selectedChatUserName = userName;
+                    selectedChat = userName;
                   });
                 },
                 backgroundColor: backgroundColor,
@@ -73,10 +84,11 @@ class _ChatWebState extends State<ChatWeb> {
           // Selected chat
           Expanded(
             flex: 2,
-            child: selectedChatUserName != null
+            child: selectedChat != null
                 ? ChatScreen(
                     userType: widget.userType,
-                    userName: selectedChatUserName!,
+                    userName: selectedChat?.name,
+                    customerId: selectedChat?.id,
                   )
                 : Center(
                     child: Text(

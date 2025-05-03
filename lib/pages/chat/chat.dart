@@ -46,6 +46,7 @@ class ChatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isChatWithCustomer = false;
     final UserModel user =
         BlocProvider.of<UsersBloc>(context).state.sessionUser!;
     
@@ -58,6 +59,7 @@ class ChatPage extends StatelessWidget {
         customerName: user.username,
       ));
     } else {
+      isChatWithCustomer = true;
       // For business, just load messages from existing chat
       context.read<ChatBloc>().add(LoadMessagesEvent(
         chatId: customerId,
@@ -83,7 +85,13 @@ class ChatPage extends StatelessWidget {
                       child: Row(
                         children: [
                           CircleAvatar(
-                              radius: 30, backgroundColor: Colors.grey[300]),
+                            radius: 30, 
+                            backgroundColor: isChatWithCustomer ? Colors.blue[200] : Colors.grey[300],
+                            child: Icon(
+                              isChatWithCustomer ? Icons.person : Icons.support_agent,
+                              color: Colors.white,
+                            ),
+                          ),
                           const SizedBox(width: 10),
                           Text(displayName,
                               style: const TextStyle(
