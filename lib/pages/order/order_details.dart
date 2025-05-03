@@ -153,22 +153,19 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       body: FutureBuilder<OrderModel>(
         future: _orderFuture,
         builder: (ctx, snap) {
-          // ---------- AQUI SE HIZO EL CAMBIO ----------
           if (snap.connectionState == ConnectionState.waiting) {
-            // Mientras carga, mostramos el loading spinner
-            return const Center(child: CustomLoading());
+            // Wait to load order
+            return const SizedBox.shrink();
           }
           if (snap.hasError) {
-            // En caso de error, mostramos mensaje y dejamos de renderizar infinitamente
             return Center(
               child: Text(
-                'Error al cargar la orden:\n${snap.error}',
+                'Error al cargar la orden:\nContacta a soporte',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.red),
               ),
             );
           }
-          // ------------------------------------------
 
           final order = snap.data!;
           final nextStatus = _computeNextStatus(order);
@@ -200,7 +197,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             if (su.connectionState == ConnectionState.waiting) {
                               return const SizedBox.shrink();
                             }
-                            return Text(su.data?.fullname ?? '---');
+                            return Text(
+                                su.data?.fullname ?? 'Usuario No Disponible');
                           },
                         ),
                         const SizedBox(height: 16),
@@ -250,27 +248,25 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                         const SizedBox(height: 16),
 
-                        // Pending debt payment button for customer
+                        // Pending debt payment for cash orders
                         if (widget.userType == UserType.customer &&
                             order.debt! > 0) ...[
                           SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2),
-                          ElevatedButton.icon(
-                            icon:
-                                const Icon(Icons.payment, color: Colors.white),
-                            label: Text(
-                              'Pagar deuda: ${formatCurrency(order.debt!)}',
-                              style: TextStyle(color: Colors.white),
+                          Text(
+                            'Tu pendiente de pago en efectivo es de:',
+                            style: TextStyle(
+                              fontSize: 16,
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: darkBlue,
-                              minimumSize:
-                                  Size(MediaQuery.of(context).size.width, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            formatCurrency(order.debt!),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: darkBlue,
                             ),
-                            onPressed: () => null,
                           ),
                         ],
                       ],
