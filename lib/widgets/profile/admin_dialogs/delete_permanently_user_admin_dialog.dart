@@ -5,10 +5,10 @@ import 'package:spl_front/models/user.dart';
 import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 
-class DeleteUserDialog extends StatelessWidget {
+class DeletePermanentlyUserDialog extends StatelessWidget {
   final UserModel user;
 
-  const DeleteUserDialog({
+  const DeletePermanentlyUserDialog({
     super.key,
     required this.user,
   });
@@ -18,7 +18,7 @@ class DeleteUserDialog extends StatelessWidget {
     return AlertDialog(
       title: Center(
         child: Text(
-          ProfileStrings.confirmDeleteTitle,
+          ProfileStrings.confirmPermanentlyDeleteTitle,
           style: const TextStyle(
             color: Colors.blue,
             fontWeight: FontWeight.bold,
@@ -32,7 +32,7 @@ class DeleteUserDialog extends StatelessWidget {
           Icon(Icons.delete, color: Colors.blue, size: 50),
           SizedBox(height: 10),
           Text(
-            ProfileStrings.confirmDeleteDescription,
+            ProfileStrings.confirmDeletePermanentlyDescription,
             style: TextStyle(
               color: Colors.black54,
               fontSize: 14,
@@ -44,7 +44,7 @@ class DeleteUserDialog extends StatelessWidget {
       ),
       actionsAlignment: MainAxisAlignment.center,
       actions: [
-        // Botón CANCELAR
+        // Cancel Button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey,
@@ -58,7 +58,7 @@ class DeleteUserDialog extends StatelessWidget {
           },
           child: const Text(ProfileStrings.cancel),
         ),
-        // Botón CONFIRMAR
+        // Confirm Button
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -68,13 +68,12 @@ class DeleteUserDialog extends StatelessWidget {
             ),
           ),
           onPressed: () async {
-            final success = await UserService.deleteUser(user.id);
+            final success = await UserService.deletePermanentlyUser(user.id);
 
             if (success) {
               // Update the bloc state with the new list of users
-              BlocProvider.of<UsersManagementBloc>(context).add(
-                OnDeleteUserEvent(user),
-              );
+              BlocProvider.of<UsersManagementBloc>(context)
+                  .add(OnPermanentDeleteUserEvent(user));
 
               /// Show the successful changes dialog
               _showSuccessfulDeleteDialog(context);
@@ -82,11 +81,13 @@ class DeleteUserDialog extends StatelessWidget {
                   const Duration(seconds: 1, milliseconds: 500));
               Navigator.pop(context); // Close the dialog
 
-              Navigator.of(context).pop(); // Close the Dialog
+              Navigator.of(context).pop(); // Close the external Dialog
             } else {
               // Error Message
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Error deleting user")),
+                const SnackBar(
+                    content:
+                        Text("Error en la eliminación permanente del usuario")),
               );
             }
           },
@@ -104,7 +105,7 @@ class DeleteUserDialog extends StatelessWidget {
         return AlertDialog(
           title: const Center(
             child: Text(
-              ProfileStrings.deleteConfirmation,
+              ProfileStrings.deletePermanentlyConfirmation,
               style: TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.bold,
@@ -118,7 +119,7 @@ class DeleteUserDialog extends StatelessWidget {
               Icon(Icons.check_circle, color: Colors.blue, size: 50),
               SizedBox(height: 10),
               Text(
-                ProfileStrings.deleteConfirmationDescription,
+                ProfileStrings.deletePermanentlyConfirmationDescription,
                 style: TextStyle(
                   color: Colors.black54,
                   fontSize: 14,

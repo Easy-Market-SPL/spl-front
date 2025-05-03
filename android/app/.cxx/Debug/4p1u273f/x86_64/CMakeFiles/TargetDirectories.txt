@@ -1,0 +1,2 @@
+E:/Proyectos GH/spl_front/android/app/.cxx/Debug/4p1u273f/x86_64/CMakeFiles/edit_cache.dir
+E:/Proyectos GH/spl_front/android/app/.cxx/Debug/4p1u273f/x86_64/CMakeFiles/rebuild_cache.dir
