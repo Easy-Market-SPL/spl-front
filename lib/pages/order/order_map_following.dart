@@ -481,7 +481,7 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                 if (snap.connectionState == ConnectionState.waiting) {
                   return const SizedBox.shrink();
                 }
-                final name = snap.data?.fullname ?? '';
+                final name = snap.data?.fullname ?? 'Usuario No Disponible';
                 return Text(
                   name.isNotEmpty ? OrderStrings.nameOrder(name) : 'Cliente:',
                   style: const TextStyle(

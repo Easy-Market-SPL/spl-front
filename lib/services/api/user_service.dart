@@ -67,12 +67,58 @@ class UserService {
     }
   }
 
+  // Methods for manage the soft deleted users
   static Future<bool> deleteUser(String id) async {
     var url = '$_url/users/$id/delete';
     var response = await _client.put(Uri.parse(url), headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     });
     if (response.statusCode == 200) {
+      return true;
+    } else {
+      print(response.statusCode);
+      print(response.body);
+      throw Exception('Failed to delete user');
+    }
+  }
+
+  static Future<bool> restoreUser(String id) async {
+    var url = '$_url/users/$id/restore';
+    print(url);
+    var response = await _client.put(Uri.parse(url), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    print(response);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to restore user');
+    }
+  }
+
+  static Future<List<UserModel>> getSoftDeletedUsers() async {
+    var url = '$_url/users?deleted=true';
+    var response = await _client.get(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    if (response.statusCode == 200) {
+      return userFromJson(response.body);
+    } else {
+      return [];
+    }
+  }
+
+  // Methods for final operations on users
+  static Future<bool> deletePermanentlyUser(String id) async {
+    var url = '$_url/users/$id';
+    var response =
+        await _client.delete(Uri.parse(url), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    if (response.statusCode == 200 || response.statusCode == 204) {
       return true;
     } else {
       throw Exception('Failed to delete user');

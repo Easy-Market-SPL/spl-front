@@ -31,10 +31,28 @@ class OnUpdateUserEvent extends UsersManagementEvent {
   List<Object> get props => [user];
 }
 
-class OnDeleteUserEvent extends UsersManagementEvent {
+class OnSoftDeleteUserEvent extends UsersManagementEvent {
   final UserModel user;
 
-  const OnDeleteUserEvent(this.user);
+  const OnSoftDeleteUserEvent(this.user);
+
+  @override
+  List<Object> get props => [user];
+}
+
+class OnPermanentDeleteUserEvent extends UsersManagementEvent {
+  final UserModel user;
+
+  const OnPermanentDeleteUserEvent(this.user);
+
+  @override
+  List<Object> get props => [user];
+}
+
+class OnRestoreUserEvent extends UsersManagementEvent {
+  final UserModel user;
+
+  const OnRestoreUserEvent(this.user);
 
   @override
   List<Object> get props => [user];

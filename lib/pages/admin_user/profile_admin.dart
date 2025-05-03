@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users_management/users_management_bloc.dart';
+import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/profile/admin_dialogs/add_user_admin_dialog.dart';
+import 'package:spl_front/widgets/profile/admin_dialogs/delete_permanently_user_admin_dialog.dart';
+import 'package:spl_front/widgets/profile/admin_dialogs/restore_user_admin_dialog.dart';
 import 'package:spl_front/widgets/profile/profile_header.dart';
-import 'package:spl_front/widgets/profile/user_card.dart';
+import 'package:spl_front/widgets/profile/user_cards/soft_deleted_user_card.dart';
+import 'package:spl_front/widgets/profile/user_cards/user_card.dart';
 
 import '../../bloc/users_blocs/users/users_bloc.dart';
 import '../../models/user.dart';
 import '../../utils/strings/profile_strings.dart';
-import '../../widgets/profile/admin_dialogs/delete_user_admin_dialog.dart';
 import '../../widgets/profile/admin_dialogs/edit_user_admin_dialog.dart';
+import '../../widgets/profile/admin_dialogs/soft_delete_user_admin_dialog.dart';
 
 class AdminPanelPage extends StatefulWidget {
   const AdminPanelPage({super.key});
@@ -20,6 +24,8 @@ class AdminPanelPage extends StatefulWidget {
 }
 
 class _AdminPanelPageState extends State<AdminPanelPage> {
+  // late List<UserModel> usersDeleted;
+
   @override
   void initState() {
     super.initState();
@@ -62,13 +68,20 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
               ),
               const SizedBox(height: 20),
               // Users List Title
-              const Text(
-                ProfileStrings.userList,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+              Row(
+                children: [
+                  const Text(
+                    ProfileStrings.userList,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  // Button for view the soft deleted users
+                  ButtonSoftDeletedUsers()
+                ],
               ),
               const SizedBox(height: 10),
               // BlocBuilder that manage the list of users, and if is empty or loading show a loading widget
@@ -106,7 +119,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                               showDialog(
                                   context: context,
                                   builder: (context) {
-                                    return DeleteUserDialog(user: user);
+                                    return SoftDeleteUserDialog(user: user);
                                   });
                             },
                           );
@@ -137,6 +150,111 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
     );
   }
 }
+
+class ButtonSoftDeletedUsers extends StatelessWidget {
+  const ButtonSoftDeletedUsers({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: const Text('Eliminados Parcialmente'),
+      selected: false,
+      selectedColor: Colors.blue,
+      backgroundColor: Colors.grey[200],
+      showCheckmark: false,
+      labelStyle: const TextStyle(
+        color: Colors.black,
+        fontSize: 12,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onSelected: (_) async {
+        /// Load all users soft deleted
+        final List<UserModel> usersDeleted =
+            await UserService.getSoftDeletedUsers();
+        if (usersDeleted.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No hay usuarios eliminados',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Usuarios Eliminados\nParcialmente',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
+              content: SizedBox(
+                height: 400,
+                width: 300,
+                child: ListView.builder(
+                  itemCount: usersDeleted.length,
+                  itemBuilder: (context, index) {
+                    final user = usersDeleted[index];
+                    return SoftDeletedUserCard(
+                      name: user.fullname,
+                      role: user.rol,
+                      initial: user.username.isNotEmpty
+                          ? user.username[0].toUpperCase()
+                          : '',
+                      onRestore: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return RestoreUserAdminDialog(user: user);
+                          },
+                        );
+                      },
+                      onDelete: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return DeletePermanentlyUserDialog(user: user);
+                            });
+                      },
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/*
+ChoiceChip(
+                      label: const Text('Mis Entregas'),
+                      selected: !_deliveryPreparacion,
+                      onSelected: (_) {
+                        setState(() => _deliveryPreparacion = false);
+                        context.read<OrdersBloc>().add(
+                              FilterDeliveryOrdersEvent(
+                                  preparacion: false, userId: userId),
+                            );
+                      },
+                      selectedColor: Colors.blue,
+                      backgroundColor: Colors.grey[200],
+                      showCheckmark: false,
+                      labelStyle: TextStyle(
+                        color:
+                            !_deliveryPreparacion ? Colors.white : Colors.black,
+                      ),
+                    ),
+ */
 
 class AddUserButton extends StatelessWidget {
   final VoidCallback onPressed;
