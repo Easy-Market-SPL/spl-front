@@ -17,7 +17,6 @@ class CustomSidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Encabezado compartido (mismo que en el menú móvil)
             MenuHeader(userType: userType),
             Expanded(
               child: ListView(

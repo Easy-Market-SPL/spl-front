@@ -8,6 +8,7 @@ class DashboardStrings {
   static const String noLabelsFound = "No se encontraron etiquetas con esa búsqueda";
   static const String cancel = "Cancelar";
   static const String applyFilters = "Aplicar filtros";
+  static const String cleanFilters = "Limpiar filtros";
   static const String fromPrice = "Desde";
   static const String toPrice = "Hasta";
   static const String minRatingFilter = "Min";
@@ -24,4 +25,5 @@ class DashboardStrings {
   static const String fromPriceWithValue = "Desde";
   static const String toPriceWithValue = "Hasta";
   static const String minRatingWithValue = "Min";
+  static const String products = "Productos";
 }

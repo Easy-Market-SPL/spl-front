@@ -29,11 +29,6 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeMobile = {
       icon: Icons.shopping_cart,
     ),
     NavbarItem(
-      label: BottomNavigationStrings.notifications,
-      route: 'customer_notifications',
-      icon: Icons.notifications,
-    ),
-    NavbarItem(
       label: BottomNavigationStrings.menu,
       route: 'customer_user_menu',
       icon: Icons.menu,
@@ -50,11 +45,6 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeMobile = {
       label: BottomNavigationStrings.orders,
       route: 'business_user_orders',
       icon: Icons.backpack_sharp,
-    ),
-    NavbarItem(
-      label: BottomNavigationStrings.notifications,
-      route: 'business_notifications',
-      icon: Icons.notifications,
     ),
     NavbarItem(
       label: BottomNavigationStrings.menu,
@@ -97,9 +87,9 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeWeb = {
       icon: Icons.shopping_cart_outlined,
     ),
     NavbarItem(
-      label: BottomNavigationStrings.notifications,
-      route: 'customer_notifications',
-      icon: Icons.notifications_none,
+      label: BottomNavigationStrings.cart,
+      route: 'customer_user_cart',
+      icon: Icons.shopping_cart,
     ),
     NavbarItem(
       label: BottomNavigationStrings.profile,
@@ -118,11 +108,6 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeWeb = {
       label: BottomNavigationStrings.orders,
       route: 'business_user_orders',
       icon: Icons.inventory_2,
-    ),
-    NavbarItem(
-      label: BottomNavigationStrings.notifications,
-      route: 'business_notifications',
-      icon: Icons.notifications_none,
     ),
     NavbarItem(
       label: BottomNavigationStrings.profile,

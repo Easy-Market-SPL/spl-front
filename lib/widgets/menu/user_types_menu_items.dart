@@ -38,11 +38,6 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
       icon: Icons.person,
     ),
     MenuItem(
-      label: MenuStrings.notifications,
-      route: 'customer_notifications',
-      icon: Icons.notifications,
-    ),
-    MenuItem(
       label: MenuStrings.customerSupport,
       route: 'customer_user_chat',
       icon: Icons.headset_mic,
@@ -69,11 +64,6 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
       label: MenuStrings.myAccount,
       route: 'business_user_profile',
       icon: Icons.person,
-    ),
-    MenuItem(
-      label: MenuStrings.notifications,
-      route: 'business_notifications',
-      icon: Icons.notifications,
     ),
     MenuItem(
       label: MenuStrings.customerSupport,

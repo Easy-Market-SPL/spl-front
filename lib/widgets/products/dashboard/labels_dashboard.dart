@@ -56,7 +56,7 @@ class LabelsWidget extends StatelessWidget {
                   children: [
                     // Todos" button
                     Padding(
-                      padding: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.only(right: 10, bottom: 8),
                       child: ElevatedButton(
                         onPressed: () {
                           context.read<ProductFilterBloc>().add(
@@ -92,7 +92,7 @@ class LabelsWidget extends StatelessWidget {
                       ) ?? false;
                       
                       return Padding(
-                        padding: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.only(right: 10, bottom: 8),
                         child: ElevatedButton(
                           onPressed: () {
                             if (isSelected) {

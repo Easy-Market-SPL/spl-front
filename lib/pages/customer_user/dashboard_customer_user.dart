@@ -17,6 +17,7 @@ import 'package:spl_front/widgets/app_bars/customer_user_app_bar.dart';
 import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 import 'package:spl_front/widgets/products/dashboard/active_filters_dashboard.dart';
 import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
+import 'package:spl_front/widgets/products/dashboard/products_filters_content.dart';
 import 'package:spl_front/widgets/products/dashboard/products_filters_dialog.dart';
 import 'package:spl_front/widgets/products/grids/customer_product_grid.dart';
 

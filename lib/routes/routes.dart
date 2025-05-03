@@ -8,6 +8,7 @@ import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
+import 'package:spl_front/pages/business_user/web/dashboard_business_user_web.dart';
 import 'package:spl_front/pages/chat/chats_web.dart';
 import 'package:spl_front/pages/customer_user/cart.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
@@ -15,6 +16,7 @@ import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
+import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/menu/menu.dart';
 import 'package:spl_front/pages/notifications/notifications.dart';
@@ -25,9 +27,7 @@ import 'package:spl_front/pages/order/web/order_tracking_web.dart';
 import 'package:spl_front/pages/order/web/orders_list_web.dart';
 import 'package:spl_front/pages/splash/splash_screen.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-
-import '../pages/auth/login/login_page.dart';
-import '../pages/auth/login/login_page_variant.dart';
+import 'package:spl_front/utils/routes/routes_helper.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
 import '../pages/chat/chat.dart';
@@ -41,7 +41,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   /// AUTH RELATED
   '': (_) => Wrapper(),
   // auth forms
-  'login': (_) => !SPLVariables.hasThirdAuth ? LoginPage() : LoginPageVariant(),
+  'login': loginPageFactory,
   'register': (_) =>
       !SPLVariables.hasThirdAuth ? RegisterPage() : RegisterPageVariant(),
   'login_web': (_) => WebLoginPage(),
@@ -58,8 +58,12 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'customer_user_menu': (_) => MenuScreen(userType: UserType.customer),
 
   /// DASHBOARD PAGES
-  'customer_dashboard': (_) => CustomerMainDashboard(),
-  'business_dashboard': (_) => BusinessUserMainDashboard(),
+  'customer_dashboard': (_) => !kIsWeb
+      ? CustomerMainDashboard()
+      : DashboardCustomerWeb(),
+  'business_dashboard': (_) => !kIsWeb
+      ? BusinessUserMainDashboard()
+      : DashboardBusinessWeb(),
 
   /// CHAT PAGES
   'customer_user_chat': (_) => !kIsWeb

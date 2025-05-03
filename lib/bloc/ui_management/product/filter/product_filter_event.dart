@@ -27,6 +27,25 @@ class ApplyFiltersFromDialog extends ProductFilterEvent {
   List<Object?> get props => [minPrice, maxPrice, minRating, selectedLabels];
 }
 
+class SetPriceRange extends ProductFilterEvent {
+  final double? minPrice;
+  final double? maxPrice;
+
+  SetPriceRange({this.minPrice, this.maxPrice});
+}
+
+class SetMinRating extends ProductFilterEvent {
+  final double? rating;
+
+  SetMinRating({this.rating});
+}
+
+class SetSelectedLabels extends ProductFilterEvent {
+  final List<Label>? labels;
+
+  SetSelectedLabels({this.labels});
+}
+
 class RemoveFilter extends ProductFilterEvent {
   final ProductFilterType filterType;
 

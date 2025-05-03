@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/data/product.dart';
 import 'package:spl_front/models/logic/user_type.dart';
@@ -18,9 +19,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double aspectRatio =
-        SPLVariables.isRated && product.rating != null ? 0.60 : 0.65;
 
     return InkWell(
       onTap: () {
@@ -34,117 +32,136 @@ class ProductCard extends StatelessWidget {
           ),
         );
       },
-      child: AspectRatio(
-        aspectRatio: aspectRatio,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 2,
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image
+            Expanded(
+              flex: 5,
+              child: SizedBox(
+                width: double.infinity,
                 child: product.imagePath.isNotEmpty
                     ? Image.network(
                         product.imagePath,
-                        height: screenWidth * (1 / 3.5),
-                        width: double.infinity,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          debugPrint('Error loading product image: ${product.code} - $error');
+                          return Image.asset(
+                            "assets/images/empty_background.jpg",
+                            fit: BoxFit.cover,
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
                       )
                     : Image.asset(
                         "assets/images/empty_background.jpg",
-                        height: screenWidth * (1 / 3.5),
-                        width: double.infinity,
                         fit: BoxFit.cover,
                       ),
               ),
-
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 6.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Product Name
-                      Text(
-                        product.name,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+            ),
+  
+            // Content
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Name
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
-
-                      // Product Reference + Rating
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Product Reference
-                          Expanded(
-                            child: Text(
-                              product.code,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+  
+                    const SizedBox(height: 2),
+  
+                    // Product Reference + Rating
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Product Reference
+                        Expanded(
+                          child: Text(
+                            product.code,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-
-                          // Product Rating
-                          if (SPLVariables.isRated &&
-                              product.rating != null &&
-                              product.reviews != null)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.star,
-                                    color: Colors.amber, size: 14),
-                                const SizedBox(width: 2),
-                                Text(
-                                  product.reviews!.isEmpty
-                                      ? 'N/A'
-                                      : product.rating!.toStringAsFixed(2),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey,
-                                  ),
+                        ),
+  
+                        // Product Rating
+                        if (SPLVariables.isRated &&
+                            product.rating != null &&
+                            product.reviews != null)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star,
+                                  color: Colors.amber, size: 14),
+                              const SizedBox(width: 2),
+                              Text(
+                                product.reviews!.isEmpty
+                                    ? 'N/A'
+                                    : product.rating!.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
                                 ),
-                              ],
-                            ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      // Description
-                      Expanded(
-                        child: Text(
-                          product.description,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+                              ),
+                            ],
                           ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                      ],
+                    ),
+  
+                    const SizedBox(height: 3),
+  
+                    // Description
+                    Expanded(
+                      child: Text(
+                        product.description,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: kIsWeb? 3 : 2,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-
-              // Price Button (customizable per card type)
-              priceButton ?? const SizedBox(),
-            ],
-          ),
+            ),
+  
+            // Price Button
+            if (priceButton != null) 
+              SizedBox(height: 44, child: priceButton!),
+          ],
         ),
       ),
     );
