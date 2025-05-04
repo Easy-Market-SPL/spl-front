@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/auth/login/register_link.dart';
-import 'package:spl_front/widgets/login/custom_welcome.dart';
-import 'package:spl_front/widgets/login/login_form.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/login/login_form.dart';
+
+import '../../../widgets/logic_widgets/user_widgets/login/custom_welcome.dart';
 
 class WebLoginPage extends StatelessWidget {
   const WebLoginPage({super.key});
@@ -52,4 +53,3 @@ class WebLoginPage extends StatelessWidget {
     );
   }
 }
-

@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/map_strings.dart';
-import 'package:spl_front/widgets/addresses/places_search_bar.dart';
 
-import '../../../widgets/addresses/places_search_result.dart';
-import '../../../widgets/map/helpers/dialogs/map_location_dialogs.dart';
+import '../../../bloc/location_management_bloc/gps_bloc/gps_bloc.dart';
+import '../../../bloc/ui_blocs/search_places_bloc/search_places_bloc.dart';
+import '../../../widgets/logic_widgets/order_widgets/map/helpers/dialogs/map_location_dialogs.dart';
+import '../../../widgets/logic_widgets/user_widgets/addresses/places_search_bar.dart';
+import '../../../widgets/logic_widgets/user_widgets/addresses/places_search_result.dart';
 
 class AddAddressPage extends StatefulWidget {
   const AddAddressPage({super.key});

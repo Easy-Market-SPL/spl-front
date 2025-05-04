@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 
-import '../../../bloc/ui_management/address/address_bloc.dart';
+import '../../../bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
 
 class SelectAddressScreen extends StatelessWidget {
   const SelectAddressScreen({super.key});

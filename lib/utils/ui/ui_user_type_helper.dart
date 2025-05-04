@@ -1,4 +1,4 @@
-import 'package:spl_front/models/logic/user_type.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
 
 class UIUserTypeHelper {
   static String getAvatarTextFromUserType(UserType userType) {

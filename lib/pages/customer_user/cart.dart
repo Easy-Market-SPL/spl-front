@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_event.dart';
-import 'package:spl_front/bloc/ui_management/order/order_state.dart';
-import 'package:spl_front/widgets/cart/cart_item.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/logic_widgets/order_widgets/cart/cart_item.dart';
 
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_event.dart';
+import '../../bloc/orders_bloc/order_state.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
-import '../../models/logic/user_type.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
 import '../../models/order_models/order_product.dart';
 import '../../utils/strings/cart_strings.dart';
-import '../../widgets/cart/cart_subtotal.dart';
-import '../../widgets/helpers/custom_loading.dart'; // Assuming Subtotal widget is here
+import '../../widgets/helpers/custom_loading.dart';
+import '../../widgets/logic_widgets/order_widgets/cart/cart_subtotal.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart'; // Assuming Subtotal widget is here
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -53,17 +53,13 @@ class _CartPageState extends State<CartPage> {
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
         child: BlocBuilder<OrdersBloc, OrdersState>(
           builder: (context, state) {
-            // Determine loading status for overlay
             bool showLoadingOverlay =
                 (state is OrdersLoaded && state.isLoading);
-            // Determine content based on non-loading states
             Widget content;
 
             if (state is OrdersInitial || state is OrdersLoading) {
-              // Show full loader only for initial load or explicit full loading state
               content = const Center(child: CustomLoading());
             } else if (state is OrdersLoaded) {
-              // Check for items within the loaded state
               final bool hasItems = state.currentCartOrder != null &&
                   state.currentCartOrder!.orderProducts.isNotEmpty;
               content = hasItems
@@ -72,23 +68,18 @@ class _CartPageState extends State<CartPage> {
                   : _buildEmptyCart(context);
             } else if (state is OrdersError) {
               debugPrint("OrdersError state in CartPage: ${state.message}");
-              content = _buildEmptyCart(context); // Fallback for errors
+              content = _buildEmptyCart(context);
             } else {
-              content =
-                  _buildEmptyCart(context); // Fallback for any other state
+              content = _buildEmptyCart(context);
             }
 
-            // Use a Stack to potentially overlay a loading indicator
             return Stack(
               children: [
-                // Main content (list, empty view, or initial loader)
                 content,
-
-                // Overlay loading indicator if isLoading flag is true in OrdersLoaded state
                 if (showLoadingOverlay)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black, // Semi-transparent background
+                      color: Colors.black,
                       child: Center(child: CustomLoading()),
                     ),
                   ),

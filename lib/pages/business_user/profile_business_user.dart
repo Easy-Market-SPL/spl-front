@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/profile/profile_header.dart';
-import 'package:spl_front/widgets/profile/profile_section.dart';
 
 import '../../bloc/users_blocs/users/users_bloc.dart';
-import '../../models/user.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_header.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_section.dart';
 
 class BusinessUserProfilePage extends StatelessWidget {
   const BusinessUserProfilePage({super.key});

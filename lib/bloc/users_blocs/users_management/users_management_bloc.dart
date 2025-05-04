@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/services/api/user_service.dart';
 
-import '../../../models/user.dart';
+import '../../../models/users_models/user.dart';
+import '../../../services/api_services/user_service/user_service.dart';
 
 part 'users_management_event.dart';
 part 'users_management_state.dart';

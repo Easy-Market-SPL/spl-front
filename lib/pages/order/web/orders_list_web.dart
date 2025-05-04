@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_event.dart';
-import 'package:spl_front/bloc/ui_management/order/order_state.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
-import 'package:spl_front/widgets/order/list/order_filters_section.dart';
-import 'package:spl_front/widgets/order/web/order_item_web.dart';
 import 'package:spl_front/widgets/web/scaffold_web.dart';
 
+import '../../../bloc/orders_bloc/order_bloc.dart';
+import '../../../bloc/orders_bloc/order_event.dart';
+import '../../../bloc/orders_bloc/order_state.dart';
 import '../../../bloc/users_blocs/users/users_bloc.dart';
+import '../../../models/helpers/intern_logic/user_type.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/list/order_filters_section.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/web/order_item_web.dart';
 
 class OrdersListWeb extends StatefulWidget {
   final UserType userType;
