@@ -1,27 +1,25 @@
-// lib/pages/order/order_details.dart
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 
-import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_model.dart';
-import '../../../models/user.dart';
-import '../../../services/api/order_service.dart';
-import '../../../services/api/user_service.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../utils/ui/format_currency.dart';
 import '../../../widgets/helpers/custom_loading.dart';
-import '../../../widgets/navigation_bars/nav_bar.dart';
-import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_event.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../services/api_services/order_service/order_service.dart';
+import '../../services/api_services/user_service/user_service.dart';
 import '../../utils/strings/payment_strings.dart';
 import '../../utils/ui/order_statuses.dart';
-import '../../widgets/order/list/products_popup.dart';
-import '../../widgets/order/tracking/modify_order_status_options.dart';
-import '../../widgets/order/tracking/shipping_company_selection.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/list/products_popup.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/modify_order_status_options.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/shipping_company_selection.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;

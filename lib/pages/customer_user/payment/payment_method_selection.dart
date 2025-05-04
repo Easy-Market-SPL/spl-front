@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
-import 'package:spl_front/models/logic/address.dart';
 
+import '../../../bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
+import '../../../models/users_models/address.dart';
 import '../../../utils/strings/payment_strings.dart';
-import '../../../widgets/payment/methods/add_payment_dialog.dart';
+import '../../../widgets/logic_widgets/user_widgets/payment/methods/add_payment_dialog.dart';
 
 class SelectPaymentMethodScreen extends StatelessWidget {
   final Address? address;

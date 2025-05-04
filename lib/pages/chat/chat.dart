@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chat/chat_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/models/user.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
 
-import '../../bloc/ui_management/chat/chat_bloc.dart';
-import '../../bloc/ui_management/chat/chat_event.dart';
-import '../../widgets/chat/chat_header.dart';
-import '../../widgets/chat/chat_input_area.dart';
-import '../../widgets/chat/chat_messages_list.dart';
+import '../../bloc/chat_bloc/single_chat_bloc/chat_bloc.dart';
+import '../../bloc/chat_bloc/single_chat_bloc/chat_event.dart';
+import '../../bloc/chat_bloc/single_chat_bloc/chat_state.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../widgets/logic_widgets/chat_widgets/chat_header.dart';
+import '../../widgets/logic_widgets/chat_widgets/chat_input_area.dart';
+import '../../widgets/logic_widgets/chat_widgets/chat_messages_list.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class ChatScreen extends StatelessWidget {
   final UserType userType;
   final String? userName;
   final String? customerId;
 
-  const ChatScreen({
-    super.key, 
-    required this.userType, 
-    this.userName, 
-    this.customerId
-  });
+  const ChatScreen(
+      {super.key, required this.userType, this.userName, this.customerId});
 
   @override
   Widget build(BuildContext context) {
-    return ChatPage(userType: userType, userName: userName, customerId: customerId,);
+    return ChatPage(
+      userType: userType,
+      userName: userName,
+      customerId: customerId,
+    );
   }
 }
 
@@ -38,8 +38,8 @@ class ChatPage extends StatelessWidget {
   final FocusNode _focusNode = FocusNode();
 
   ChatPage({
-    super.key, 
-    required this.userType, 
+    super.key,
+    required this.userType,
     required this.userName,
     this.customerId,
   });
@@ -48,24 +48,24 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserModel user =
         BlocProvider.of<UsersBloc>(context).state.sessionUser!;
-    
+
     String displayName = userName ?? user.username;
 
     if (userType == UserType.customer) {
       // For customers, initialize chat with their info
       context.read<ChatBloc>().add(LoadMessagesEvent(
-        customerId: user.id, 
-        customerName: user.username,
-      ));
+            customerId: user.id,
+            customerName: user.username,
+          ));
     } else {
       // For business, just load messages from existing chat
       context.read<ChatBloc>().add(LoadMessagesEvent(
-        chatId: customerId,
-        customerId: customerId,
-        customerName: displayName,
-      ));
+            chatId: customerId,
+            customerId: customerId,
+            customerName: displayName,
+          ));
     }
-        
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -137,7 +137,8 @@ class ChatPage extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(userType: userType, context: context),
+      bottomNavigationBar:
+          CustomBottomNavigationBar(userType: userType, context: context),
     );
   }
 }

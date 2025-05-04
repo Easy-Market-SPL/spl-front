@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/models/logic/user_type.dart';
-import 'package:spl_front/widgets/menu/menu_header.dart';
-import 'package:spl_front/widgets/menu/user_types_menu_items.dart';
+import 'package:spl_front/widgets/style_widgets/menu/menu_header.dart';
+
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../widgets/style_widgets/menu/user_types_menu_items.dart';
 
 class MenuScreen extends StatelessWidget {
   final UserType userType;

@@ -2,39 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:spl_front/bloc/ui_management/address/address_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chat/chat_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
-import 'package:spl_front/bloc/ui_management/gps/gps_bloc.dart';
-import 'package:spl_front/bloc/ui_management/labels_store/labels_store_bloc.dart';
-import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
-import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/payment/payment_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/details/product_details_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/products/product_bloc.dart';
-import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users_management/users_management_bloc.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/providers/product_form_provider.dart';
 import 'package:spl_front/providers/selected_labels_provider.dart';
 import 'package:spl_front/routes/routes.dart';
-import 'package:spl_front/services/api/color_service.dart';
-import 'package:spl_front/services/api/label_service.dart';
-import 'package:spl_front/services/api/order_service.dart';
-import 'package:spl_front/services/api/product_service.dart';
-import 'package:spl_front/services/api/review_service.dart';
-import 'package:spl_front/services/api/user_service.dart';
-import 'package:spl_front/services/gui/map/map_service.dart';
-import 'package:spl_front/services/gui/stripe/stripe_service.dart';
-import 'package:spl_front/services/supabase/real-time/real_time_chat_service.dart';
-import 'package:spl_front/services/supabase/supabase_config.dart';
+import 'package:spl_front/services/api_services/order_service/order_service.dart';
+import 'package:spl_front/services/api_services/product_services/color_service.dart';
+import 'package:spl_front/services/api_services/product_services/label_service.dart';
+import 'package:spl_front/services/api_services/product_services/product_service.dart';
+import 'package:spl_front/services/api_services/review_service/review_service.dart';
+import 'package:spl_front/services/api_services/user_service/user_service.dart';
+import 'package:spl_front/services/external_services/google_maps/map_service.dart';
+import 'package:spl_front/services/external_services/stripe/stripe_service.dart';
+import 'package:spl_front/services/supabase_services/real-time/real_time_chat_service.dart';
+import 'package:spl_front/services/supabase_services/supabase_config.dart';
 import 'package:spl_front/theme/theme.dart';
+
+import 'bloc/chat_bloc/list_chats_bloc/chats_bloc.dart';
+import 'bloc/chat_bloc/single_chat_bloc/chat_bloc.dart';
+import 'bloc/location_management_bloc/gps_bloc/gps_bloc.dart';
+import 'bloc/location_management_bloc/location_bloc/location_bloc.dart';
+import 'bloc/orders_bloc/order_bloc.dart';
+import 'bloc/product_blocs/labels_store/labels_store_bloc.dart';
+import 'bloc/product_blocs/product_details/product_details_bloc.dart';
+import 'bloc/product_blocs/product_filter/product_filter_bloc.dart';
+import 'bloc/product_blocs/product_form/labels/label_bloc.dart';
+import 'bloc/product_blocs/product_form/product_form_bloc.dart';
+import 'bloc/product_blocs/products_management/product_bloc.dart';
+import 'bloc/ui_blocs/map_bloc/map_bloc.dart';
+import 'bloc/ui_blocs/profile_tab_bloc/profile_tab_bloc.dart';
+import 'bloc/ui_blocs/search_places_bloc/search_places_bloc.dart';
+import 'bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
+import 'bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
 
 Future main() async {
   // Load the environment variables from the .env file for begin the app
@@ -74,8 +75,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ProfileTabBloc()),
         BlocProvider(create: (context) => AddressBloc()),
         BlocProvider(create: (context) => LabelsStoreBloc()),
-        BlocProvider(create: (context) => ChatBloc(chatService: RealTimeChatService())),
-        BlocProvider(create: (context) => ChatsBloc(chatService: RealTimeChatService())),
+        BlocProvider(
+            create: (context) => ChatBloc(chatService: RealTimeChatService())),
+        BlocProvider(
+            create: (context) => ChatsBloc(chatService: RealTimeChatService())),
         BlocProvider(create: (context) => ProductBloc()),
         BlocProvider(create: (context) => ProductFormBloc()),
         BlocProvider(create: (context) => ProductDetailsBloc()),

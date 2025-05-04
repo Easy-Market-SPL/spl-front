@@ -4,18 +4,18 @@ import 'package:intl/intl.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/pages/order/order_map_following.dart';
 
-import '../../../models/logic/user_type.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../utils/ui/order_statuses.dart';
-import '../../../widgets/navigation_bars/nav_bar.dart';
-import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_state.dart';
-import '../../widgets/order/tracking/horizontal_order_status.dart';
-import '../../widgets/order/tracking/modify_order_status_options.dart';
-import '../../widgets/order/tracking/order_action_buttons.dart';
-import '../../widgets/order/tracking/order_tracking_header.dart';
-import '../../widgets/order/tracking/shipping_guide.dart';
-import '../../widgets/order/tracking/vertical_order_status.dart';
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_state.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/horizontal_order_status.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/modify_order_status_options.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/order_action_buttons.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/order_tracking_header.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/shipping_guide.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/vertical_order_status.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final UserType userType;
@@ -31,8 +31,6 @@ class OrderTrackingScreen extends StatelessWidget {
   Widget build(BuildContext context) =>
       OrderTrackingPage(userType: userType, order: order);
 }
-
-/* ───────────────────────────────────────── */
 
 class OrderTrackingPage extends StatefulWidget {
   final UserType userType;
@@ -127,7 +125,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
     );
   }
 
-  /* ────────────── 2. sin tracking en tiempo real ────────────── */
   Widget _buildNonRealTime() {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
@@ -217,10 +214,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingPage> {
             HorizontalOrderStatus(order: order),
             Expanded(
               child: Container(
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: const Text('Mapa aquí'),
-              ),
+                  color: Colors.grey[300],
+                  alignment: Alignment.center,
+                  child: SizedBox.shrink()),
             ),
           ],
         );

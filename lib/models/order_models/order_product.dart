@@ -1,5 +1,5 @@
-import '../../services/api/product_service.dart';
-import '../data/product.dart';
+import '../../services/api_services/product_services/product_service.dart';
+import '../product_models/product.dart';
 
 class OrderProduct {
   final int idOrder;

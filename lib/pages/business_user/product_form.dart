@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/product_form_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/product_form_event.dart';
-import 'package:spl_front/bloc/ui_management/product/form/product_form_state.dart';
-import 'package:spl_front/models/data/product.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-import 'package:spl_front/widgets/app_bars/product_view_app_bar.dart';
-import 'package:spl_front/widgets/products/business/product_form_buttons.dart';
-import 'package:spl_front/widgets/products/business/product_form_content.dart';
+
+import '../../bloc/product_blocs/product_form/product_form_bloc.dart';
+import '../../bloc/product_blocs/product_form/product_form_event.dart';
+import '../../bloc/product_blocs/product_form/product_form_state.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/product_models/product.dart';
+import '../../widgets/logic_widgets/products_widgets/business/product_form_buttons.dart';
+import '../../widgets/logic_widgets/products_widgets/business/product_form_content.dart';
+import '../../widgets/style_widgets/app_bars/product_view_app_bar.dart';
 
 class ProductFormPage extends StatefulWidget {
   final Product? product;
@@ -38,10 +39,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
     // Initialize the ProductFormBloc
     context.read<ProductFormBloc>().add(
-      InitProductForm(
-        productCode: widget.product?.code,
-      ),
-    );
+          InitProductForm(
+            productCode: widget.product?.code,
+          ),
+        );
   }
 
   @override
@@ -70,18 +71,22 @@ class _ProductFormPageState extends State<ProductFormPage> {
             children: [
               // Form content
               if (state is ProductFormSaving)
-                const Expanded(child: Center(child: CircularProgressIndicator()))
+                const Expanded(
+                    child: Center(child: CircularProgressIndicator()))
               else if (state is ProductFormLoading)
-                const Expanded(child: Center(child: CircularProgressIndicator()))
+                const Expanded(
+                    child: Center(child: CircularProgressIndicator()))
               else if (state is ProductFormLoaded)
-                Expanded(child: ProductFormContent(
+                Expanded(
+                    child: ProductFormContent(
                   isEditing: widget.isEditing,
                   nameController: nameController,
                   codeController: codeController,
                   descriptionController: descriptionController,
                   priceController: priceController,
                 ))
-              else if (state is ProductFormSuccess || state is ProductFormDeleted)
+              else if (state is ProductFormSuccess ||
+                  state is ProductFormDeleted)
                 Expanded(child: _buildSuccessState())
               else if (state is ProductFormError)
                 Expanded(child: _buildErrorState(state.error))
@@ -89,7 +94,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 const Expanded(
                   child: Center(child: Text(ProductStrings.initializingForm)),
                 ),
-              
+
               // Action buttons
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -146,7 +151,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       );
       return;
     }
-  
+
     double? price;
     try {
       String priceText = priceController.text.replaceAll(',', '');
@@ -158,20 +163,20 @@ class _ProductFormPageState extends State<ProductFormPage> {
       );
       return;
     }
-  
+
     // Dispatch SaveProductForm event
     final currentState = context.read<ProductFormBloc>().state;
     if (currentState is ProductFormLoaded) {
       context.read<ProductFormBloc>().add(SaveProductForm(
-        name: nameController.text,
-        code: codeController.text,
-        description: descriptionController.text,
-        price: price,
-        imagePath: currentState.imagePath,
-        colors: currentState.colors,
-        labels: currentState.labels,
-        variants: currentState.variants,
-      ));
+            name: nameController.text,
+            code: codeController.text,
+            description: descriptionController.text,
+            price: price,
+            imagePath: currentState.imagePath,
+            colors: currentState.colors,
+            labels: currentState.labels,
+            variants: currentState.variants,
+          ));
     }
   }
 
@@ -191,18 +196,19 @@ class _ProductFormPageState extends State<ProductFormPage> {
             onPressed: () {
               // Close dialog
               Navigator.pop(context);
-              
+
               // Dispatch DeleteProductForm event
               final currentState = context.read<ProductFormBloc>().state;
               if (currentState is ProductFormLoaded) {
                 if (currentState.productCode != null) {
                   context.read<ProductFormBloc>().add(
-                    DeleteProductForm(currentState.productCode!),
-                  );
+                        DeleteProductForm(currentState.productCode!),
+                      );
                 }
               }
             },
-            child: const Text(ProductStrings.delete, style: TextStyle(color: Colors.red)),
+            child: const Text(ProductStrings.delete,
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -258,10 +264,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
             ElevatedButton(
               onPressed: () {
                 context.read<ProductFormBloc>().add(
-                  InitProductForm(
-                    productCode: widget.product?.code,
-                  ),
-                );
+                      InitProductForm(
+                        productCode: widget.product?.code,
+                      ),
+                    );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

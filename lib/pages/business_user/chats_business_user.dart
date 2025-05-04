@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_event.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_state.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
-import 'package:spl_front/widgets/chat/chat_item.dart';
-import 'package:spl_front/widgets/chat/chats_header.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+
+import '../../bloc/chat_bloc/list_chats_bloc/chats_bloc.dart';
+import '../../bloc/chat_bloc/list_chats_bloc/chats_event.dart';
+import '../../bloc/chat_bloc/list_chats_bloc/chats_state.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../widgets/logic_widgets/chat_widgets/chat_item.dart';
+import '../../widgets/logic_widgets/chat_widgets/chats_header.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class ChatsScreen extends StatelessWidget {
   final Function(String)? onChatSelected;
@@ -112,7 +113,8 @@ class _ChatsPageState extends State<ChatsPage> {
                         final chat = state.filteredChats[index];
                         return GestureDetector(
                           onTap: () {
-                            _searchFocusNode.unfocus(); // Avoid the keyboard to stay open
+                            _searchFocusNode
+                                .unfocus(); // Avoid the keyboard to stay open
                             if (widget.onChatSelected != null) {
                               widget.onChatSelected!(chat.name);
                             } else if (!widget.isWeb) {
@@ -142,7 +144,10 @@ class _ChatsPageState extends State<ChatsPage> {
       ),
       bottomNavigationBar: widget.isWeb
           ? null
-          : CustomBottomNavigationBar(userType: UserType.business, context: context,),
+          : CustomBottomNavigationBar(
+              userType: UserType.business,
+              context: context,
+            ),
     );
   }
 }

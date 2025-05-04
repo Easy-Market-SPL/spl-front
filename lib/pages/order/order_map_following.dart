@@ -5,22 +5,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_event.dart';
-import 'package:spl_front/bloc/ui_management/order/order_state.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
 import 'package:spl_front/models/order_models/order_status.dart';
-import 'package:spl_front/models/user.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
-import 'package:spl_front/services/api/user_service.dart';
-import 'package:spl_front/services/supabase/real-time/real_time_tracking_service.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
-import 'package:spl_front/widgets/map/map_view_address.dart';
+import 'package:spl_front/widgets/logic_widgets/order_widgets/map/map_view_address.dart';
 
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_event.dart';
+import '../../bloc/orders_bloc/order_state.dart';
+import '../../bloc/ui_blocs/map_bloc/map_bloc.dart';
+import '../../bloc/ui_blocs/search_places_bloc/search_places_bloc.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../services/api_services/user_service/user_service.dart';
+import '../../services/supabase_services/real-time/real_time_tracking_service.dart';
 import '../../utils/ui/format_currency.dart';
 
 class OrderMapFollowing extends StatefulWidget {
@@ -38,7 +38,6 @@ class OrderMapFollowing extends StatefulWidget {
 }
 
 class _OrderMapFollowingState extends State<OrderMapFollowing> {
-  /* -------------------- DATA & SERVICIOS -------------------- */
   late final Future<UserModel?> _userFuture;
   final _trackingSvc = DeliveryTrackingService();
   StreamSubscription<List<Map<String, dynamic>>>? _trackingSub;
@@ -60,7 +59,7 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     _isDelivered =
         widget.order.orderStatuses.last.status.toLowerCase() == 'delivered';
 
-    // Solo recargar orden y suscribirse a tracking si NO está entregada
+    // Relaod and track only if not delivered
     if (!_isDelivered) {
       final ordersBloc = context.read<OrdersBloc>();
       if (ordersBloc.state is! OrdersLoaded) {
@@ -73,7 +72,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
       }
     }
 
-    // Siempre necesitamos el destino para dibujar el marcador
     context
         .read<SearchPlacesBloc>()
         .getPlacesByGoogleQuery(widget.order.address!);
@@ -86,7 +84,7 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
   }
 
   void _handleTrackingRows(List<Map<String, dynamic>> rows) {
-    if (rows.isEmpty || _isDelivered) return; // ← protección extra
+    if (rows.isEmpty || _isDelivered) return;
 
     final last = rows.last;
     final lat = (last['latitude'] as num?)?.toDouble();
@@ -99,7 +97,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
         _startLocation!.longitude != newPos.longitude) {
       setState(() => _startLocation = newPos);
 
-      // Si ya tenemos destino → dibujar ruta
       final places = context.read<SearchPlacesBloc>().state.googlePlaces;
       if (places != null && places.isNotEmpty) {
         _drawDestinationRoute(
@@ -112,15 +109,13 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     }
   }
 
-  /* ========================== UI ========================= */
-  @override
+  /// UI
   @override
   Widget build(BuildContext context) {
     final mapBloc = context.read<MapBloc>();
     final infoTrip = Provider.of<InfoTripProvider>(context, listen: false);
 
-    final LatLng? startLocation =
-        _isDelivered ? null : _startLocation; // nunca hay courier si entregada
+    final LatLng? startLocation = _isDelivered ? null : _startLocation;
 
     return MultiBlocListener(
       listeners: [
@@ -134,7 +129,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
               _endLocation = destLatLng;
               mapBloc.drawDestinationMarker(destLatLng);
 
-              // Solo dibuja ruta si hay courier y NO está entregada
               if (startLocation != null && !_isDelivered) {
                 _drawDestinationRoute(
                   startLocation,
@@ -149,7 +143,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
       ],
       child: BlocBuilder<MapBloc, MapState>(
         builder: (context, mapState) {
-          // loading mientras no haya destino
           if (_endLocation == null) {
             return const Scaffold(body: Center(child: CustomLoading()));
           }
@@ -166,7 +159,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                   ),
                 ),
 
-                // Botón seguir courier (solo si no está entregada y existe courier)
                 if (!_isDelivered && startLocation != null)
                   Positioned(
                     bottom: _isExpanded
@@ -182,7 +174,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                     ),
                   ),
 
-                // FAB expand/colapsar
                 Positioned(
                   bottom: MediaQuery.of(context).size.height * 0.08,
                   right: 20,
@@ -250,7 +241,7 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
                 IconButton(
                   icon: const Icon(
                     Icons.expand_more_outlined,
-                    color: darkBlue, // use corporate color
+                    color: darkBlue,
                   ),
                   onPressed: () => setState(() => _isExpanded = false),
                 ),
@@ -415,9 +406,13 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
 
   /// Builds a simplified info card (only address + customer) when no start location.
   Widget _buildSimplifiedInfoCard(BuildContext context, bool isDelivered) {
-    final deliveredStatus =
-        widget.order.orderStatuses.lastWhere((s) => s.status == 'delivered');
-    final dateText = DateFormat('dd/MM/yyyy').format(deliveredStatus.startDate);
+    late String dateText;
+    if (isDelivered) {
+      final deliveredStatus =
+          widget.order.orderStatuses.lastWhere((s) => s.status == 'delivered');
+
+      dateText = DateFormat('dd/MM/yyyy').format(deliveredStatus.startDate);
+    }
 
     return Positioned(
       bottom: MediaQuery.of(context).size.height * 0.10,

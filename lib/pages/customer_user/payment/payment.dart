@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_bloc.dart';
-import 'package:spl_front/bloc/ui_management/order/order_event.dart';
-import 'package:spl_front/bloc/ui_management/order/order_state.dart';
-import 'package:spl_front/models/data/payment_method.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
-import 'package:spl_front/widgets/cart/cart_item.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
+import 'package:spl_front/widgets/logic_widgets/order_widgets/cart/cart_item.dart';
 
+import '../../../bloc/orders_bloc/order_bloc.dart';
+import '../../../bloc/orders_bloc/order_event.dart';
+import '../../../bloc/orders_bloc/order_state.dart';
 import '../../../bloc/users_blocs/users/users_bloc.dart';
-import '../../../models/logic/address.dart';
+import '../../../models/helpers/intern_logic/user_type.dart';
 import '../../../models/order_models/order_product.dart';
+import '../../../models/users_models/address.dart';
+import '../../../models/users_models/payment_method.dart';
 import '../../../utils/strings/cart_strings.dart';
-import '../../../widgets/addresses/helpers/address_dialogs.dart';
-import '../../../widgets/payment/process/payment_total.dart';
+import '../../../widgets/logic_widgets/user_widgets/addresses/helpers/address_dialogs.dart';
+import '../../../widgets/logic_widgets/user_widgets/payment/process/payment_total.dart';
+import '../../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class PaymentScreen extends StatelessWidget {
   const PaymentScreen({super.key});

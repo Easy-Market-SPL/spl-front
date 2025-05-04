@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users_management/users_management_bloc.dart';
-import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
-import 'package:spl_front/widgets/profile/admin_dialogs/add_user_admin_dialog.dart';
-import 'package:spl_front/widgets/profile/admin_dialogs/delete_permanently_user_admin_dialog.dart';
-import 'package:spl_front/widgets/profile/admin_dialogs/restore_user_admin_dialog.dart';
-import 'package:spl_front/widgets/profile/profile_header.dart';
-import 'package:spl_front/widgets/profile/user_cards/soft_deleted_user_card.dart';
-import 'package:spl_front/widgets/profile/user_cards/user_card.dart';
 
 import '../../bloc/users_blocs/users/users_bloc.dart';
-import '../../models/user.dart';
+import '../../models/users_models/user.dart';
+import '../../services/api_services/user_service/user_service.dart';
 import '../../utils/strings/profile_strings.dart';
-import '../../widgets/profile/admin_dialogs/edit_user_admin_dialog.dart';
-import '../../widgets/profile/admin_dialogs/soft_delete_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/admin_dialogs/add_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/admin_dialogs/delete_permanently_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/admin_dialogs/edit_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/admin_dialogs/restore_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/admin_dialogs/soft_delete_user_admin_dialog.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_header.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/user_cards/soft_deleted_user_card.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/user_cards/user_card.dart';
+import '../../widgets/style_widgets/buttons/add_user_admin_button.dart';
 
 class AdminPanelPage extends StatefulWidget {
   const AdminPanelPage({super.key});
@@ -24,8 +25,6 @@ class AdminPanelPage extends StatefulWidget {
 }
 
 class _AdminPanelPageState extends State<AdminPanelPage> {
-  // late List<UserModel> usersDeleted;
-
   @override
   void initState() {
     super.initState();
@@ -231,55 +230,6 @@ class ButtonSoftDeletedUsers extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-/*
-ChoiceChip(
-                      label: const Text('Mis Entregas'),
-                      selected: !_deliveryPreparacion,
-                      onSelected: (_) {
-                        setState(() => _deliveryPreparacion = false);
-                        context.read<OrdersBloc>().add(
-                              FilterDeliveryOrdersEvent(
-                                  preparacion: false, userId: userId),
-                            );
-                      },
-                      selectedColor: Colors.blue,
-                      backgroundColor: Colors.grey[200],
-                      showCheckmark: false,
-                      labelStyle: TextStyle(
-                        color:
-                            !_deliveryPreparacion ? Colors.white : Colors.black,
-                      ),
-                    ),
- */
-
-class AddUserButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const AddUserButton({super.key, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.blue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        icon: const Icon(Icons.person_add, color: Colors.white),
-        label: const Text(
-          ProfileStrings.addUser,
-          style: TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ),
     );
   }
 }

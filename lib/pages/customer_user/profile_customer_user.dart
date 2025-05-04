@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/profile_tab/profile_tab_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/addresses/address_section.dart';
-import 'package:spl_front/widgets/payment/methods/payment_list_section.dart';
-import 'package:spl_front/widgets/profile/profile_header.dart';
-import 'package:spl_front/widgets/profile/profile_section.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/payment/methods/payment_list_section.dart';
 
+import '../../bloc/ui_blocs/profile_tab_bloc/profile_tab_bloc.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
-import '../../models/user.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_header.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_section.dart';
+import '../../widgets/logic_widgets/user_widgets/addresses/address_section.dart';
 
 class CustomerProfilePage extends StatefulWidget {
   const CustomerProfilePage({super.key});
