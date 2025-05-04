@@ -415,9 +415,14 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
 
   /// Builds a simplified info card (only address + customer) when no start location.
   Widget _buildSimplifiedInfoCard(BuildContext context, bool isDelivered) {
-    final deliveredStatus =
-        widget.order.orderStatuses.lastWhere((s) => s.status == 'delivered');
-    final dateText = DateFormat('dd/MM/yyyy').format(deliveredStatus.startDate);
+    late String dateText;
+    if (isDelivered) {
+      final deliveredStatus =
+      widget.order.orderStatuses.lastWhere((s) => s.status == 'delivered');
+
+      dateText = DateFormat('dd/MM/yyyy').format(
+          deliveredStatus.startDate);
+    }
 
     return Positioned(
       bottom: MediaQuery.of(context).size.height * 0.10,

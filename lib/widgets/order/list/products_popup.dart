@@ -19,7 +19,7 @@ class _ProductPopupState extends State<ProductPopup> {
   @override
   void initState() {
     super.initState();
-    // ⇣ cargamos una sola vez todos los productos de la orden
+    // Load the products when the widget is initialized
     _loadFuture = widget.orderModel.fetchAllProducts();
   }
 
@@ -65,7 +65,7 @@ class _ProductPopupState extends State<ProductPopup> {
     );
   }
 
-  // ───────────────────────── cabecera ──────────────────────────
+  /// Header
   Widget _header(BuildContext ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 18, 8, 12),
         child: Row(
@@ -85,7 +85,7 @@ class _ProductPopupState extends State<ProductPopup> {
         ),
       );
 
-  // ────────────────────── línea de producto ─────────────────────
+  /// Product Information
   Widget _line(OrderProduct op) {
     final p = op.product!;
     final subtotal = p.price * op.quantity;
@@ -99,16 +99,23 @@ class _ProductPopupState extends State<ProductPopup> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
+              Text(
+                p.name,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+              ),
+              if (p.description.isNotEmpty) ...[
+                const SizedBox(height: 4),
                 Text(
-                  p.name,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                  p.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
-                const SizedBox(width: 12),
-              ]),
+              ],
               Row(
                 children: [
                   Text(formatCurrency(p.price),
@@ -140,15 +147,6 @@ class _ProductPopupState extends State<ProductPopup> {
                   ),
                 ],
               ),
-              if (p.description.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  p.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-              ],
             ],
           ),
         ),
@@ -156,9 +154,9 @@ class _ProductPopupState extends State<ProductPopup> {
     );
   }
 
-  // ───────────── imagen con placeholder fijo ─────────────
+  /// Image with placeholder
   Widget _thumb(String url) {
-    const double size = 64;
+    const double size = 76;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
