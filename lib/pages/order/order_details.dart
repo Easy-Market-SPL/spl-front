@@ -247,23 +247,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         const SizedBox(height: 16),
 
                         // Pending debt payment for cash orders
-                        if (widget.userType == UserType.customer &&
-                            order.debt! > 0) ...[
+                        if (order.debt! > 0) ...[
                           SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2),
+                          _subTitle('Pendiente de Pago:'),
                           Text(
-                            'Tu pendiente de pago en efectivo es de:',
+                            'El pendiente de pago en efectivo es de:',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             formatCurrency(order.debt!),
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: darkBlue,
                             ),
                           ),
                         ],
