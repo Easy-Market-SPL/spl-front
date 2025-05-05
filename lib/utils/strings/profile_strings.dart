@@ -60,7 +60,12 @@ class ProfileStrings {
   static const successFullUserCreatedDescription =
       'El usuario ha sido creado correctamente';
   static const editUserTitle = 'Editar Datos de Usuario';
-  static const confirmDeleteTitle = 'Eliminar Usuario';
+  static const confirmDeleteTitle = 'Eliminar Usuario Parcialmente';
+  static const confirmPermanentlyDeleteTitle =
+      'Eliminar Usuario Permanentemente';
+  static const confirmDeletePermanentlyDescription =
+      '¿Estás seguro de eliminar este usuario?. \n'
+      'Esta acción no se puede deshacer.';
   static const confirmDeleteDescription =
       '¿Estás seguro de eliminar este usuario?';
   static const cancel = 'Cancelar';
@@ -68,4 +73,14 @@ class ProfileStrings {
   static const deleteConfirmation = 'Usuario eliminado';
   static const deleteConfirmationDescription =
       'El usuario ha sido eliminado correctamente';
+  static const deletePermanentlyConfirmation =
+      'Usuario eliminado permanentemente';
+  static const deletePermanentlyConfirmationDescription =
+      'El usuario ha sido eliminado permanentemente';
+  static const confirmRestoreDescription =
+      '¿Estás seguro de restaurar este usuario?';
+  static const restoreTitle = 'Restaurar Usuario';
+  static const restoreConfirmation = 'Usuario restaurado';
+  static const restoreConfirmationDescription =
+      'El usuario ha sido restaurado correctamente';
 }

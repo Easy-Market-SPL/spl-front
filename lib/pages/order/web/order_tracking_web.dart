@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
-import 'package:spl_front/widgets/order/web/horizontal_order_status_web.dart'; // Ajusta a tu conveniencia
 
-import '../../../bloc/ui_management/order/order_bloc.dart';
-import '../../../bloc/ui_management/order/order_state.dart';
-import '../../../models/logic/user_type.dart';
+import '../../../bloc/orders_bloc/order_bloc.dart';
+import '../../../bloc/orders_bloc/order_state.dart';
+import '../../../models/helpers/intern_logic/user_type.dart';
 import '../../../pages/order/order_details.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../theme/colors/primary_colors.dart';
-import '../../../widgets/order/tracking/horizontal_order_status.dart';
-import '../../../widgets/order/tracking/modify_order_status_options.dart';
-import '../../../widgets/order/tracking/order_action_buttons.dart';
-import '../../../widgets/order/tracking/order_tracking_header.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/tracking/horizontal_order_status.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/tracking/modify_order_status_options.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/tracking/order_action_buttons.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/tracking/order_tracking_header.dart';
+import '../../../widgets/logic_widgets/order_widgets/orders/web/horizontal_order_status_web.dart';
 import '../../../widgets/web/scaffold_web.dart';
 
 class OrderTrackingWebScreen extends StatelessWidget {

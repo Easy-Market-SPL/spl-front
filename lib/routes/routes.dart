@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
 import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/auth/wrapper.dart';
@@ -16,23 +15,24 @@ import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
-import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
+import 'package:spl_front/pages/delivery_user/order_management/orders_list_delivery.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
+import 'package:spl_front/pages/helpers/splash/splash_screen.dart';
 import 'package:spl_front/pages/menu/menu.dart';
-import 'package:spl_front/pages/notifications/notifications.dart';
-import 'package:spl_front/pages/order/delivery/orders_list_delivery.dart';
 import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 import 'package:spl_front/pages/order/web/order_tracking_web.dart';
-import 'package:spl_front/pages/order/web/orders_list_web.dart';
-import 'package:spl_front/pages/splash/splash_screen.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-import 'package:spl_front/utils/routes/routes_helper.dart';
+
+import '../models/helpers/intern_logic/user_type.dart';
+import '../pages/auth/login/login_page.dart';
+import '../pages/auth/login/login_page_variant.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
 import '../pages/chat/chat.dart';
 import '../pages/customer_user/payment/payment.dart';
-import '../pages/delivery_user/delivery_user_tracking.dart';
+import '../pages/delivery_user/order_management/delivery_user_tracking.dart';
+import '../pages/order/web/orders_list_web.dart';
 
 final Map<String, Widget Function(BuildContext)> appRoutes = {
   /// Initialization
@@ -76,8 +76,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
       : ChatWeb(
           userType: UserType.business,
         ),
-  'business_user_chat': (_) =>
-      ChatScreen(userType: UserType.business),
+  'business_user_chat': (_) => ChatScreen(userType: UserType.business),
 
   /// PRODUCTS PAGES
   'add_product': (_) => ProductFormPage(),
@@ -105,14 +104,6 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),
   'customer_user_cart': (_) => CartPage(),
-
-  /// NOTIFICATIONS
-  'customer_notifications': (_) => NotificationsScreen(
-        userType: UserType.customer,
-      ),
-  'business_notifications': (_) => NotificationsScreen(
-        userType: UserType.business,
-      ),
 
   // PAYMENT
   'customer_payment': (_) => PaymentScreen(),

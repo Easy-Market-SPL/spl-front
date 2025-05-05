@@ -1,27 +1,25 @@
-// lib/pages/order/order_details.dart
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 
-import '../../../models/logic/user_type.dart';
 import '../../../models/order_models/order_model.dart';
-import '../../../models/user.dart';
-import '../../../services/api/order_service.dart';
-import '../../../services/api/user_service.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../utils/ui/format_currency.dart';
 import '../../../widgets/helpers/custom_loading.dart';
-import '../../../widgets/navigation_bars/nav_bar.dart';
-import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_event.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../services/api_services/order_service/order_service.dart';
+import '../../services/api_services/user_service/user_service.dart';
 import '../../utils/strings/payment_strings.dart';
 import '../../utils/ui/order_statuses.dart';
-import '../../widgets/order/list/products_popup.dart';
-import '../../widgets/order/tracking/modify_order_status_options.dart';
-import '../../widgets/order/tracking/shipping_company_selection.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/list/products_popup.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/modify_order_status_options.dart';
+import '../../widgets/logic_widgets/order_widgets/orders/tracking/shipping_company_selection.dart';
+import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final UserType userType;
@@ -153,22 +151,19 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       body: FutureBuilder<OrderModel>(
         future: _orderFuture,
         builder: (ctx, snap) {
-          // ---------- AQUI SE HIZO EL CAMBIO ----------
           if (snap.connectionState == ConnectionState.waiting) {
-            // Mientras carga, mostramos el loading spinner
-            return const Center(child: CustomLoading());
+            // Wait to load order
+            return const SizedBox.shrink();
           }
           if (snap.hasError) {
-            // En caso de error, mostramos mensaje y dejamos de renderizar infinitamente
             return Center(
               child: Text(
-                'Error al cargar la orden:\n${snap.error}',
+                'Error al cargar la orden:\nContacta a soporte',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.red),
               ),
             );
           }
-          // ------------------------------------------
 
           final order = snap.data!;
           final nextStatus = _computeNextStatus(order);
@@ -200,7 +195,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             if (su.connectionState == ConnectionState.waiting) {
                               return const SizedBox.shrink();
                             }
-                            return Text(su.data?.fullname ?? '---');
+                            return Text(
+                                su.data?.fullname ?? 'Usuario No Disponible');
                           },
                         ),
                         const SizedBox(height: 16),
@@ -250,27 +246,25 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
                         const SizedBox(height: 16),
 
-                        // Pending debt payment button for customer
+                        // Pending debt payment for cash orders
                         if (widget.userType == UserType.customer &&
                             order.debt! > 0) ...[
                           SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2),
-                          ElevatedButton.icon(
-                            icon:
-                                const Icon(Icons.payment, color: Colors.white),
-                            label: Text(
-                              'Pagar deuda: ${formatCurrency(order.debt!)}',
-                              style: TextStyle(color: Colors.white),
+                          Text(
+                            'Tu pendiente de pago en efectivo es de:',
+                            style: TextStyle(
+                              fontSize: 16,
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: darkBlue,
-                              minimumSize:
-                                  Size(MediaQuery.of(context).size.width, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            formatCurrency(order.debt!),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: darkBlue,
                             ),
-                            onPressed: () => null,
                           ),
                         ],
                       ],

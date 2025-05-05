@@ -9,6 +9,8 @@ import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
 import 'package:spl_front/widgets/web/scaffold_web.dart';
 
+import '../../models/helpers/intern_logic/user_type.dart';
+
 class ChatWeb extends StatefulWidget {
   final UserType userType;
 
@@ -46,7 +48,7 @@ class _ChatWebState extends State<ChatWeb> {
       body: Row(
         children: [
           // Chats list
-            Expanded(
+          Expanded(
             flex: 1,
             child: widget.userType == UserType.business
               ? ChatsScreen(
@@ -59,28 +61,31 @@ class _ChatWebState extends State<ChatWeb> {
                 isWeb: true,
               )
 
-              // Left side for customer user
-              : Container(
-                color: backgroundColor,
-                padding: EdgeInsets.only(top: 20, left: 10.0, right: 10.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20),
-                    Text(
-                      ChatStrings.attentionToCustomers,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                // Left side for customer user
+                : Container(
+                    color: backgroundColor,
+                    padding: EdgeInsets.only(top: 20, left: 10.0, right: 10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        Text(
+                          ChatStrings.attentionToCustomers,
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          ChatStrings.customerDisclaimer,
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      ChatStrings.customerDisclaimer,
-                      style: TextStyle(fontSize: 18,),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
+                  ),
+          ),
+
           // Selected chat
           Expanded(
             flex: 2,

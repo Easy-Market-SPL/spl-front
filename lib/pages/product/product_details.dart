@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/models/data/product.dart';
-import 'package:spl_front/models/data/product_color.dart';
-import 'package:spl_front/widgets/helpers/custom_loading.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-import 'package:spl_front/widgets/app_bars/product_view_app_bar.dart';
-import 'package:spl_front/widgets/products/product_add_to_cart.dart';
-import 'package:spl_front/widgets/products/view/color/product_color_selection.dart';
-import 'package:spl_front/widgets/products/view/details/product_details_image.dart';
-import 'package:spl_front/widgets/products/view/details/product_details_info.dart';
-import 'package:spl_front/widgets/products/view/details/product_details_labels.dart';
-import 'package:spl_front/widgets/products/view/details/product_details_variants.dart';
+import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
-import '../../bloc/ui_management/address/address_bloc.dart';
-import '../../bloc/ui_management/order/order_bloc.dart';
-import '../../bloc/ui_management/order/order_event.dart';
-import '../../bloc/ui_management/product/details/product_details_bloc.dart';
-import '../../bloc/ui_management/product/details/product_details_event.dart';
-import '../../bloc/ui_management/product/details/product_details_state.dart';
+import '../../bloc/orders_bloc/order_bloc.dart';
+import '../../bloc/orders_bloc/order_event.dart';
+import '../../bloc/product_blocs/product_details/product_details_bloc.dart';
+import '../../bloc/product_blocs/product_details/product_details_event.dart';
+import '../../bloc/product_blocs/product_details/product_details_state.dart';
 import '../../bloc/users_blocs/users/users_bloc.dart';
+import '../../bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
+import '../../models/helpers/intern_logic/user_type.dart';
 import '../../models/order_models/order_product.dart';
-import '../../widgets/reviews/review_creation.dart';
-import '../../widgets/reviews/reviews_list.dart';
+import '../../models/product_models/product.dart';
+import '../../models/product_models/product_color.dart';
+import '../../widgets/logic_widgets/products_widgets/product_add_to_cart.dart';
+import '../../widgets/logic_widgets/products_widgets/view/color/product_color_selection.dart';
+import '../../widgets/logic_widgets/products_widgets/view/details/product_details_image.dart';
+import '../../widgets/logic_widgets/products_widgets/view/details/product_details_info.dart';
+import '../../widgets/logic_widgets/products_widgets/view/details/product_details_labels.dart';
+import '../../widgets/logic_widgets/products_widgets/view/details/product_details_variants.dart';
+import '../../widgets/logic_widgets/reviews_widgets/review_creation.dart';
+import '../../widgets/logic_widgets/reviews_widgets/reviews_list.dart';
+import '../../widgets/style_widgets/app_bars/product_view_app_bar.dart';
 
 class ViewProductDetailsPage extends StatefulWidget {
   final UserType userType;
@@ -89,7 +89,7 @@ class _ViewProductDetailsPageState extends State<ViewProductDetailsPage> {
                   ProductColorSelector(
                     colors: state.colors,
                     selectedColor: selectedColor,
-                    onColorSelected: (color) {
+                    onColorSelected: (ProductColor color) {
                       setState(() {
                         selectedColor = color;
                       });

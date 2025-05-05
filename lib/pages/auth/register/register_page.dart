@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/auth/register/login_link.dart';
-import 'package:spl_front/widgets/register/custom_welcome.dart';
-import 'package:spl_front/widgets/register/register_form.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/register/register_form.dart';
+
+import '../../../widgets/logic_widgets/user_widgets/register/custom_welcome.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

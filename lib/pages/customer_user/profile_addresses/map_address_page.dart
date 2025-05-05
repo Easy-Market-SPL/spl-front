@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:spl_front/bloc/ui_management/location/location_bloc.dart';
-import 'package:spl_front/bloc/ui_management/map/map_bloc.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
-import 'package:spl_front/widgets/buttons/back_widget.dart';
-import 'package:spl_front/widgets/buttons/follow_user_widget.dart';
-import 'package:spl_front/widgets/map/manual_marker.dart';
-import 'package:spl_front/widgets/map/map_view_address.dart';
+import 'package:spl_front/widgets/logic_widgets/order_widgets/map/manual_marker.dart';
+import 'package:spl_front/widgets/logic_widgets/order_widgets/map/map_view_address.dart';
+
+import '../../../bloc/location_management_bloc/location_bloc/location_bloc.dart';
+import '../../../bloc/ui_blocs/map_bloc/map_bloc.dart';
+import '../../../bloc/ui_blocs/search_places_bloc/search_places_bloc.dart';
+import '../../../widgets/style_widgets/buttons/back_widget.dart';
+import '../../../widgets/style_widgets/buttons/follow_user_widget.dart';
 
 class MapAddressPage extends StatefulWidget {
   const MapAddressPage({super.key});

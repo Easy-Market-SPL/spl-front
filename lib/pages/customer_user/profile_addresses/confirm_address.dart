@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:spl_front/bloc/ui_management/search_places/search_places_bloc.dart';
-import 'package:spl_front/services/api/user_service.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
-import 'package:spl_front/widgets/addresses/helpers/address_dialogs.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/addresses/helpers/address_dialogs.dart';
 
-import '../../../bloc/ui_management/address/address_bloc.dart';
-import '../../../bloc/ui_management/gps/gps_bloc.dart';
+import '../../../bloc/location_management_bloc/gps_bloc/gps_bloc.dart';
+import '../../../bloc/ui_blocs/search_places_bloc/search_places_bloc.dart';
 import '../../../bloc/users_blocs/users/users_bloc.dart';
-import '../../../models/logic/address.dart';
+import '../../../bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
+import '../../../models/users_models/address.dart';
+import '../../../services/api_services/user_service/user_service.dart';
 import 'add_address.dart';
 
 class ConfirmAddressPage extends StatefulWidget {
@@ -199,7 +199,7 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                                 state.selectedPlace!.geometry.location.lat,
                                 state.selectedPlace!.geometry.location.lng);
 
-                        // Espera al Future y pasa la dirección al AddressBloc
+                        // Wait the address creation
                         address.then((createdAddress) {
                           if (createdAddress != null) {
                             addressBloc.add(AddAddress(
@@ -211,7 +211,7 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                               longitude: createdAddress.longitude,
                             ));
 
-                            // Mostrar el diálogo de éxito
+                            // Show the success dialog
                             showDialog(
                               context: context,
                               barrierDismissible: false,
@@ -248,7 +248,7 @@ class _ConfirmAddressPageState extends State<ConfirmAddressPage> {
                               },
                             );
 
-                            // Esperar un momento antes de cerrar el diálogo y la página
+                            // Wait for 1.5 seconds and then close the dialog
                             Future.delayed(
                                 const Duration(seconds: 1, milliseconds: 500),
                                 () {
