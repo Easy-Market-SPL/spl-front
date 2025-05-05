@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/filter/product_filter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/filter/product_filter_event.dart';
-import 'package:spl_front/bloc/ui_management/product/form/labels/label_bloc.dart';
-import 'package:spl_front/bloc/ui_management/product/form/labels/label_state.dart';
-import 'package:spl_front/models/data/label.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_event.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_state.dart';
+import 'package:spl_front/models/product_models/labels/label.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/prices/price_formatter.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';

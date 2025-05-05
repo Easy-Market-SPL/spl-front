@@ -15,6 +15,7 @@ import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
+import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
 import 'package:spl_front/pages/delivery_user/order_management/orders_list_delivery.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/helpers/splash/splash_screen.dart';
@@ -23,10 +24,8 @@ import 'package:spl_front/pages/order/order_tracking.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
 import 'package:spl_front/pages/order/web/order_tracking_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
-
+import 'package:spl_front/utils/routes/routes_helper.dart';
 import '../models/helpers/intern_logic/user_type.dart';
-import '../pages/auth/login/login_page.dart';
-import '../pages/auth/login/login_page_variant.dart';
 import '../pages/auth/register/register_page.dart';
 import '../pages/auth/register/register_page_variant.dart';
 import '../pages/chat/chat.dart';

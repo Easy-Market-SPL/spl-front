@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/pages/order/web/order_tracking_web.dart';
 import 'package:spl_front/utils/dates/date_helper.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
@@ -28,7 +29,15 @@ class OrderItemWeb extends StatelessWidget {
         ? '--'
         : DateHelper.formatDate(order.creationDate!);
 
-    const clientNamePlaceholder = '(clientName_placeholder)';
+    final statusMap = {
+      'confirmed': 'Confirmada',
+      'preparing': 'Preparando',
+      'on the way': 'En Camino',
+      'delivered': 'Entregada',
+    };
+
+    // Get the translated status or default to 'Sin Estado'
+    final placeHolderStatusShow = statusMap[placeholderStatus] ?? 'Sin Estado';
 
     return Card(
       elevation: 3.0,
@@ -70,6 +79,25 @@ class OrderItemWeb extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      RichText(
+                        text: TextSpan(
+                          text: '${OrderStrings.idOrder}: ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: order.id.toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
                       // Fecha
                       Text(
                         '${OrderStrings.orderDate}: $creationDate',
@@ -80,17 +108,8 @@ class OrderItemWeb extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
 
-                      if (userType == UserType.business) ...[
-                        Text(
-                          '${OrderStrings.client}: $clientNamePlaceholder',
-                          style: const TextStyle(fontSize: 14),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 5),
-                      ],
-
                       Text(
-                        '${OrderStrings.status}: $placeholderStatus',
+                        '${OrderStrings.status}: $placeHolderStatusShow',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -106,17 +125,15 @@ class OrderItemWeb extends StatelessWidget {
               alignment: Alignment.center,
               child: ElevatedButton(
                 onPressed: () {
-                  if (userType == UserType.business) {
-                    Navigator.of(context).pushNamed(
-                      'business_user_order_tracking',
-                      arguments: order,
-                    );
-                  } else {
-                    Navigator.of(context).pushNamed(
-                      'customer_user_order_tracking',
-                      arguments: order,
-                    );
-                  }
+                  Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                     builder: (context) => OrderTrackingWebScreen(
+                       userType: userType,
+                       order: order,
+                     ),
+                   ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,

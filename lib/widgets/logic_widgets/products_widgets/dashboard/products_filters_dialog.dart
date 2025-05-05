@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/widgets/products/dashboard/products_filters_content.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/products_filters_content.dart';
+
 
 class ProductFilterDialog extends StatelessWidget {
   final ProductFilter initialFilter;

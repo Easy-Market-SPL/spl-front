@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spl_front/models/data/chat.dart';
+import 'package:spl_front/models/chat_models/chat.dart';
 
 Widget chatItem(Chat chat) {
   final fromCustomer = chat.sender == 'customer';

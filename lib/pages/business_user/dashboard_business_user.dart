@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_event.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_state.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_event.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_state.dart';
+import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/utils/strings/business_user_strings.dart';
 import 'package:spl_front/utils/strings/dashboard_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
-import 'package:spl_front/widgets/navigation_bars/nav_bar.dart';
-import 'package:spl_front/widgets/products/dashboard/active_filters_dashboard.dart';
-import 'package:spl_front/widgets/products/dashboard/labels_dashboard.dart';
-import 'package:spl_front/widgets/products/dashboard/products_filters_content.dart';
-import 'package:spl_front/widgets/products/dashboard/products_filters_dialog.dart';
-import 'package:spl_front/widgets/products/grids/business_product_grid.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/active_filters_dashboard.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/labels_dashboard.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/products_filters_content.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/products_filters_dialog.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/grids/business_product_grid.dart';
+import 'package:spl_front/widgets/style_widgets/app_bars/business_user_app_bar.dart';
+import 'package:spl_front/widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class BusinessUserMainDashboard extends StatefulWidget {
   const BusinessUserMainDashboard({super.key});

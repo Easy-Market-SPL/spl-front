@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
-import 'package:spl_front/models/logic/user_type.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
-
 import '../../../models/helpers/intern_logic/user_type.dart';
-import '../../../models/users_models/user.dart';
 
 class MenuHeader extends StatelessWidget {
   final UserType userType;

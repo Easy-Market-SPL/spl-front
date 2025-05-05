@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
-import 'package:spl_front/models/data/chat.dart';
-import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/chat_models/chat.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/theme/colors/primary_colors.dart';

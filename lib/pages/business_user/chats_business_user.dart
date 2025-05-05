@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_bloc.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_event.dart';
-import 'package:spl_front/bloc/ui_management/chats/chats_state.dart';
-import 'package:spl_front/models/data/chat.dart';
-import 'package:spl_front/models/logic/user_type.dart';
+import 'package:spl_front/models/chat_models/chat.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
 

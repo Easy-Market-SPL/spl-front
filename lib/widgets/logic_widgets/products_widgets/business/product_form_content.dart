@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-
 import '../../../../bloc/product_blocs/product_form/product_form_bloc.dart';
 import '../../../../bloc/product_blocs/product_form/product_form_state.dart';
 import '../pickers/product_image_picker.dart';
@@ -160,9 +159,7 @@ class ProductFormContent extends StatelessWidget {
                   // Variants
                   VariantsEditor(
                     variants: variants,
-                    onVariantsChanged: () {
-                      // TODO: Implement onVariantsChanged
-                    },
+                    onVariantsChanged: () {},
                   ),
                   const SizedBox(height: 40),
                 ],

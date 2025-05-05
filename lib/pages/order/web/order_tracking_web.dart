@@ -22,7 +22,7 @@ class OrderTrackingWebScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OrderTrackingWebPage(userType: userType);
+    return OrderTrackingWebPage(userType: userType, order: order);
   }
 }
 
@@ -67,7 +67,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (userType == UserType.business) ...[
-                                  const CustomHorizontalOrderStatus(),
+                                  CustomHorizontalOrderStatus(order: order!,),
                                   const SizedBox(height: 24.0),
                                   if (SPLVariables.hasRealTimeTracking) ...[
                                     Container(
@@ -78,7 +78,7 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                                     ),
                                   ],
                                 ] else if (userType == UserType.customer) ...[
-                                  const CustomHorizontalOrderStatus(),
+                                  CustomHorizontalOrderStatus(order: order!,),
                                   const SizedBox(height: 24.0),
                                   if (SPLVariables.hasRealTimeTracking) ...[
                                     Container(

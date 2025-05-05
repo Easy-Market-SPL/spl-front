@@ -42,6 +42,10 @@ class OrderStrings {
   static const String date = 'Fecha';
   static const String client = 'Cliente';
   static const String status = 'Estado';
+  static const String orderStatusConfirmed = 'confirmed';
+  static const String orderStatusPreparing = 'preparing';
+  static const String orderStatusOnTheWay = 'on the way';
+  static const String orderStatusDelivered = 'delivered';
   static const String items = 'Items';
   static const String takeOrder = 'Tomar Orden';
   static const String viewOrder = 'Ver orden';
