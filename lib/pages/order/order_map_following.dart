@@ -59,7 +59,7 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
     _isDelivered =
         widget.order.orderStatuses.last.status.toLowerCase() == 'delivered';
 
-    // Relaod and track only if not delivered
+    // Reload and track only if not delivered
     if (!_isDelivered) {
       final ordersBloc = context.read<OrdersBloc>();
       if (ordersBloc.state is! OrdersLoaded) {
