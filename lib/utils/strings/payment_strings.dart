@@ -21,8 +21,6 @@ class PaymentStrings {
   static const successPayment = 'Pago exitoso';
   static const errorInPayment = 'Error en el pago';
   static const unknownError = 'Ocurrió un error inesperado';
-  static const selectCardBeforePayment =
-      'Por favor, seleccione una tarjeta antes de proceder con el pago a crédito.';
   static const selectCreditCard = 'Seleccionar Tarjeta de Crédito';
   static const selectAddressBeforePaymentDescription =
       'Por favor, seleccione una dirección antes de proceder con el pago.';

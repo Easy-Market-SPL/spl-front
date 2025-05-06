@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 
 import '../../../bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
 import '../../../models/users_models/address.dart';
@@ -34,7 +35,8 @@ class SelectPaymentMethodScreen extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.only(bottom: 40),
               children: [
-                _buildCashPaymentOption(context),
+                if (SPLVariables.hasRealTimeTracking)
+                  _buildCashPaymentOption(context),
                 const SizedBox(height: 10),
                 if (state.cards.isNotEmpty) ...[
                   ...state.cards.map((card) => _buildCardOption(context, card)),
@@ -182,6 +184,8 @@ class SelectPaymentMethodScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey.shade700,
+            fontWeight: FontWeight.w500,
+            fontStyle: FontStyle.italic,
           ),
         ),
       ),
