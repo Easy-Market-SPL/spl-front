@@ -6,7 +6,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
-import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/providers/info_trip_provider.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
@@ -21,7 +20,6 @@ import '../../models/helpers/intern_logic/user_type.dart';
 import '../../models/users_models/user.dart';
 import '../../services/api_services/user_service/user_service.dart';
 import '../../services/supabase_services/real-time/real_time_tracking_service.dart';
-import '../../utils/ui/format_currency.dart';
 
 class OrderMapFollowing extends StatefulWidget {
   final OrderModel order;
@@ -315,61 +313,8 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
             Builder(builder: (_) {
               final lastStatus = widget.order.orderStatuses.last.status;
               // Show button only if not delivered and user can deliver
-              if (lastStatus != 'delivered' &&
-                  widget.userType == UserType.customer) {
+              if (lastStatus != 'delivered') {
                 return const SizedBox.shrink();
-              }
-              if (lastStatus != 'delivered' &&
-                  (widget.userType == UserType.admin ||
-                      widget.userType == UserType.business)) {
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      /// Make the distance check
-                      final infoTripProvider =
-                          Provider.of<InfoTripProvider>(context, listen: false);
-
-                      final metersDistance = !infoTripProvider.metersDistance
-                          ? infoTripProvider.distance * 1000
-                          : infoTripProvider.distance;
-
-                      if (metersDistance >= 100) {
-                        _distanceDeliveryErrorDialog();
-                      } else {
-                        /// Check if the order has debt that according with the business logic means a payment cash
-                        if (widget.order.debt != 0) {
-                          _askPaymentCashDebtDialog();
-                        } else {
-                          setState(() {
-                            widget.order.orderStatuses.add(
-                              OrderStatus(
-                                  status: 'delivered',
-                                  startDate: DateTime.now()),
-                            );
-                          });
-                          context.read<OrdersBloc>().add(
-                                DeliveredOrderEvent(widget.order.id!),
-                              );
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Entregar Orden',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                );
               } else {
                 // Show delivered date
                 final deliveredStatus = widget.order.orderStatuses
@@ -514,123 +459,6 @@ class _OrderMapFollowingState extends State<OrderMapFollowing> {
           ],
         ),
       ),
-    );
-  }
-
-  /// Helper for process delivery order
-  void _askPaymentCashDebtDialog() {
-    // Show a dialog to confirm the payment with cash
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Confirmar Pago',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              )),
-          content: Text(
-              '¿Deseas confirmar el pago de la orden en efectivo por ${formatCurrency(widget.order.debt!)}?'),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                minimumSize: const Size(120, 45),
-              ),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child:
-                  const Text('Cancelar', style: TextStyle(color: Colors.blue)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                minimumSize: const Size(120, 45),
-              ),
-              onPressed: () {
-                /// The delivery is confirmed
-                Navigator.pop(dialogContext);
-                // Call the function to confirm the payment
-                context.read<OrdersBloc>().add(UpdateDebtEvent(
-                    orderId: widget.order.id!,
-                    paymentAmount: widget.order.debt!));
-                setState(() {
-                  widget.order.orderStatuses.add(
-                    OrderStatus(status: 'delivered', startDate: DateTime.now()),
-                  );
-                });
-                context.read<OrdersBloc>().add(
-                      DeliveredOrderEvent(widget.order.id!),
-                    );
-              },
-              child: const Text('Confirmar',
-                  style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// HELPER FOR DISTANCE OF DELIVERY TRACKING
-  void _distanceDeliveryErrorDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Center(
-            child: Text(
-              'Error',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error, color: Colors.red, size: 50),
-              const SizedBox(height: 10),
-              Text(
-                'Debes encontrarte a menos de 100 metros para marcar la orden como entregada.',
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            Center(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  'Aceptar',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
