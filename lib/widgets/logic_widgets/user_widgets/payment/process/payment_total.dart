@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
@@ -200,24 +201,31 @@ class PaymentTotal extends StatelessWidget {
     }
 
     if (card == null) {
-      // Means that the payment is cash
-      _showSucessfullCashPaymentDialog(context);
-      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-      Navigator.pop(context); // Close the dialog
+      // Means that the payment is cash when the SPL Variable of Tracking is true
+      if (SPLVariables.hasRealTimeTracking) {
+        _showSucessfullCashPaymentDialog(context);
+        await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+        Navigator.pop(context); // Close the dialog
 
-      // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed and put the paymentAmount on the moment in 0
-      orderBloc.add(ConfirmOrderEvent(
-          orderId: orderBloc.state.currentCartOrder!.id!,
-          shippingCost: 0,
-          paymentAmount: 0));
+        // In this case, the payment is done with cash, so it's neccesary update the order status to confirmed and put the paymentAmount on the moment in 0
+        orderBloc.add(ConfirmOrderEvent(
+            orderId: orderBloc.state.currentCartOrder!.id!,
+            shippingCost: 0,
+            paymentAmount: 0));
 
-      order!.orderStatuses
-          .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
-        (Route<dynamic> route) => false,
-      );
-      return;
+        order!.orderStatuses
+            .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
+          (Route<dynamic> route) => false,
+        );
+        return;
+      }
+      // Show a dialog to select a card for not real time tracking
+      else {
+        showSelectPaymentMethodDialog(context);
+        return;
+      }
     }
 
     _showLoadingDialog(context);

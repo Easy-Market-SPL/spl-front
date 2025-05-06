@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
@@ -189,16 +190,21 @@ class PaymentPageState extends State<PaymentPage> {
                   children: [
                     selectedCard != null
                         ? Icon(Icons.payment, color: Colors.blue, size: 24)
-                        : Icon(Icons.monetization_on,
-                            color: Colors.green, size: 24),
+                        : SPLVariables.hasRealTimeTracking
+                            ? Icon(Icons.monetization_on,
+                                color: Colors.green, size: 24)
+                            : Icon(Icons.credit_card_off_sharp,
+                                color: Colors.blue),
                     const SizedBox(width: 12),
                     Text(
                       selectedCard != null
                           ? "**** ${selectedCard!.cardNumber!.substring(selectedCard!.cardNumber!.length - 4)}"
-                          : PaymentStrings.cash,
+                          : SPLVariables.hasRealTimeTracking
+                              ? PaymentStrings.cash
+                              : 'Tarjeta No Seleccionada',
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -206,7 +212,9 @@ class PaymentPageState extends State<PaymentPage> {
                 Text(
                   'Cambiar',
                   style: TextStyle(
-                    color: selectedCard == null ? Colors.green : Colors.blue,
+                    color: SPLVariables.hasRealTimeTracking
+                        ? Colors.green
+                        : Colors.blue,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
