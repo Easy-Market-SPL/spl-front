@@ -33,7 +33,7 @@ class _DashboardCustomerWebState extends State<DashboardCustomerWeb> {
     super.initState();
     // Initialize product and filter blocs
     context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
+    context.read<LabelBloc>().add(LoadLabels());
     context.read<ProductFilterBloc>().add(InitFilters());
   }
 

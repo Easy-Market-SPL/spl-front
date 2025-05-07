@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:spl_front/models/product_models/variants/variant.dart';
 import 'package:spl_front/models/product_models/variants/variant_option.dart';
@@ -58,11 +60,12 @@ class DeleteProductForm extends ProductFormEvent {
 
 class UpdateProductImage extends ProductFormEvent {
   final String imagePath;
-
-  const UpdateProductImage(this.imagePath);
-
+  final Uint8List? webImageBytes;
+  
+  const UpdateProductImage(this.imagePath, {this.webImageBytes});
+  
   @override
-  List<Object?> get props => [imagePath];
+  List<Object?> get props => [imagePath, webImageBytes];
 }
 
 class AddProductColor extends ProductFormEvent {

@@ -30,14 +30,14 @@ class ProductFormContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductFormBloc, ProductFormState>(
       builder: (context, state) {
-        if (state is! ProductFormLoaded) {
+        if (state is !ProductFormLoaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
         // Retrieve data from the Bloc state
-        final colors = state.colors;
-        final tags = state.labels;
-        final variants = state.variants;
+        var colors = state.colors;
+        var tags = state.labels;
+        var variants = state.variants;
 
         final int maxNameLength = 45;
         final int maxDescriptionLength = 250;

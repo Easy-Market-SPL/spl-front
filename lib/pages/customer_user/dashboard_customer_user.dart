@@ -64,7 +64,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
     context.read<PaymentBloc>().add(LoadPaymentMethodsEvent(userId));
 
     context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
+    context.read<LabelBloc>().add(LoadLabels());
     context.read<ProductFilterBloc>().add(InitFilters());
 
     searchController = TextEditingController();

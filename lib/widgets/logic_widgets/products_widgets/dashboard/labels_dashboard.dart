@@ -18,7 +18,7 @@ class LabelsWidget extends StatelessWidget {
       builder: (context, labelState) {
         if (labelState is LabelInitial || labelState is LabelLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (labelState is LabelDashboardLoaded) {
+        } else if (labelState is LabelsLoaded) {
           return BlocBuilder<ProductFilterBloc, ProductFilterState>(
             builder: (context, filterState) {
               final hasSelectedLabels = filterState.selectedLabels != null &&
@@ -26,9 +26,8 @@ class LabelsWidget extends StatelessWidget {
 
               // Organices labels, putting the selected ones first
               List<Label> organizedLabels = [];
-              final todosLabel =
-                  labelState.labels.isNotEmpty ? labelState.labels[0] : null;
-              final nonTodosLabels = labelState.labels.skip(1).toList();
+              final todosLabel = Label(idLabel: -1, name: "Todos", description: "");
+              final nonTodosLabels = labelState.labels.toList();
 
               List<Label> selectedLabels = [];
               List<Label> nonSelectedLabels = [];
@@ -47,9 +46,7 @@ class LabelsWidget extends StatelessWidget {
               }
 
               // Sort the labels: "Todos", selected ones first, then non-selected ones
-              if (todosLabel != null) {
-                organizedLabels.add(todosLabel);
-              }
+              organizedLabels.add(todosLabel);
               organizedLabels.addAll(selectedLabels);
               organizedLabels.addAll(nonSelectedLabels);
 

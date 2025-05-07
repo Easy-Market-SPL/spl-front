@@ -184,11 +184,8 @@ class _ProductFiltersFormState extends State<ProductFiltersForm> {
           builder: (context, state) {
             if (state is LabelLoading) {
               return const Center(child: CircularProgressIndicator());
-            } else if (state is LabelDashboardLoaded) {
+            } else if (state is LabelsLoaded) {
               List<Label> labels = state.labels.toList();
-              if (labels.isNotEmpty) {
-                labels.removeAt(0); // Removes the first label "todos"
-              }
               
               // Filter labels based on search query
               if (_labelSearchQuery.isNotEmpty) {

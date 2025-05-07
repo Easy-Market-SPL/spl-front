@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:spl_front/models/product_models/variants/variant.dart';
 
@@ -27,6 +29,7 @@ class ProductFormLoaded extends ProductFormState {
   final List<Label> labels;
   final List<Variant> variants;
   final bool isEditing;
+  final Uint8List? webImageBytes;
 
   const ProductFormLoaded({
     this.productCode,
@@ -39,6 +42,7 @@ class ProductFormLoaded extends ProductFormState {
     this.labels = const [],
     this.variants = const [],
     this.isEditing = false,
+    this.webImageBytes,
   });
 
   ProductFormLoaded copyWith({
@@ -50,6 +54,7 @@ class ProductFormLoaded extends ProductFormState {
     List<ProductColor>? colors,
     List<Label>? labels,
     List<Variant>? variants,
+    Uint8List? webImageBytes,
   }) {
     return ProductFormLoaded(
       productCode: productCode,
@@ -62,6 +67,7 @@ class ProductFormLoaded extends ProductFormState {
       labels: labels ?? this.labels,
       variants: variants ?? this.variants,
       isEditing: isEditing,
+      webImageBytes: webImageBytes ?? this.webImageBytes,
     );
   }
 
@@ -77,6 +83,7 @@ class ProductFormLoaded extends ProductFormState {
         labels,
         variants,
         isEditing,
+        webImageBytes,
       ];
 }
 
