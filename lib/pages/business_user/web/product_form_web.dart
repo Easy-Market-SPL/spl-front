@@ -7,8 +7,31 @@ import 'package:spl_front/bloc/product_blocs/products_management/product_bloc.da
 import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
 import 'package:spl_front/models/product_models/product.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
+import 'package:spl_front/utils/ui/snackbar_manager_web.dart';
 import 'package:spl_front/widgets/logic_widgets/products_widgets/business/product_form_buttons.dart';
 import 'package:spl_front/widgets/logic_widgets/products_widgets/business/product_form_content.dart';
+
+void showProductFormWeb(
+    BuildContext context, {
+    required Product? product,
+    required bool isEditing,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
+          child: ProductFormWeb(
+            product: product,
+            isEditing: isEditing,
+          ),
+        ),
+      ),
+    );
+  }
 
 class ProductFormWeb extends StatefulWidget {
   final Product? product;
@@ -48,15 +71,12 @@ class _ProductFormWebState extends State<ProductFormWeb> {
     return BlocConsumer<ProductFormBloc, ProductFormState>(
       listener: (ctx, state) {
         if (state is ProductFormSuccess) {
-          _showSuccessSnackBar(
-            context, 
-            ProductStrings.productSaved 
-          );
+          SnackbarManager.showSuccess(context, message: ProductStrings.productSaved);
           
           ctx.read<ProductBloc>().add(RefreshProducts());
           Navigator.pop(ctx, true);
         } else if (state is ProductFormDeleted) {
-          _showSuccessSnackBar(context, ProductStrings.productDeleted);
+          SnackbarManager.showSuccess(context, message: ProductStrings.productDeleted);
           
           ctx.read<ProductBloc>().add(RefreshProducts());
           Navigator.pop(ctx, true);
@@ -165,43 +185,11 @@ class _ProductFormWebState extends State<ProductFormWeb> {
     );
   }
 
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Hide any existing SnackBar
-    
-    final snackBar = SnackBar(
-      content: Row(
-        children: [
-          const Icon(Icons.check_circle_outline, color: Colors.white),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: Colors.green.shade700,
-      duration: const Duration(seconds: 3),
-      behavior: SnackBarBehavior.floating,
-      width: 400,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      action: SnackBarAction(
-        label: 'CERRAR',
-        textColor: Colors.white,
-        onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        },
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
   void _validateAndSave() {
     if (nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ProductStrings.requiredProductName)),
+      SnackbarManager.showWarning(
+        context, message: 
+        ProductStrings.requiredProductName
       );
       return;
     }
@@ -212,8 +200,9 @@ class _ProductFormWebState extends State<ProductFormWeb> {
       price = double.parse(priceText);
       if (price <= 0) throw Exception();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ProductStrings.invalidPrice)),
+      SnackbarManager.showWarning(
+        context, message: 
+        ProductStrings.invalidPrice
       );
       return;
     }

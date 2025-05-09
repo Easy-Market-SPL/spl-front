@@ -9,7 +9,6 @@ import 'package:spl_front/bloc/product_blocs/products_management/product_bloc.da
 import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
 import 'package:spl_front/bloc/product_blocs/products_management/product_state.dart';
 import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
-import 'package:spl_front/models/product_models/product.dart';
 import 'package:spl_front/pages/business_user/web/product_form_web.dart';
 import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/dashboard_strings.dart';
@@ -179,7 +178,7 @@ class _DashboardBusinessWebState extends State<DashboardBusinessWeb> {
                             // Create product button
                             ElevatedButton.icon(
                               onPressed: () {
-                                showProductFormWeb(context, isEditing: false);
+                                showProductFormWeb(context, isEditing: false, product: null);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
@@ -298,27 +297,5 @@ class _DashboardBusinessWebState extends State<DashboardBusinessWeb> {
             );
       }
     });
-  }
-
-  void showProductFormWeb(
-    BuildContext context, {
-    Product? product,
-    bool isEditing = false,
-  }) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
-          child: ProductFormWeb(
-            product: product,
-            isEditing: isEditing,
-          ),
-        ),
-      ),
-    );
   }
 }

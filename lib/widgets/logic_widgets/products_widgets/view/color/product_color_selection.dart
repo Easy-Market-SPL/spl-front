@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../models/product_models/product_color.dart';
@@ -29,7 +30,7 @@ class ProductColorSelector extends StatelessWidget {
       child: Wrap(
         spacing: 12,
         runSpacing: 12,
-        alignment: WrapAlignment.end,
+        alignment: kIsWeb ? WrapAlignment.start : WrapAlignment.end,
         children: colors.map((color) {
           final isSelected = selectedColor?.idColor == color.idColor;
 

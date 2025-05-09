@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/product/product_details.dart';
+import 'package:spl_front/pages/product/web/product_details_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 import '../../../../models/helpers/intern_logic/user_type.dart';
@@ -23,15 +24,23 @@ class ProductCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ViewProductDetailsPage(
-              product: product,
-              userType: userType,
+        if (kIsWeb) {
+          showProductDetailsWeb(
+            context,
+            product: product,
+            userType: userType,
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ViewProductDetailsPage(
+                product: product,
+                userType: userType,
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       child: Card(
         shape: RoundedRectangleBorder(

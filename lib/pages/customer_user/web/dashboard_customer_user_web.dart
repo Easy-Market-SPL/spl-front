@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/orders_bloc/order_bloc.dart';
+import 'package:spl_front/bloc/orders_bloc/order_event.dart';
 import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_bloc.dart';
 import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_event.dart';
 import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_state.dart';
@@ -8,7 +10,11 @@ import 'package:spl_front/bloc/product_blocs/product_form/labels/label_event.dar
 import 'package:spl_front/bloc/product_blocs/products_management/product_bloc.dart';
 import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
 import 'package:spl_front/bloc/product_blocs/products_management/product_state.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
+import 'package:spl_front/bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
 import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
+import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/strings/dashboard_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
@@ -26,11 +32,28 @@ class DashboardCustomerWeb extends StatefulWidget {
 }
 
 class _DashboardCustomerWebState extends State<DashboardCustomerWeb> {
+  late UsersBloc usersBloc;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    usersBloc = BlocProvider.of<UsersBloc>(context);
+
+    // Fetch the current user's orders, passing role=consumer
+    final userId = usersBloc.state.sessionUser?.id ?? '';
+    if (userId.isNotEmpty) {
+      context.read<OrdersBloc>().add(
+            LoadOrdersEvent(
+              userId: userId,
+              userRole: 'customer',
+            ),
+          );
+    }
+
+    // Fetch the current user's addresses and payment methods
+    context.read<AddressBloc>().add(LoadAddresses(userId));
+    context.read<PaymentBloc>().add(LoadPaymentMethodsEvent(userId));
     // Initialize product and filter blocs
     context.read<ProductBloc>().add(LoadProducts());
     context.read<LabelBloc>().add(LoadLabels());
@@ -76,6 +99,7 @@ class _DashboardCustomerWebState extends State<DashboardCustomerWeb> {
                             }
                             return Card(
                               elevation: 2,
+                              color: PrimaryColors.blueWeb,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
@@ -134,6 +158,7 @@ class _DashboardCustomerWebState extends State<DashboardCustomerWeb> {
                   Expanded(
                     child: Card(
                       elevation: 2,
+                      color: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
