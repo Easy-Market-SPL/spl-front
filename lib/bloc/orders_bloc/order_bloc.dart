@@ -364,10 +364,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     );
     if (err != null) {
       emit(OrdersError(err));
+      debugPrint(err);
       return;
     }
     if (updated == null) {
       emit(const OrdersError("Order could not be confirmed"));
+      debugPrint("Order could not be confirmed");
       return;
     }
     add(LoadSingleOrderEvent(event.orderId));

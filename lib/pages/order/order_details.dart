@@ -140,6 +140,64 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
+  /// Show forbidden delivered business/admin -> The delivery is doing just by the domiciliary
+  void _deliveredBusinessAdminError(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Center(
+            child: Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          content: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 50),
+                const SizedBox(height: 10),
+                Text(
+                  'Las ordenes a domicilio solo pueden ser entregadas por parte del domiciliario asignado.',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  PaymentStrings.accept,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -247,23 +305,22 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         const SizedBox(height: 16),
 
                         // Pending debt payment for cash orders
-                        if (widget.userType == UserType.customer &&
-                            order.debt! > 0) ...[
+                        if (order.debt != null && order.debt! > 0) ...[
                           SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2),
+                          _subTitle('Pendiente de Pago:'),
                           Text(
-                            'Tu pendiente de pago en efectivo es de:',
+                            'El pendiente de pago en efectivo es de:',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             formatCurrency(order.debt!),
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: darkBlue,
                             ),
                           ),
                         ],
@@ -467,10 +524,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                       : _confirmOnTheWay(order);
                   return;
                 case 'delivered':
-                  context
-                      .read<OrdersBloc>()
-                      .add(DeliveredOrderEvent(order.id!));
-                  break;
+                  SPLVariables.hasRealTimeTracking
+                      ? _deliveredBusinessAdminError(context)
+                      : _confirmDelivered(order);
+                  return;
               }
               Navigator.pop(context);
               setState(_loadOrder);
@@ -512,6 +569,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       setState(_loadOrder);
       showSuccessDialogStatuses.call(context, widget.userType);
     }
+  }
+
+  void _confirmDelivered(OrderModel order) {
+    context.read<OrdersBloc>().add(DeliveredOrderEvent(order.id!));
+    setState(_loadOrder);
+    showSuccessDialogStatuses.call(context, widget.userType);
   }
 
   void showSuccessDialogStatuses(BuildContext ctx, UserType userType) {

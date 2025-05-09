@@ -54,27 +54,27 @@ class OrderStrings {
   static const String accept = 'Aceptar';
   static const String orderConfirmed = 'Orden Confirmada';
   static const String orderConfirmedDescription =
-      'Tu orden ha sido procesada correctamente';
+      'La orden ha sido procesada correctamente';
   static const String notConfirmed = 'Sin confirmar';
   static const String notConfirmedDescription =
-      'Tu orden aún no ha sido aceptada';
+      'La orden aún no ha sido aceptada';
   static const String preparingOrder = 'Preparando la Orden';
   static const String preparingOrderDescription =
-      'Tu orden está siendo preparada para su entrega';
+      'La orden está siendo preparada para su entrega';
   static const String notPrepared = 'Sin preparar';
   static const String notPreparedDescription =
-      'Tu orden aún no se ha procesado';
+      'La orden aún no se ha procesado';
   static const String onTheWay = 'En camino';
   static const String onTheWayDescription =
       'La orden se encuentra en camino hacía el destino';
   static const String notOnTheWay = 'Sin salir';
   static const String notOnTheWayDescription =
-      'Tu orden no está lista para partir';
+      'La orden no está lista para partir';
   static const String delivered = 'Entregada';
   static const String deliveredDescription = 'La orden ha sido entregada';
   static const String notDelivered = 'Sin entregar';
   static const String notDeliveredDescription =
-      'Tu orden aún no ha sido entregada';
+      'La orden aún no ha sido entregada';
   static const String estimatedDeliveryDate = 'Fecha de entrega estimada';
   static const String selectShippingCompany = 'Seleccionar Empresa de Envío';
   static const String productsInOrder = 'Productos en esta orden';
