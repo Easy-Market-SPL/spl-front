@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:spl_front/pages/admin_user/profile_admin.dart';
+import 'package:spl_front/pages/admin_user/web/profile_admin_web.dart';
 import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/auth/wrapper.dart';
 import 'package:spl_front/pages/business_user/chats_business_user.dart';
@@ -8,6 +9,7 @@ import 'package:spl_front/pages/business_user/dashboard_business_user.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
 import 'package:spl_front/pages/business_user/profile_business_user.dart';
 import 'package:spl_front/pages/business_user/web/dashboard_business_user_web.dart';
+import 'package:spl_front/pages/business_user/web/profile_business_user_web.dart';
 import 'package:spl_front/pages/chat/chats_web.dart';
 import 'package:spl_front/pages/customer_user/cart.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
@@ -15,7 +17,9 @@ import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
+import 'package:spl_front/pages/customer_user/web/cart_web.dart';
 import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
+import 'package:spl_front/pages/customer_user/web/profile_customer_user_web.dart';
 import 'package:spl_front/pages/delivery_user/order_management/orders_list_delivery.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
 import 'package:spl_front/pages/helpers/splash/splash_screen.dart';
@@ -47,9 +51,15 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
 
   /// PROFILE PAGES
   'delivery_profile': (_) => DeliveryProfilePage(),
-  'business_user_profile': (_) => BusinessUserProfilePage(),
-  'admin_profile': (_) => AdminPanelPage(),
-  'customer_profile': (_) => CustomerProfilePage(),
+  'business_user_profile': (_) => !kIsWeb 
+      ? BusinessUserProfilePage() 
+      : BusinessUserProfileWebPage(),
+  'admin_profile': (_) => !kIsWeb 
+      ? AdminPanelPage() 
+      : AdminPanelWebPage(),
+  'customer_profile': (_) => !kIsWeb 
+      ? CustomerProfilePage() 
+      : CustomerProfileWebPage(),
 
   /// MENU PAGES
   'delivery_user_menu': (_) => MenuScreen(userType: UserType.delivery),
@@ -102,7 +112,9 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'add_address': (_) => AddAddressPage(),
   'map_address': (_) => MapAddressPage(),
   'confirm_address': (_) => ConfirmAddressPage(),
-  'customer_user_cart': (_) => CartPage(),
+  'customer_user_cart': (_) => !kIsWeb
+      ? const CartPage()
+      : const CartWebPage(),
 
   // PAYMENT
   'customer_payment': (_) => PaymentScreen(),
