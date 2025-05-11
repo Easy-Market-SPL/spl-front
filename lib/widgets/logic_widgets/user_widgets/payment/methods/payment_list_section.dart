@@ -79,7 +79,17 @@ class PaymentMethodsSection extends StatelessWidget {
                 } else {
                   showDialog(
                     context: context,
-                    builder: (BuildContext context) => AddPaymentDialog(),
+                    builder: (BuildContext context) => Dialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 800, 
+                          maxHeight: MediaQuery.of(context).size.height * 0.8,
+                        ),
+                        child: AddPaymentDialog(),
+                      ),
+                    ),
                   );
                 }
               },

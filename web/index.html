@@ -31,6 +31,18 @@
 
   <title>spl_front</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    window.loadGoogleMapsApi = function(apiKey) {
+      // Create script element
+      var script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=places';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+      console.log('Google Maps script loaded with key from environment');
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

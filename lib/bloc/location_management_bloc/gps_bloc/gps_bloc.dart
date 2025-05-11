@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -45,34 +46,50 @@ class GpsBloc extends Bloc<GpsEvent, GpsState> {
   }
 
   Future<bool> _isPermissionGranted() async {
-    final isGranted = await Permission.location.isGranted;
-    return isGranted;
+    if (kIsWeb) {
+      final permission = await Geolocator.checkPermission();
+      return permission == LocationPermission.always || 
+             permission == LocationPermission.whileInUse;
+    } else {
+      final isGranted = await Permission.location.isGranted;
+      return isGranted;
+    }
   }
 
   Future<bool> _checkGpsStatus() async {
     final isEnable = await Geolocator.isLocationServiceEnabled();
-    gpsServiceSubscription =
-        Geolocator.getServiceStatusStream().listen((event) {
-      final isEnabled = (event.index == 1) ? true : false;
-      add(GpsAndPermissionEvent(
-          isGpsEnabled: isEnabled,
-          isGpsPermissionGranted: state.isGpsPermissionGranted));
-    });
+    if (!kIsWeb) {
+      gpsServiceSubscription =
+          Geolocator.getServiceStatusStream().listen((event) {
+        final isEnabled = (event.index == 1) ? true : false;
+        add(GpsAndPermissionEvent(
+            isGpsEnabled: isEnabled,
+            isGpsPermissionGranted: state.isGpsPermissionGranted));
+      });
+    }
 
     return isEnable;
   }
 
   Future<void> askGpsAccess() async {
-    // This line will display the dialog to ask for the GPS permission
-    final status = await Permission.location.request();
+    if (kIsWeb) {
+      final permission = await Geolocator.requestPermission();
+      final isGranted = permission == LocationPermission.always || 
+                        permission == LocationPermission.whileInUse;
 
-    if (status.isGranted) {
       add(GpsAndPermissionEvent(
-          isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
+          isGpsEnabled: state.isGpsEnabled, 
+          isGpsPermissionGranted: isGranted));
     } else {
-      add(GpsAndPermissionEvent(
-          isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
-      openAppSettings();
+      final status = await Permission.location.request();
+      if (status.isGranted) {
+        add(GpsAndPermissionEvent(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: true));
+      } else {
+        add(GpsAndPermissionEvent(
+            isGpsEnabled: state.isGpsEnabled, isGpsPermissionGranted: false));
+        openAppSettings();
+      }
     }
   }
 

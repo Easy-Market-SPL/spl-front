@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/ui_blocs/profile_tab_bloc/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
 import 'package:spl_front/models/users_models/user.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/addresses/web/address_section_web.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/logic_widgets/profile_management_widgets/profile_header.dart';
 import 'package:spl_front/widgets/logic_widgets/profile_management_widgets/profile_section.dart';
@@ -123,7 +125,9 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
                           } else {
                             return Padding(
                               padding: const EdgeInsets.all(24),
-                              child: AddressSection(),
+                              child: kIsWeb 
+                                ? AddressSectionWeb()
+                                : AddressSection(),
                             );
                           }
                         },
@@ -143,8 +147,8 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
     return BlocBuilder<ProfileTabBloc, ProfileTabState>(
       builder: (context, state) {
         return Wrap(
-          spacing: 12, // horizontal space between items
-          runSpacing: 12, // vertical space between lines
+          spacing: 12,
+          runSpacing: 12,
           children: [
             _buildTabButton(0, ProfileStrings.information, state.showedTab),
             _buildTabButton(1, ProfileStrings.paymentMethods, state.showedTab),
@@ -158,10 +162,10 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
   Widget _buildTabButton(int tabIndex, String label, int currentTab) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        minWidth: 120, // minimum width to prevent tiny buttons
-        maxWidth: 180, // maximum width to maintain design
+        minWidth: 120,
+        maxWidth: 180,
       ),
-      child: IntrinsicWidth( // Makes the button take only the space it needs
+      child: IntrinsicWidth(
         child: ElevatedButton(
           onPressed: () => context.read<ProfileTabBloc>().add(ChangeTab(tabIndex)),
           style: ElevatedButton.styleFrom(

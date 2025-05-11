@@ -17,8 +17,11 @@ import 'package:spl_front/pages/customer_user/profile_addresses/add_address.dart
 import 'package:spl_front/pages/customer_user/profile_addresses/confirm_address.dart';
 import 'package:spl_front/pages/customer_user/profile_addresses/map_address_page.dart';
 import 'package:spl_front/pages/customer_user/profile_customer_user.dart';
+import 'package:spl_front/pages/customer_user/web/address/add_address_web.dart';
 import 'package:spl_front/pages/customer_user/web/cart_web.dart';
+import 'package:spl_front/pages/customer_user/web/address/confirm_address_web.dart';
 import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
+import 'package:spl_front/pages/customer_user/web/payment/payment_web.dart';
 import 'package:spl_front/pages/customer_user/web/profile_customer_user_web.dart';
 import 'package:spl_front/pages/delivery_user/order_management/orders_list_delivery.dart';
 import 'package:spl_front/pages/delivery_user/profile_delivery.dart';
@@ -109,13 +112,21 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'delivery_user_tracking': (_) => DeliveryUserTracking(),
 
   /// ADDRESS PAGES
-  'add_address': (_) => AddAddressPage(),
+  'add_address': (_) => !kIsWeb
+      ? const AddAddressPage()
+      : const AddAddressWebPage(),
+
   'map_address': (_) => MapAddressPage(),
-  'confirm_address': (_) => ConfirmAddressPage(),
+  'confirm_address': (_) => !kIsWeb
+      ? const ConfirmAddressPage()
+      : const ConfirmAddressWebPage(),
+
   'customer_user_cart': (_) => !kIsWeb
       ? const CartPage()
       : const CartWebPage(),
 
   // PAYMENT
-  'customer_payment': (_) => PaymentScreen(),
+  'customer_payment': (_) => !kIsWeb
+      ? const PaymentScreen()
+      : const PaymentWebScreen(),
 };
