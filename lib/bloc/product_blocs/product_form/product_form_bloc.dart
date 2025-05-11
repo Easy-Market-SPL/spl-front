@@ -61,7 +61,12 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         }
       } else {
         // New product
-        emit(const ProductFormLoaded(isEditing: false));
+        emit(ProductFormLoaded(
+          isEditing: false,
+          colors: [],
+          labels: [],
+          variants: [],
+        ));
       }
     } catch (e) {
       debugPrint('Error initializing form: $e');
@@ -86,7 +91,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       String? imageUrl = event.imagePath;
       if (StorageService.isLocalImage(imageUrl)) {
         imageUrl =
-            await _uploadProductImage(event.imagePath!, event.code, emit);
+            await _uploadProductImage(event.imagePath!, event.code, emit, previousState.webImageBytes);
         if (imageUrl == null) return;
       }
 
@@ -151,14 +156,14 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       final currentState = state as ProductFormLoaded;
       emit(currentState.copyWith(
         imagePath: event.imagePath,
+        webImageBytes: event.webImageBytes,
       ));
     }
   }
 
-  Future<String?> _uploadProductImage(
-      String localPath, String code, Emitter<ProductFormState> emit) async {
+  Future<String?> _uploadProductImage(String localPath, String code, Emitter<ProductFormState> emit, Uint8List? webImageBytes) async {
     try {
-      final imageUrl = await StorageService().uploadImage(localPath, code);
+      final imageUrl = await StorageService().uploadImage(localPath, code, webImageBytes);
       if (imageUrl == null) {
         emit(ProductFormError(ProductStrings.productImageUploadError));
       }

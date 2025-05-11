@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/orders_bloc/order_bloc.dart';
+import 'package:spl_front/bloc/orders_bloc/order_event.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_event.dart';
+import 'package:spl_front/bloc/product_blocs/product_filter/product_filter_state.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_form/labels/label_event.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
+import 'package:spl_front/bloc/product_blocs/products_management/product_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
+import 'package:spl_front/bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
+import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
 import 'package:spl_front/utils/strings/customer_user_strings.dart';
 import 'package:spl_front/utils/strings/dashboard_strings.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-
-import '../../bloc/orders_bloc/order_bloc.dart';
-import '../../bloc/orders_bloc/order_event.dart';
-import '../../bloc/product_blocs/product_filter/product_filter_bloc.dart';
-import '../../bloc/product_blocs/product_filter/product_filter_event.dart';
-import '../../bloc/product_blocs/product_filter/product_filter_state.dart';
-import '../../bloc/product_blocs/product_form/labels/label_bloc.dart';
-import '../../bloc/product_blocs/product_form/labels/label_event.dart';
-import '../../bloc/product_blocs/products_management/product_bloc.dart';
-import '../../bloc/product_blocs/products_management/product_event.dart';
-import '../../bloc/product_blocs/products_management/product_state.dart';
-import '../../bloc/users_session_information_blocs/address_bloc/address_bloc.dart';
-import '../../bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
-import '../../models/helpers/intern_logic/user_type.dart';
+import 'package:spl_front/widgets/logic_widgets/products_widgets/dashboard/products_filters_content.dart';
 import '../../widgets/helpers/custom_loading.dart';
 import '../../widgets/logic_widgets/products_widgets/dashboard/active_filters_dashboard.dart';
 import '../../widgets/logic_widgets/products_widgets/dashboard/labels_dashboard.dart';
@@ -64,7 +64,7 @@ class _CustomerMainDashboardState extends State<CustomerMainDashboard> {
     context.read<PaymentBloc>().add(LoadPaymentMethodsEvent(userId));
 
     context.read<ProductBloc>().add(LoadProducts());
-    context.read<LabelBloc>().add(LoadDashboardLabels());
+    context.read<LabelBloc>().add(LoadLabels());
     context.read<ProductFilterBloc>().add(InitFilters());
 
     searchController = TextEditingController();

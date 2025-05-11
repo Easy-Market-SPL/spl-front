@@ -31,6 +31,9 @@ class ProductDetailsBloc
           await ProductService.getProductVariants(event.productCode);
       final labels = product.labels ?? [];
 
+      await product.fetchReviewsProduct(product.code);
+      await product.fetchReviewAverage(product.code);
+
       emit(ProductDetailsLoaded(
         product: product,
         colors: colors ?? [],

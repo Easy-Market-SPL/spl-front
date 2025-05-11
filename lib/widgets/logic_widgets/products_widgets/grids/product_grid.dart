@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../models/product_models/product.dart';
@@ -16,19 +17,25 @@ class ProductGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 5.0,
-        mainAxisSpacing: 5.0,
-        childAspectRatio: 0.65,
-      ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        return cardBuilder(products[index]);
-      },
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final crossAxisCount = kIsWeb
+          ? (width ~/ 200).clamp(2, 6)  // at least 2 and at most 6 columns
+          : 2;                          // mobile layout with 2 columns
+      return GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.65,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          return cardBuilder(products[index]);
+        },
+      );
+    });
   }
 }

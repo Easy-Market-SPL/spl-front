@@ -65,6 +65,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       final List<OrderModel> safeOrders = List.from(orderList ?? []);
       OrderModel? currentCartOrder;
       List<OrderModel> filtered = safeOrders;
+      filtered.sort((a, b) {
+        return b.creationDate!.compareTo(a.creationDate!);
+      }); // Sort by creation date
 
       if (event.userRole == 'customer') {
         final cartIndex = safeOrders.indexWhere((order) =>

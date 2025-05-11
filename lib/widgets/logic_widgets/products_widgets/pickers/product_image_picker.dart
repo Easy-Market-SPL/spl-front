@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,17 +9,35 @@ import '../../../../bloc/product_blocs/product_form/product_form_bloc.dart';
 import '../../../../bloc/product_blocs/product_form/product_form_event.dart';
 import '../../../../bloc/product_blocs/product_form/product_form_state.dart';
 
-class ProductImagePickerWidget extends StatelessWidget {
+class ProductImagePickerWidget extends StatefulWidget {
   const ProductImagePickerWidget({super.key});
 
-  // Method to pick an image from the gallery
-  Future<String?> _pickImage() async {
+  @override
+  State<ProductImagePickerWidget> createState() => _ProductImagePickerWidgetState();
+}
+
+class _ProductImagePickerWidgetState extends State<ProductImagePickerWidget> {
+  Uint8List? _webImageBytes;
+  
+  Future<void> _pickImageAndUpdate(BuildContext context) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
     if (pickedFile != null) {
-      return pickedFile.path;
+    if (kIsWeb) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _webImageBytes = bytes;
+      });
+      
+      context.read<ProductFormBloc>().add(UpdateProductImage(
+        pickedFile.path,
+        webImageBytes: bytes,
+      ));
+    } else {
+      context.read<ProductFormBloc>().add(UpdateProductImage(pickedFile.path));
     }
-    return null;
+  }
   }
 
   @override
@@ -42,12 +61,30 @@ class ProductImagePickerWidget extends StatelessWidget {
             );
           } else {
             // Local image
-            imageWidget = Image.file(
-              File(imagePath),
-              fit: BoxFit.contain,
-              width: double.infinity,
-              height: 320,
-            );
+            if (kIsWeb) {
+              if (_webImageBytes != null) {
+                imageWidget = Image.memory(
+                  _webImageBytes!,
+                  fit: BoxFit.contain,
+                  width: double.infinity,
+                  height: 320,
+                );
+              } else {
+
+                imageWidget = Container(
+                  color: Colors.grey.shade200,
+                  alignment: Alignment.center,
+                  child: const Text('Cargando imagen...'),
+                );
+              }
+            } else {
+              imageWidget = Image.file(
+                File(imagePath),
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: 320,
+              );
+            }
           }
         } else {
           // Placeholder
@@ -80,14 +117,7 @@ class ProductImagePickerWidget extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 child: IconButton(
                   icon: const Icon(Icons.camera_alt, color: Colors.white),
-                  onPressed: () async {
-                    final path = await _pickImage();
-                    if (path != null) {
-                      context
-                          .read<ProductFormBloc>()
-                          .add(UpdateProductImage(path));
-                    }
-                  },
+                  onPressed: () => _pickImageAndUpdate(context),
                 ),
               ),
             ),

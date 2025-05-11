@@ -22,22 +22,29 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       await _chatsSubscription?.cancel();
 
       // Subscribe to real-time chat updates
-      _chatsSubscription = _chatService.watchAll().listen((chatsData) {
-        final chats = chatsData
-            .map((chatData) => Chat(
-                  id: chatData['chat_id'],
-                  name: chatData['customer_name'] ?? 'Unknown',
-                  message: chatData['last_message'] ?? '',
-                  date: chatData['last_message_date'] ?? '',
-                  time: chatData['last_message_time'] ?? '',
-                ))
-            .whereNot((chat) => chat.message.isEmpty)
-            .toList();
-
-        add(ChatsLoadedEvent(chats));
-      }, onError: (error) {
-        add(ChatsErrorEvent(error.toString()));
-      });
+      _chatsSubscription = _chatService.watchAll().listen(
+        (chatsData) {
+          final chats = chatsData.map((chatData) => Chat(
+            id: chatData['chat_id'],
+            name: chatData['customer_name'] ?? 'Unknown',
+            message: chatData['last_message'] ?? '',
+            date: chatData['last_message_date'] ?? '',
+            time: chatData['last_message_time'] ?? '',
+            sender: chatData['sender'] ?? 'customer',
+          )).whereNot((chat) => chat.message.isEmpty)
+          .sorted(
+            (a, b) => b.date.compareTo(a.date) != 0 
+              ? b.date.compareTo(a.date) 
+              : b.time.compareTo(a.time)
+          )
+          .toList();
+          
+          add(ChatsLoadedEvent(chats));
+        },
+        onError: (error) {
+          add(ChatsErrorEvent(error.toString()));
+        }
+      );
     });
 
     on<LoadCustomerChatEvent>((event, emit) async {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
 
@@ -23,12 +24,17 @@ class OrderTrackingHeader extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.close, color: Colors.black),
               onPressed: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => OrdersPage(userType: userType),
-                  ),
-                  ModalRoute.withName('/'),
-                );
+                if (!kIsWeb){
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => OrdersPage(userType: userType),
+                    ),
+                    ModalRoute.withName('/'),
+                  );
+                }
+                else{
+                  Navigator.pop(context);
+                }
               },
             ),
           ),

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
-
 import '../../../models/helpers/intern_logic/user_type.dart';
-import '../../../models/users_models/user.dart';
 
 class MenuHeader extends StatelessWidget {
   final UserType userType;
@@ -18,7 +16,18 @@ class MenuHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = BlocProvider.of<UsersBloc>(context);
-    final UserModel user = userProvider.state.sessionUser!;
+    final user = userProvider.state.sessionUser;
+
+    // Handle null user case
+    if (user == null) {
+      return Container(
+        color: Colors.blue,
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
 
     return Container(
       color: Colors.blue,

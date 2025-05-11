@@ -11,8 +11,12 @@ import '../../../../utils/ui/format_currency.dart';
 
 class CartItem extends StatelessWidget {
   final OrderProduct item;
+  final bool isWeb;
 
-  const CartItem({super.key, required this.item});
+  const CartItem({super.key, 
+    required this.item,
+    this.isWeb = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +26,9 @@ class CartItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return _buildProductDetails(context);
+    return isWeb 
+        ? _buildWebCartItem(context)
+        : _buildProductDetails(context);
   }
 
   Widget _buildProductDetails(BuildContext context) {
@@ -188,6 +194,133 @@ class CartItem extends StatelessWidget {
         icon: Icon(icon, size: 22, color: color),
         padding: EdgeInsets.zero,
         onPressed: onPressed,
+      ),
+    );
+  }
+
+  Widget _buildWebCartItem(BuildContext context) {
+    final product = item.product!;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 120,
+              height: 120,
+              child: Image.network(
+                product.imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.image_not_supported, size: 40),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 24),
+          
+          // Product details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product name
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+                // Product description
+                const SizedBox(height: 4),
+                Text(
+                  product.description,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Bottom row with quantity controls and price
+                Row(
+                  children: [
+                    // Quantity controls
+                    Row(
+                      children: [
+                        _buildIconButton(context, Icons.remove, () {
+                          if (item.quantity > 1) {
+                            _updateProductQuantity(context, item.quantity - 1);
+                          } else {
+                            _removeProduct(context);
+                          }
+                        }),
+                        
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${item.quantity}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        
+                        _buildIconButton(context, Icons.add, () {
+                          _updateProductQuantity(context, item.quantity + 1);
+                        }),
+                      ],
+                    ),
+                    
+                    const Spacer(),
+                    
+                    // Price
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          formatCurrency(product.price * item.quantity),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${formatCurrency(product.price)} c/u',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(width: 16),
+                    
+                    // Remove button
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: () => _removeProduct(context),
+                      tooltip: 'Eliminar del carrito',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

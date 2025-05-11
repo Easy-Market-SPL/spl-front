@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,6 +20,7 @@ import 'package:spl_front/services/external_services/stripe/stripe_service.dart'
 import 'package:spl_front/services/supabase_services/real-time/real_time_chat_service.dart';
 import 'package:spl_front/services/supabase_services/supabase_config.dart';
 import 'package:spl_front/theme/theme.dart';
+import 'package:spl_front/utils/map/helpers/google_maps_api_web_loader.dart';
 
 import 'bloc/chat_bloc/list_chats_bloc/chats_bloc.dart';
 import 'bloc/chat_bloc/single_chat_bloc/chat_bloc.dart';
@@ -47,6 +49,13 @@ Future main() async {
   await UserService.initializeUserService();
   await OrderService.initializeOrderService();
   await ReviewService.initializeReviewService();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (kIsWeb) {
+      GoogleMapsApiWebLoader.loadGoogleMapsApi();
+    }
+  });
+  
   runApp(MyApp());
 }
 

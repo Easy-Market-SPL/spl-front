@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/chat_models/chat.dart';
 import 'package:spl_front/pages/chat/chat.dart';
 import 'package:spl_front/utils/strings/chat_strings.dart';
 
@@ -12,7 +13,7 @@ import '../../widgets/logic_widgets/chat_widgets/chats_header.dart';
 import '../../widgets/style_widgets/navigation_bars/nav_bar.dart';
 
 class ChatsScreen extends StatelessWidget {
-  final Function(String)? onChatSelected;
+  final Function(Chat)? onChatSelected;
   final Color? backgroundColor;
   final bool isWeb;
 
@@ -35,7 +36,7 @@ class ChatsScreen extends StatelessWidget {
 }
 
 class ChatsPage extends StatefulWidget {
-  final Function(String)? onChatSelected;
+  final Function(Chat)? onChatSelected;
   final Color? backgroundColor;
   final bool isWeb;
 
@@ -116,7 +117,7 @@ class _ChatsPageState extends State<ChatsPage> {
                             _searchFocusNode
                                 .unfocus(); // Avoid the keyboard to stay open
                             if (widget.onChatSelected != null) {
-                              widget.onChatSelected!(chat.name);
+                              widget.onChatSelected!(chat);
                             } else if (!widget.isWeb) {
                               Navigator.push(
                                 context,
@@ -130,7 +131,7 @@ class _ChatsPageState extends State<ChatsPage> {
                               );
                             }
                           },
-                          child: chatItem(chat.name, chat.message, chat.date),
+                          child: chatItem(chat),
                         );
                       },
                     );

@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/business_user/product_form.dart';
+import 'package:spl_front/pages/business_user/web/product_form_web.dart';
 import 'package:spl_front/widgets/logic_widgets/products_widgets/cards/product_card.dart';
 
 import '../../../../bloc/product_blocs/products_management/product_bloc.dart';
@@ -27,18 +29,26 @@ class BusinessProductCard extends StatelessWidget {
         height: 43,
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    ProductFormPage(product: product, isEditing: true),
-              ),
-              // Refresh products after editing
-            ).then((result) {
-              if (result == true) {
-                context.read<ProductBloc>().add(RefreshProducts());
-              }
-            });
+            if (!kIsWeb){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProductFormPage(product: product, isEditing: true),
+                ),
+                // Refresh products after editing
+              ).then((result) {
+                if (result == true) {
+                  context.read<ProductBloc>().add(RefreshProducts());
+                }
+              });
+            } else{
+              showProductFormWeb(
+                context,
+                product: product,
+                isEditing: true,
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -66,6 +76,28 @@ class BusinessProductCard extends StatelessWidget {
                 color: Colors.white,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showProductFormWeb(
+    BuildContext context, {
+    Product? product,
+    bool isEditing = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
+          child: ProductFormWeb(
+            product: product,
+            isEditing: isEditing,
           ),
         ),
       ),

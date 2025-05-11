@@ -9,8 +9,6 @@ abstract class LabelEvent extends Equatable {
 
 class LoadLabels extends LabelEvent {}
 
-class LoadDashboardLabels extends LabelEvent {}
-
 class CreateLabel extends LabelEvent {
   final String name;
   final String description;

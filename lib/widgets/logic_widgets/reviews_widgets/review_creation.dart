@@ -1,7 +1,10 @@
 // lib/widgets/write_review_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_details/product_details_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_details/product_details_event.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
+import 'package:spl_front/utils/ui/snackbar_manager_web.dart';
 
 import '../../../bloc/product_blocs/products_management/product_bloc.dart';
 import '../../../bloc/product_blocs/products_management/product_event.dart';
@@ -49,12 +52,11 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
             _selectedRating = 0.0;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gracias por tu reseña.'),
-              backgroundColor: Colors.blue,
-            ),
+          SnackbarManager.showSuccess(
+            context, 
+            message: 'Gracias por tu reseña.'
           );
+
           if (widget.idReview != null) {
             Navigator.of(context).pop();
           }
@@ -114,13 +116,9 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
                             context.read<UsersBloc>().state.sessionUser!.id;
                         final text = _reviewController.text.trim();
                         if (text.isEmpty || _selectedRating == 0.0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: Colors.blue,
-                              content: Text(
-                                'Por favor ingresa una reseña y calificación.',
-                              ),
-                            ),
+                          SnackbarManager.showWarning(
+                            context, 
+                            message: 'Por favor ingresa una reseña y calificación.'
                           );
                           return;
                         }
@@ -137,10 +135,9 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
                             context.read<ProductBloc>().add(LoadProducts());
                           } else {
                             setState(() => _isSubmitting = false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Error al enviar la reseña.'),
-                              ),
+                            SnackbarManager.showError(
+                              context, 
+                              message: 'Error al enviar la reseña.'
                             );
                           }
                         } else {
@@ -151,12 +148,12 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
                           );
                           if (updated != null) {
                             context.read<ProductBloc>().add(LoadProducts());
+                            context.read<ProductDetailsBloc>().add(LoadProductDetails(widget.product.code));
                           } else {
                             setState(() => _isSubmitting = false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Error al actualizar la reseña.'),
-                              ),
+                            SnackbarManager.showError(
+                              context, 
+                              message: 'Error al actualizar la reseña.'
                             );
                           }
                         }

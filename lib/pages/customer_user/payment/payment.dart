@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_address_selection.dart';
 import 'package:spl_front/pages/customer_user/payment/payment_method_selection.dart';
+import 'package:spl_front/pages/customer_user/web/payment/payment_address_selection.dart';
+import 'package:spl_front/pages/customer_user/web/payment/payment_method_selection_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
@@ -154,8 +157,9 @@ class PaymentPageState extends State<PaymentPage> {
             final selected = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    SelectPaymentMethodScreen(address: selectedAddress),
+                builder: (context) => !kIsWeb
+                    ? SelectPaymentMethodScreen(address: selectedAddress)
+                    : PaymentMethodSelectionWeb(),
               ),
             );
             if (selected != null) {
@@ -292,7 +296,9 @@ class PaymentPageState extends State<PaymentPage> {
             final selected = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const SelectAddressScreen(),
+                builder: (context) => !kIsWeb 
+                  ? const SelectAddressScreen()
+                  : const PaymentAddressSelection(),
               ),
             );
             if (selected != null) {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
-
 import '../../../../bloc/product_blocs/product_form/product_form_bloc.dart';
 import '../../../../bloc/product_blocs/product_form/product_form_state.dart';
 import '../pickers/product_image_picker.dart';
@@ -31,14 +30,14 @@ class ProductFormContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductFormBloc, ProductFormState>(
       builder: (context, state) {
-        if (state is! ProductFormLoaded) {
+        if (state is !ProductFormLoaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
         // Retrieve data from the Bloc state
-        final colors = state.colors;
-        final tags = state.labels;
-        final variants = state.variants;
+        var colors = state.colors;
+        var tags = state.labels;
+        var variants = state.variants;
 
         final int maxNameLength = 45;
         final int maxDescriptionLength = 250;
@@ -160,9 +159,7 @@ class ProductFormContent extends StatelessWidget {
                   // Variants
                   VariantsEditor(
                     variants: variants,
-                    onVariantsChanged: () {
-                      // TODO: Implement onVariantsChanged
-                    },
+                    onVariantsChanged: () {},
                   ),
                   const SizedBox(height: 40),
                 ],

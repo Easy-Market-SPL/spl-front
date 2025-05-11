@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../supabase_config.dart';
@@ -18,12 +18,30 @@ class StorageService {
     return !(imageUrl.startsWith('http') || imageUrl.startsWith('https'));
   }
 
-  Future<String?> uploadImage(String filePath, String productCode) async {
+  Future<String?> uploadImage(String filePath, String productCode, [Uint8List? webImageBytes]) async {
     try {
-      final File file = File(filePath);
-      final storageResponse = await storage.from(imagesPath).upload(
-          '$productsPath/$productCode', file,
-          fileOptions: const FileOptions(upsert: true));
+      String storageResponse = '';
+
+      if (kIsWeb) {
+        if (webImageBytes == null) {
+          debugPrint('Error: No image bytes provided for web upload');
+          return null;
+        }
+
+        storageResponse = await storage.from(imagesPath).uploadBinary(
+          '$productsPath/$productCode', 
+          webImageBytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+      } else {
+        final file = File(filePath);
+        storageResponse = await storage.from(imagesPath).upload(
+          '$productsPath/$productCode', 
+          file,
+          fileOptions: const FileOptions(upsert: true),
+        );
+      }
+
       if (storageResponse.isEmpty) return null;
 
       final String publicUrl =

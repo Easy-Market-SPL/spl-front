@@ -1,42 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/models/order_models/order_status.dart';
 import 'package:spl_front/utils/strings/order_strings.dart';
-
 import '../../../../../bloc/orders_bloc/order_bloc.dart';
 import '../../../../../bloc/orders_bloc/order_state.dart';
 
 class CustomHorizontalOrderStatus extends StatelessWidget {
-  const CustomHorizontalOrderStatus({super.key});
+  final OrderModel order;
+  const CustomHorizontalOrderStatus({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (state is OrdersLoaded && state.filteredOrders.isNotEmpty) {
-          final order = state.filteredOrders.first;
           final currentStatus = _extractLastStatus(order.orderStatuses);
           final step1Active = _isActive(
             currentStatus,
             [
-              OrderStrings.orderConfirmed,
-              OrderStrings.preparingOrder,
-              OrderStrings.onTheWay,
-              OrderStrings.delivered
+              OrderStrings.orderStatusConfirmed,
+              OrderStrings.orderStatusPreparing,
+              OrderStrings.orderStatusOnTheWay,
+              OrderStrings.orderStatusDelivered
             ],
           );
           final step2Active = _isActive(
             currentStatus,
             [
-              OrderStrings.preparingOrder,
-              OrderStrings.onTheWay,
-              OrderStrings.delivered
+              OrderStrings.orderStatusPreparing,
+              OrderStrings.orderStatusOnTheWay,
+              OrderStrings.orderStatusDelivered
             ],
           );
           final step3Active = _isActive(
             currentStatus,
-            [OrderStrings.onTheWay, OrderStrings.delivered],
+            [
+              OrderStrings.orderStatusOnTheWay,
+              OrderStrings.orderStatusDelivered
+            ],
           );
-          final step4Active = (currentStatus == OrderStrings.delivered);
+          final step4Active = (currentStatus == OrderStrings.orderStatusDelivered);
 
           final steps = [
             OrderStep(
@@ -136,8 +140,8 @@ class CustomHorizontalOrderStatus extends StatelessWidget {
     );
   }
 
-  String _extractLastStatus(statuses) {
-    if (statuses == null || statuses.isEmpty) return '';
+  String _extractLastStatus(List<OrderStatus> statuses) {
+    if (statuses.isEmpty) return '';
     return statuses.last.status;
   }
 

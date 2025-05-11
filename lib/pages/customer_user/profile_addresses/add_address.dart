@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/address_strings.dart';
@@ -111,12 +112,22 @@ Future<void> handleWaitGpsStatus(
 
 bool handleGpsAnswer(BuildContext context, GpsBloc gpsBloc) {
   if (!gpsBloc.state.isGpsEnabled) {
-    showGpsLocationDialog(context);
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor activa la ubicación en tu navegador')),
+      );
+    } else {
+      showGpsLocationDialog(context);
+    }
     return false;
   }
 
   if (!gpsBloc.state.isGpsPermissionGranted) {
-    showLocationPermissionDialog(context, gpsBloc);
+    if (kIsWeb) {
+      gpsBloc.askGpsAccess();
+    } else {
+      showLocationPermissionDialog(context, gpsBloc);
+    }
     return false;
   }
 

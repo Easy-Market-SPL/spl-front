@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/pages/customer_user/dashboard_customer_user.dart';
+import 'package:spl_front/pages/customer_user/web/dashboard_customer_user_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/cart_strings.dart';
 import 'package:spl_front/utils/strings/payment_strings.dart';
@@ -216,7 +218,10 @@ class PaymentTotal extends StatelessWidget {
         order!.orderStatuses
             .add(OrderStatus(status: 'confirmed', startDate: DateTime.now()));
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
+          MaterialPageRoute(builder: (context) => !kIsWeb 
+            ? CustomerMainDashboard()
+            : const DashboardCustomerWeb()
+          ),
           (Route<dynamic> route) => false,
         );
         return;

@@ -1,21 +1,21 @@
 // lib/widgets/reviews_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_details/product_details_bloc.dart';
+import 'package:spl_front/bloc/product_blocs/product_details/product_details_state.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/product_models/reviews/review.dart';
-import 'package:spl_front/widgets/helpers/custom_loading.dart';
 import 'package:spl_front/widgets/logic_widgets/reviews_widgets/review_creation.dart';
 
 import '../../../bloc/product_blocs/products_management/product_bloc.dart';
 import '../../../bloc/product_blocs/products_management/product_event.dart';
-import '../../../bloc/product_blocs/products_management/product_state.dart';
 import '../../../models/helpers/intern_logic/user_type.dart';
 import '../../../models/product_models/product.dart';
 import '../../../models/users_models/user.dart';
 import '../../../services/api_services/review_service/review_service.dart';
 import '../../../services/api_services/user_service/user_service.dart';
 
-class ReviewsWidget extends StatelessWidget {
+class ReviewsWidget extends StatefulWidget {
   final Product product;
   final UserType userType;
 
@@ -26,27 +26,84 @@ class ReviewsWidget extends StatelessWidget {
   });
 
   @override
+  State<ReviewsWidget> createState() => _ReviewsWidgetState();
+}
+
+class _ReviewsWidgetState extends State<ReviewsWidget> {
+  // Cache for user data
+  final Map<String, UserModel?> _userCache = {};
+  final Map<int, Widget> _reviewCardCache = {};
+  
+  // Review data caching
+  List<Review>? _cachedReviews;
+  List<Widget>? _cachedCustomerReviews;
+  List<Widget>? _cachedVisitorReviews;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadUserData();
+    _initializeCache();
+  }
+
+  void _initializeCache() {
+    // We'll initialize cache on first build
+    if (widget.product.reviews != null && !_initialized) {
+      _processReviewsForCache(widget.product.reviews!);
+    }
+  }
+  
+  void _processReviewsForCache(List<Review> reviews) {
+    _cachedReviews = reviews;
+    
+    // Build all review cards upfront and store in cache
+    final purchasedReviews = reviews.where((r) => r.purchasedReview == true).toList();
+    final nonPurchasedReviews = reviews.where((r) => r.purchasedReview == false).toList();
+    
+    if (purchasedReviews.isNotEmpty) {
+      _cachedCustomerReviews = purchasedReviews.map((r) {
+        final key = r.id ?? DateTime.now().millisecondsSinceEpoch;
+        _reviewCardCache[key] = _buildReviewCard(context, r);
+        return _reviewCardCache[key]!;
+      }).toList();
+    }
+    
+    if (nonPurchasedReviews.isNotEmpty) {
+      _cachedVisitorReviews = nonPurchasedReviews.map((r) {
+        final key = r.id ?? DateTime.now().millisecondsSinceEpoch;
+        _reviewCardCache[key] = _buildReviewCard(context, r);
+        return _reviewCardCache[key]!;
+      }).toList();
+    }
+    
+    _initialized = true;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProductBloc, ProductState>(
-      builder: (context, state) {
-        var reviews = state is ProductLoaded
-            ? state.products
-                .firstWhere((p) => p.code == product.code,
-                    orElse: () => product)
-                .reviews
-            : product.reviews;
-
-        final purchasedReviews =
-            reviews?.where((review) => review.purchasedReview == true).toList();
-
-        final nonPurchasedReviews = reviews
-            ?.where((review) => review.purchasedReview == false)
-            .toList();
-
-        if (reviews == null || state is ProductLoading) {
-          return const CustomLoading();
+    return BlocSelector<ProductDetailsBloc, ProductDetailsState, List<Review>?>(
+      selector: (state) {
+        if (state is ProductDetailsLoaded) {
+          try {
+            final product = state.product;
+            return product.reviews;
+          } catch (e) {
+            return widget.product.reviews;
+          }
         }
-        if (reviews.isEmpty) {
+        return widget.product.reviews;
+      },
+      builder: (context, reviews) {
+        // If reviews changed from our cached version, rebuild cache
+        if (reviews != null && 
+            (_cachedReviews == null || 
+             _cachedReviews!.length != reviews.length ||
+             _reviewsChanged(_cachedReviews!, reviews))) {
+          _processReviewsForCache(reviews);
+        }
+        
+        if (reviews == null || reviews.isEmpty) {
           return const Text(
             'El producto no cuenta con reseñas aún',
             style: TextStyle(
@@ -57,49 +114,20 @@ class ReviewsWidget extends StatelessWidget {
           );
         }
 
+        // Return cached UI
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            purchasedReviews == null || purchasedReviews.isEmpty
+            _cachedCustomerReviews == null || _cachedCustomerReviews!.isEmpty
                 ? const SizedBox.shrink()
-                : _buildCustomersReviews(context, purchasedReviews),
+                : _buildCachedCustomersReviews(),
             const SizedBox(height: 4),
-            nonPurchasedReviews == null || nonPurchasedReviews.isEmpty
+            _cachedVisitorReviews == null || _cachedVisitorReviews!.isEmpty
                 ? const SizedBox.shrink()
-                : _buildVisitorsReviews(context, nonPurchasedReviews),
+                : _buildCachedVisitorsReviews(),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildCustomersReviews(
-      BuildContext context, List<Review> purchasedReviews) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Reseñas Compradores: ',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ...purchasedReviews.map((r) => _buildReviewCard(context, r)),
-      ],
-    );
-  }
-
-  Widget _buildVisitorsReviews(
-      BuildContext context, List<Review> nonPurchasedReviews) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Reseñas Visitantes: ',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ...nonPurchasedReviews.map((r) => _buildReviewCard(context, r)),
-      ],
     );
   }
 
@@ -111,7 +139,7 @@ class ReviewsWidget extends StatelessWidget {
 
     // Determine actions
     final actions = <Widget>[];
-    if (userType == UserType.business || userType == UserType.admin) {
+    if (widget.userType == UserType.business || widget.userType == UserType.admin) {
       actions.add(
         IconButton(
           icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
@@ -120,7 +148,7 @@ class ReviewsWidget extends StatelessWidget {
       );
     }
     // allow customers to edit or delete their own review
-    if (userType == UserType.customer && review.idUser == myUserId) {
+    if (widget.userType == UserType.customer && review.idUser == myUserId) {
       actions.addAll([
         IconButton(
           icon: const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
@@ -161,7 +189,7 @@ class ReviewsWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       FutureBuilder<UserModel?>(
-                        future: UserService.getUser(review.idUser!),
+                        future: _getUser(review.idUser!),
                         builder: (ctx, snap) {
                           if (snap.connectionState != ConnectionState.done ||
                               snap.data == null) {
@@ -190,6 +218,21 @@ class ReviewsWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Cached user data fetch
+  Future<UserModel?> _getUser(String userId) async {
+    // Return from cache if available
+    if (_userCache.containsKey(userId)) {
+      return _userCache[userId];
+    }
+    
+    // Otherwise fetch and cache
+    final user = await UserService.getUser(userId);
+    if (user != null) {
+      _userCache[userId] = user;
+    }
+    return user;
   }
 
   Widget _buildStarRating(double rating) {
@@ -269,7 +312,7 @@ class ReviewsWidget extends StatelessWidget {
               if (success) {
                 context
                     .read<ProductBloc>()
-                    .add(RemoveReview(product.code, reviewId));
+                    .add(RemoveReview(widget.product.code, reviewId));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Error al eliminar reseña.')),
@@ -293,11 +336,69 @@ class ReviewsWidget extends StatelessWidget {
       builder: (_) => AlertDialog(
         title: const Text('Editar reseña'),
         content: WriteReviewWidget(
-          product: product,
+          product: widget.product,
           idReview: review.id,
           previousRating: review.calification,
         ),
       ),
+    );
+  }
+
+  void _preloadUserData() async {
+    // Get all unique user IDs from reviews
+    final uniqueUserIds = <String>{}; 
+    final reviews = widget.product.reviews ?? [];
+
+    for (final review in reviews) {
+      if (review.idUser != null) {
+        uniqueUserIds.add(review.idUser!);
+      }
+    }
+
+    // Preload all users in parallel
+    await Future.wait(
+      uniqueUserIds.map((id) => _getUser(id))
+    );
+  }
+
+  bool _reviewsChanged(List<Review> oldReviews, List<Review> newReviews) {
+    if (oldReviews.length != newReviews.length) return true;
+    
+    for (int i = 0; i < oldReviews.length; i++) {
+      if (oldReviews[i].id != newReviews[i].id ||
+          oldReviews[i].commentary != newReviews[i].commentary ||
+          oldReviews[i].calification != newReviews[i].calification) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Widget _buildCachedCustomersReviews() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Reseñas Compradores: ',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        ..._cachedCustomerReviews!,
+      ],
+    );
+  }
+
+  Widget _buildCachedVisitorsReviews() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Reseñas Visitantes: ',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        ..._cachedVisitorReviews!,
+      ],
     );
   }
 }

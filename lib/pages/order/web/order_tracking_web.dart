@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/models/order_models/order_model.dart';
+import 'package:spl_front/pages/order/order_map_following.dart';
 
 import '../../../bloc/orders_bloc/order_bloc.dart';
 import '../../../bloc/orders_bloc/order_state.dart';
@@ -22,7 +23,7 @@ class OrderTrackingWebScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OrderTrackingWebPage(userType: userType);
+    return OrderTrackingWebPage(userType: userType, order: order);
   }
 }
 
@@ -67,36 +68,21 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (userType == UserType.business) ...[
-                                  const CustomHorizontalOrderStatus(),
+                                  CustomHorizontalOrderStatus(order: order!,),
                                   const SizedBox(height: 24.0),
                                   if (SPLVariables.hasRealTimeTracking) ...[
-                                    Container(
-                                      height: 400,
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                          child: Text('Mapa aquí')),
-                                    ),
+                                    buildWebMap(order, userType)
                                   ],
                                 ] else if (userType == UserType.customer) ...[
-                                  const CustomHorizontalOrderStatus(),
+                                  CustomHorizontalOrderStatus(order: order!,),
                                   const SizedBox(height: 24.0),
                                   if (SPLVariables.hasRealTimeTracking) ...[
-                                    Container(
-                                      height: 500,
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                          child: Text('Mapa aquí')),
-                                    ),
+                                    buildWebMap(order, userType)
                                   ],
                                 ] else if (userType == UserType.delivery) ...[
                                   HorizontalOrderStatus(order: order!),
                                   if (SPLVariables.hasRealTimeTracking) ...[
-                                    Container(
-                                      height: 400,
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                          child: Text('Mapa aquí')),
-                                    ),
+                                    buildWebMap(order, userType)
                                   ] else ...[
                                     const SizedBox(height: 24.0),
                                     ModifyOrderStatusOptions(
@@ -155,5 +141,35 @@ class _OrderTrackingWebPageState extends State<OrderTrackingWebPage> {
     final statuses = order.orderStatuses;
     if (statuses == null || statuses.isEmpty) return '';
     return statuses.last.status;
+  }
+
+  Widget buildWebMap(OrderModel order, UserType userType) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenSize = MediaQuery.of(context).size;
+        final mapWidth = constraints.maxWidth;
+        final mapHeight = screenSize.height * 0.6;
+
+        return Container(
+          height: mapHeight,
+          width: mapWidth,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: OrderMapFollowing(
+            order: widget.order!,
+            userType: widget.userType
+          ),
+        );
+      },
+    );
   }
 }

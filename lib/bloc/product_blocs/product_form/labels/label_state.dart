@@ -22,15 +22,6 @@ class LabelsLoaded extends LabelState {
   List<Object?> get props => [labels];
 }
 
-class LabelDashboardLoaded extends LabelState {
-  final List<Label> labels;
-
-  const LabelDashboardLoaded(this.labels);
-
-  @override
-  List<Object?> get props => [labels];
-}
-
 class LabelCreated extends LabelState {
   final Label label;
 

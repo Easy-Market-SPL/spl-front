@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/theme/colors/primary_colors.dart';
 import 'package:spl_front/utils/ui/ui_user_type_helper.dart';
 
@@ -15,10 +17,16 @@ class AppBarWeb extends StatelessWidget implements PreferredSizeWidget {
     required this.context,
   });
 
+  String initialsName(String userName) {
+    return userName.substring(0, 2).toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = navbarItemsByUserTypeWeb[userType]!;
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
+    final userProvider = BlocProvider.of<UsersBloc>(context);
+    final user = userProvider.state.sessionUser;
 
     return AppBar(
       automaticallyImplyLeading: false,
@@ -79,7 +87,9 @@ class AppBarWeb extends StatelessWidget implements PreferredSizeWidget {
                 backgroundColor: Colors.grey[300],
                 radius: 20,
                 child: Text(
-                  UIUserTypeHelper.getAvatarTextFromUserType(userType),
+                  user != null
+                      ? initialsName(user.fullname)
+                      : UIUserTypeHelper.getAvatarTextFromUserType(userType), // Fallback initials
                   style: const TextStyle(
                     color: Colors.blueAccent,
                     fontWeight: FontWeight.bold,

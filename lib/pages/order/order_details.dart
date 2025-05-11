@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:spl_front/pages/order/orders_list.dart';
-
+import 'package:spl_front/pages/order/web/orders_list_web.dart';
 import '../../../models/order_models/order_model.dart';
 import '../../../spl/spl_variables.dart';
 import '../../../utils/ui/format_currency.dart';
@@ -411,7 +411,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             '${order.orderProducts.fold<int>(0, (sum, p) => sum + p.quantity)} ítems',
             onTap: () => showDialog(
               context: context,
-              builder: (_) => ProductPopup(orderModel: order),
+              builder: (_) => !kIsWeb
+              ? ProductPopup(orderModel: order)
+              : showProductPopupWeb(context, order),
             ),
             withArrow: true,
           ),
@@ -603,7 +605,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               Navigator.pop(ctx);
               Navigator.of(ctx).pushAndRemoveUntil(
                 MaterialPageRoute(
-                  builder: (_) => OrdersPage(userType: userType),
+                  builder: (_) => !kIsWeb
+                  ? OrdersPage(userType: userType)
+                  : OrdersListWeb(
+                       userType: userType
+                    ),
                 ),
                 ModalRoute.withName('/'),
               );
@@ -611,6 +617,20 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             child: const Text('Aceptar', style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  Dialog showProductPopupWeb(BuildContext context, OrderModel order) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 600,
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        child: ProductPopup(orderModel: order),
       ),
     );
   }

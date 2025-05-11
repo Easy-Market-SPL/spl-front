@@ -83,6 +83,11 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeWeb = {
       icon: Icons.shopping_cart_outlined,
     ),
     NavbarItem(
+      label: BottomNavigationStrings.cart,
+      route: 'customer_user_cart',
+      icon: Icons.shopping_cart,
+    ),
+    NavbarItem(
       label: BottomNavigationStrings.profile,
       route: 'customer_profile',
       icon: Icons.person_outline,

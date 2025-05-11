@@ -20,6 +20,7 @@ class LabelPicker extends StatefulWidget {
 
 class _LabelPickerState extends State<LabelPicker> {
   void _selectExistingLabel() async {
+    // Show the label dialog to select an existing label.
     final selectedLabel = await showLabelDialog(context);
     if (selectedLabel != null) {
       setState(() {

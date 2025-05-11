@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/widgets/logic_widgets/products_widgets/view/labels/product_new_label_dialog.dart';
@@ -137,10 +138,12 @@ Future<Label?> showLabelDialog(BuildContext context) async {
                                 : GridView.builder(
                                     gridDelegate:
                                         SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: isSmallScreen ? 2 : 3,
-                                      crossAxisSpacing: 8,
-                                      mainAxisSpacing: 8,
-                                      childAspectRatio: 3,
+                                      crossAxisCount: kIsWeb 
+                                          ? (isSmallScreen ? 3 : 4)
+                                          : (isSmallScreen ? 2 : 3),
+                                      crossAxisSpacing: kIsWeb ? 6 : 8,
+                                      mainAxisSpacing: kIsWeb ? 6 : 8,
+                                      childAspectRatio: kIsWeb ? 4 : 3,
                                     ),
                                     itemCount: filteredLabels.length,
                                     itemBuilder: (context, index) {
@@ -151,10 +154,14 @@ Future<Label?> showLabelDialog(BuildContext context) async {
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
                                             border: Border.all(
-                                                color: Colors.blue.shade300),
+                                                color: Colors.blue.shade300,
+                                                width: kIsWeb ? 0.8 : 1.0),
                                             borderRadius:
-                                                BorderRadius.circular(8),
+                                                BorderRadius.circular(kIsWeb ? 6 : 8),
                                           ),
+                                          padding: kIsWeb 
+                                              ? const EdgeInsets.symmetric(vertical: 4, horizontal: 6)
+                                              : const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                           child: Text(
                                             label.name,
                                             textAlign: TextAlign.center,
@@ -179,11 +186,11 @@ Future<Label?> showLabelDialog(BuildContext context) async {
                         Expanded(
                           child: TextButton.icon(
                             onPressed: () async {
-                              Navigator.pop(ctx);
                               final newLabel =
                                   await showNewLabelDialog(context);
                               if (newLabel != null) {
                                 labelBloc.add(LoadLabels());
+                                Navigator.pop(ctx, newLabel);
                               }
                             },
                             icon: const Icon(Icons.add,
