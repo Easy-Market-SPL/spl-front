@@ -264,7 +264,10 @@ class PaymentTotal extends StatelessWidget {
 
       // Navigate to the order tracking page
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => CustomerMainDashboard()),
+        MaterialPageRoute(builder: (context) => !kIsWeb
+          ? CustomerMainDashboard()
+          : const DashboardCustomerWeb()
+        ),
         (Route<dynamic> route) => false,
       );
     } else {

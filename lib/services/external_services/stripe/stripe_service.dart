@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
@@ -34,6 +34,13 @@ class StripeService {
     required PaymentMethodCard card,
   }) async {
     try {
+      if (kIsWeb) {
+        return await payWithCardWeb(
+          amount: amount,
+          currency: currency,
+          card: card,
+        );
+      }
       final String? clientSecret = await _createPaymentIntent(
         amount: amount,
         currency: currency,
@@ -124,6 +131,44 @@ class StripeService {
       return StripeCustomReponse(ok: true, msg: 'Pago exitoso');
     } catch (e) {
       debugPrint("Error en _confirmPaymentIntent: $e");
+      return StripeCustomReponse(ok: false, msg: e.toString());
+    }
+  }
+
+Future<String?> createPaymentIntentAndGetClientSecret({
+  required String amount,
+  required String currency,
+}) async {
+  return await _createPaymentIntent(
+    amount: amount,
+    currency: currency,
+  );
+}
+
+  Future<StripeCustomReponse> payWithCardWeb({
+    required String amount,
+    required String currency,
+    PaymentMethodCard? card,
+  }) async {
+    try {
+      final String? clientSecret = await _createPaymentIntent(
+        amount: amount,
+        currency: currency,
+      );
+
+      if (clientSecret == null) {
+        return StripeCustomReponse(
+          ok: false, 
+          msg: 'Error al crear el PaymentIntent'
+        );
+      }
+
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+      return StripeCustomReponse(ok: true, msg: clientSecret);
+
+    } catch (e) {
+      debugPrint("Error en payWithCardWeb: $e");
       return StripeCustomReponse(ok: false, msg: e.toString());
     }
   }
