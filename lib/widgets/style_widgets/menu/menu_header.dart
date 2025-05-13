@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
+
 import '../../../models/helpers/intern_logic/user_type.dart';
 
 class MenuHeader extends StatelessWidget {
@@ -31,7 +32,7 @@ class MenuHeader extends StatelessWidget {
 
     return Container(
       color: Colors.blue,
-      padding: const EdgeInsets.only(left: 20, top: 60, bottom: 20, right: 20),
+      padding: const EdgeInsets.only(left: 20, top: 60, bottom: 20, right: 10),
       child: Row(
         children: [
           CircleAvatar(
@@ -46,23 +47,26 @@ class MenuHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                overflow: TextOverflow.ellipsis,
-                user.fullname,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  overflow: TextOverflow.ellipsis,
+                  user.fullname,
+                  maxLines: 2,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const Text(
-                MenuStrings.myProfile,
-                style: TextStyle(color: Colors.white70),
-              ),
-            ],
+                const Text(
+                  MenuStrings.myProfile,
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -296,9 +296,9 @@ class PaymentPageState extends State<PaymentPage> {
             final selected = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => !kIsWeb 
-                  ? const SelectAddressScreen()
-                  : const PaymentAddressSelection(),
+                builder: (context) => !kIsWeb
+                    ? const SelectAddressScreen()
+                    : const PaymentAddressSelection(),
               ),
             );
             if (selected != null) {
