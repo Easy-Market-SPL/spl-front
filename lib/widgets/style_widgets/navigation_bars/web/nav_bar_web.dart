@@ -89,7 +89,8 @@ class AppBarWeb extends StatelessWidget implements PreferredSizeWidget {
                 child: Text(
                   user != null
                       ? initialsName(user.fullname)
-                      : UIUserTypeHelper.getAvatarTextFromUserType(userType), // Fallback initials
+                      : UIUserTypeHelper.getAvatarTextFromUserType(
+                          userType), // Fallback initials
                   style: const TextStyle(
                     color: Colors.blueAccent,
                     fontWeight: FontWeight.bold,

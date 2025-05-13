@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/menu_strings.dart';
 
 import '../../../models/helpers/intern_logic/user_type.dart';
@@ -38,11 +39,12 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
       route: 'customer_profile',
       icon: Icons.person,
     ),
-    MenuItem(
-      label: MenuStrings.customerSupport,
-      route: 'customer_user_chat',
-      icon: Icons.headset_mic,
-    ),
+    if (SPLVariables.hasChat)
+      MenuItem(
+        label: MenuStrings.customerSupport,
+        route: 'customer_user_chat',
+        icon: Icons.headset_mic,
+      ),
   ],
   // Business menu items
   UserType.business: [
@@ -66,11 +68,12 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
       route: 'business_user_profile',
       icon: Icons.person,
     ),
-    MenuItem(
-      label: MenuStrings.customerSupport,
-      route: 'business_user_chats',
-      icon: Icons.headset_mic,
-    ),
+    if (SPLVariables.hasChat)
+      MenuItem(
+        label: MenuStrings.customerSupport,
+        route: 'business_user_chats',
+        icon: Icons.headset_mic,
+      ),
   ],
   // Delivery menu items
   UserType.delivery: [
