@@ -1,0 +1,29 @@
+class DashboardStrings {
+  static const String allLabels = "Todos";
+  static const String filters = "Filtros";
+  static const String priceRange = "Rango de precio";
+  static const String minRating = "Calificación mínima";
+  static const String labels = "Etiquetas";
+  static const String searchLabels = "Buscar etiquetas...";
+  static const String noLabelsFound = "No se encontraron etiquetas con esa búsqueda";
+  static const String cancel = "Cancelar";
+  static const String applyFilters = "Aplicar filtros";
+  static const String cleanFilters = "Limpiar filtros";
+  static const String fromPrice = "Desde";
+  static const String toPrice = "Hasta";
+  static const String minRatingFilter = "Min";
+  static const String clearAll = "Borrar todos";
+  static const String apply = "Aplicar";
+  static const String searchPlaceholder = "Buscar productos...";
+  static const String loading = "Cargando...";
+  static const String errorLoading = "Ocurrió un error al cargar los datos";
+  static const String errorLoadingLabels = "No se pudieron cargar las etiquetas";
+  static const String noProductsAvailable = "No hay productos disponibles";
+  static const String retry = "Intentar de nuevo";
+  static const String selected = "Seleccionado";
+  static const String notSelected = "No seleccionado";
+  static const String fromPriceWithValue = "Desde";
+  static const String toPriceWithValue = "Hasta";
+  static const String minRatingWithValue = "Min";
+  static const String products = "Productos";
+}

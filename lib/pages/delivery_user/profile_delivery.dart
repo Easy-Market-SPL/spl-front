@@ -1,88 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
-import 'package:spl_front/widgets/buttons/profile_save_changes_button.dart';
-import 'package:spl_front/widgets/profile/profile_header.dart';
-import 'package:spl_front/widgets/profile/profile_section.dart';
 
-class DeliveryProfilePage extends StatelessWidget {
+import '../../models/helpers/intern_logic/user_type.dart';
+import '../../models/users_models/user.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_header.dart';
+import '../../widgets/logic_widgets/profile_management_widgets/profile_section.dart';
+
+class DeliveryProfilePage extends StatefulWidget {
   const DeliveryProfilePage({super.key});
 
   @override
+  DeliveryProfilePageState createState() => DeliveryProfilePageState();
+}
+
+class DeliveryProfilePageState extends State<DeliveryProfilePage> {
+  // Create the controllers for the username and name fields
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose controllers to avoid memory leaks
+    userNameController.dispose();
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Create the controllers for the username and name fields
-    final TextEditingController userNameController = TextEditingController();
-    final TextEditingController nameController = TextEditingController();
+    final UserModel user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser!;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
           child: Column(
             children: [
-              // Main content with Scroll
+              // Scrollable content
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // TODO: Pass the information of the user when the login is implemented
-                        const ProfileHeader(
-                            userRoleTitle: ProfileStrings.deliveryTitle,
-                            userRoleDescription:
-                                ProfileStrings.roleDescription),
+                        // Header
+                        ProfileHeader(
+                          userName: user.fullname,
+                          userRoleTitle: ProfileStrings.deliveryTitle,
+                          userRoleDescription:
+                              ProfileStrings.roleDescriptionDelivery(
+                                  user.fullname),
+                        ),
                         const SizedBox(height: 20),
 
-                        // Profile Section for modify the information
+                        // Profile Section
                         ProfileSection(
-                            nameController: nameController,
-                            userNameController: userNameController),
+                          userNameController: userNameController,
+                          nameController: nameController,
+                          userType: UserType.delivery,
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                ),
-              ),
-
-              // Button for save changes.
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: SaveChangesButton(
-                  onPressed: () {
-                    //TODO: Implement the logic for save the changes of the delivery user, pass the user as parameter to the component
-                    // print("Save changes");
-                  },
                 ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class SectionTitle extends StatelessWidget {
-  final String title;
-
-  const SectionTitle({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.info, color: Colors.blue),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-      ],
     );
   }
 }
