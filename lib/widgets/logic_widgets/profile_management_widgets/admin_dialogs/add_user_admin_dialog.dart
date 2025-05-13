@@ -7,6 +7,7 @@ import '../../../../bloc/users_blocs/users_management/users_management_bloc.dart
 import '../../../../models/users_models/user.dart';
 import '../../../../services/api_services/user_service/user_service.dart';
 import '../../../../services/supabase_services/auth/auth_service.dart';
+import '../../../../spl/spl_variables.dart';
 import '../../../style_widgets/buttons/create_user_button.dart';
 import '../../../style_widgets/inputs/custom_input.dart';
 
@@ -110,10 +111,12 @@ class AddUserDialog extends StatelessWidget {
               value: 'business',
               child: Text(ProfileStrings.productsManagerProfile),
             ),
-            DropdownMenuItem(
-              value: 'delivery',
-              child: Text(ProfileStrings.deliveryProfile),
-            ),
+            if (SPLVariables.hasRealTimeTracking) ...[
+              DropdownMenuItem(
+                value: 'delivery',
+                child: Text(ProfileStrings.deliveryProfile),
+              ),
+            ],
           ],
           onChanged: (value) {
             selectedRole.value = value;
