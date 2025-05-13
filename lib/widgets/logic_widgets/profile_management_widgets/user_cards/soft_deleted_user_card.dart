@@ -47,7 +47,7 @@ class SoftDeletedUserCard extends StatelessWidget {
         subtitle: Text(
           role,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 10,
             color: Colors.black54,
           ),
         ),

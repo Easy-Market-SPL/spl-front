@@ -102,7 +102,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                           final user = state.users[index];
                           return UserCard(
                             name: user.fullname,
-                            role: user.rol,
+                            role: _getNameRole(user.rol),
                             initial: user.username.isNotEmpty
                                 ? user.username[0].toUpperCase()
                                 : '',
@@ -147,6 +147,21 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
         ),
       ),
     );
+  }
+}
+
+String _getNameRole(String role) {
+  switch (role) {
+    case 'admin':
+      return 'Usuario Administrador';
+    case 'business':
+      return 'Usuario de Empresa';
+    case 'delivery':
+      return 'Domiciliario de Empresa';
+    case 'customer':
+      return 'Usuario Consumidor';
+    default:
+      return '';
   }
 }
 
@@ -203,7 +218,7 @@ class ButtonSoftDeletedUsers extends StatelessWidget {
                     final user = usersDeleted[index];
                     return SoftDeletedUserCard(
                       name: user.fullname,
-                      role: user.rol,
+                      role: _getNameRole(user.rol),
                       initial: user.username.isNotEmpty
                           ? user.username[0].toUpperCase()
                           : '',
