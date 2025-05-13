@@ -21,7 +21,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return InkWell(
       onTap: () {
         if (kIsWeb) {
@@ -61,7 +60,8 @@ class ProductCard extends StatelessWidget {
                         product.imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          debugPrint('Error loading product image: ${product.code} - $error');
+                          debugPrint(
+                              'Error loading product image: ${product.code} - $error');
                           return Image.asset(
                             "assets/images/empty_background.jpg",
                             fit: BoxFit.cover,
@@ -74,7 +74,8 @@ class ProductCard extends StatelessWidget {
                           return Center(
                             child: CircularProgressIndicator(
                               value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
                                   : null,
                             ),
                           );
@@ -86,7 +87,7 @@ class ProductCard extends StatelessWidget {
                       ),
               ),
             ),
-  
+
             // Content
             Expanded(
               flex: 4,
@@ -105,9 +106,9 @@ class ProductCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-  
+
                     const SizedBox(height: 2),
-  
+
                     // Product Reference + Rating
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -124,7 +125,7 @@ class ProductCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-  
+
                         // Product Rating
                         if (SPLVariables.isRated &&
                             product.rating != null &&
@@ -137,7 +138,7 @@ class ProductCard extends StatelessWidget {
                               const SizedBox(width: 2),
                               Text(
                                 product.reviews!.isEmpty
-                                    ? 'N/A'
+                                    ? '--'
                                     : product.rating!.toStringAsFixed(1),
                                 style: const TextStyle(
                                   fontSize: 11,
@@ -148,9 +149,9 @@ class ProductCard extends StatelessWidget {
                           ),
                       ],
                     ),
-  
+
                     const SizedBox(height: 3),
-  
+
                     // Description
                     Expanded(
                       child: Text(
@@ -160,17 +161,16 @@ class ProductCard extends StatelessWidget {
                           color: Colors.grey,
                         ),
                         overflow: TextOverflow.ellipsis,
-                        maxLines: kIsWeb? 3 : 2,
+                        maxLines: kIsWeb ? 3 : 2,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-  
+
             // Price Button
-            if (priceButton != null) 
-              SizedBox(height: 44, child: priceButton!),
+            if (priceButton != null) SizedBox(height: 44, child: priceButton!),
           ],
         ),
       ),
