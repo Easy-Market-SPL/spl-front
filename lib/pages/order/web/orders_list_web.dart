@@ -41,6 +41,14 @@ class _OrdersListWebState extends State<OrdersListWeb> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.read<UsersBloc>().state.sessionUser!.id;
+    context.read<OrdersBloc>().add(
+          LoadOrdersEvent(
+            userId: userId,
+            userRole:
+                widget.userType == UserType.customer ? 'customer' : 'business',
+          ),
+        );
     return WebScaffold(
       userType: widget.userType,
       body: Row(
@@ -70,7 +78,16 @@ class _OrdersListWebState extends State<OrdersListWeb> {
                       bloc.add(const ClearDateRangeEvent());
                     },
                     onStatusFilter: (label) {
-                      context.read<OrdersBloc>().add(FilterOrdersEvent(label));
+                      final labelFilter = {
+                            OrderStrings.statusConfirmed: 'confirmed',
+                            OrderStrings.statusPreparing: 'preparing',
+                            OrderStrings.statusOnTheWay: 'on-the-way',
+                            OrderStrings.statusDelivered: 'delivered',
+                          }[label] ??
+                          label;
+                      context
+                          .read<OrdersBloc>()
+                          .add(FilterOrdersEvent(labelFilter));
                     },
                     currentAdditionalFilters:
                         _currentAdditionalFilters(context),

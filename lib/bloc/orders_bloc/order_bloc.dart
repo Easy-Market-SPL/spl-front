@@ -200,8 +200,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         current.allOrders.removeWhere((order) => order.id == cartOrder.id);
       }
 
+      // Not filter the cart order (Orders without status)
+      final filtered =
+          current.allOrders.where((o) => o.orderStatuses.isNotEmpty).toList();
+
       final newFiltered = _applyFilters(
-        orders: current.allOrders,
+        orders: filtered,
         selectedFilters: updatedFilters,
         additionalFilters: current.additionalFilters,
         dateRange: current.dateRange,
