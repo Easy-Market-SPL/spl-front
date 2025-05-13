@@ -44,7 +44,6 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   /// Sign in method using Supabase
-  /// Si el login es exitoso, se limpia el estado anterior y se actualiza el bloc con el nuevo usuario
   void login(BuildContext context) async {
     if (!_validate()) return;
 

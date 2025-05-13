@@ -27,16 +27,6 @@ class SocialAuthButtons extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: SocialButton(
-                  text: LoginStrings.facebookText,
-                  color: Colors.blue,
-                  image: AssetImage("assets/images/facebook_logo.png"),
-                  onTap: () {
-                    // TODO: Implement the Facebook Sign In
-                  },
-                ),
-              ),
               const SizedBox(width: 10),
               Expanded(
                 child: SocialButton(
