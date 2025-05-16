@@ -28,7 +28,7 @@ class LogOutButton extends StatelessWidget {
           searchPlacesBloc.clearSelectedPlace();
           ordersBloc.add(ClearOrdersEvent());
 
-          UIUserTypeHelper.isAdmin = true;
+          UIUserTypeHelper.isAdmin = false;
 
           if (context.mounted) {
             Navigator.of(context).pushNamedAndRemoveUntil(
