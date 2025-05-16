@@ -1,6 +1,7 @@
 import '../../models/helpers/intern_logic/user_type.dart';
 
 class UIUserTypeHelper {
+  static bool isAdmin = false;
   static String getAvatarTextFromUserType(UserType userType) {
     switch (userType) {
       case UserType.customer:

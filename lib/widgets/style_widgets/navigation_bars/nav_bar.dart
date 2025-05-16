@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/ui/ui_user_type_helper.dart';
 import 'package:spl_front/widgets/style_widgets/navigation_bars/user_types_navbar_items.dart';
 
 import '../../../models/helpers/intern_logic/user_type.dart';
@@ -18,8 +19,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android) {
+      final isAdmin = UIUserTypeHelper.isAdmin;
       final List<NavbarItem> items = navbarItemsByUserTypeMobile[
-          userType]!; // Gets the items for the current user type
+          isAdmin ? UserType.admin : userType]!; // Gets the items for the current user type
       final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
       final int currentIndex =
           items.indexWhere((item) => item.route == currentRoute);

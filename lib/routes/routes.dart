@@ -62,6 +62,7 @@ final Map<String, Widget Function(BuildContext)> appRoutes = {
   'delivery_user_menu': (_) => MenuScreen(userType: UserType.delivery),
   'business_user_menu': (_) => MenuScreen(userType: UserType.business),
   'customer_user_menu': (_) => MenuScreen(userType: UserType.customer),
+  'admin_user_menu': (_) => MenuScreen(userType: UserType.admin),
 
   /// DASHBOARD PAGES
   'customer_dashboard': (_) => !kIsWeb

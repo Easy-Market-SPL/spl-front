@@ -23,7 +23,7 @@ class AddressSectionWeb extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton.icon(
-                  icon: Icon(Icons.add_location_alt),
+                  icon: Icon(Icons.add_location_alt, color: Colors.white,),
                   label: Text(AddressStrings.addNewAddress),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,

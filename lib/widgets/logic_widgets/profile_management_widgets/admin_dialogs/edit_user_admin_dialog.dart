@@ -25,6 +25,10 @@ class EditUserDialog extends StatelessWidget {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxWidth: 450,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -69,6 +73,7 @@ class EditUserDialog extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

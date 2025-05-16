@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spl_front/utils/ui/ui_user_type_helper.dart';
 import 'package:spl_front/widgets/style_widgets/menu/menu_header.dart';
 
 import '../../models/helpers/intern_logic/user_type.dart';
@@ -22,7 +23,8 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = menuItemsByUserType[userType]!;
+    final isAdmin = UIUserTypeHelper.isAdmin;
+    final items = menuItemsByUserType[isAdmin ? UserType.admin : userType]!;
 
     return Scaffold(
       body: Column(
