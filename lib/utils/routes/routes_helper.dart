@@ -5,6 +5,7 @@ import 'package:spl_front/pages/auth/login/login_page_variant.dart';
 import 'package:spl_front/pages/auth/login/login_page_web.dart';
 import 'package:spl_front/pages/auth/register/register_page.dart';
 import 'package:spl_front/pages/auth/register/register_page_variant.dart';
+import 'package:spl_front/pages/auth/register/register_page_web.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 
 Widget loginPageFactory(BuildContext ctx) {
@@ -18,6 +19,9 @@ Widget loginPageFactory(BuildContext ctx) {
 }
 
 Widget registerPageFactory(BuildContext ctx) {
+  if (kIsWeb) {
+    return RegisterPageWeb();
+  }
   if (SPLVariables.hasThirdAuth) {
     return RegisterPageVariant();
   }
