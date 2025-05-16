@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
+import 'package:spl_front/utils/ui/ui_user_type_helper.dart';
 
 import '../../../bloc/orders_bloc/order_bloc.dart';
 import '../../../bloc/orders_bloc/order_event.dart';
@@ -26,6 +27,8 @@ class LogOutButton extends StatelessWidget {
           searchPlacesBloc.emptyGooglePlaces();
           searchPlacesBloc.clearSelectedPlace();
           ordersBloc.add(ClearOrdersEvent());
+
+          UIUserTypeHelper.isAdmin = true;
 
           if (context.mounted) {
             Navigator.of(context).pushNamedAndRemoveUntil(
