@@ -59,6 +59,30 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
       icon: Icons.history,
     ),
     MenuItem(
+      label: MenuStrings.myAccount,
+      route: 'business_user_profile',
+      icon: Icons.person,
+    ),
+    if (SPLVariables.hasChat)
+      MenuItem(
+        label: MenuStrings.customerSupport,
+        route: 'business_user_chats',
+        icon: Icons.headset_mic,
+      ),
+  ],
+  // Admin menu items
+  UserType.admin: [
+    MenuItem(
+      label: MenuStrings.home,
+      route: 'business_dashboard',
+      icon: Icons.home,
+    ),
+    MenuItem(
+      label: MenuStrings.orderHistory,
+      route: 'business_user_orders',
+      icon: Icons.history,
+    ),
+    MenuItem(
       label: MenuStrings.adminPanel,
       route: 'admin_profile',
       icon: Icons.admin_panel_settings,
@@ -66,7 +90,7 @@ const Map<UserType, List<MenuItem>> menuItemsByUserType = {
     MenuItem(
       label: MenuStrings.myAccount,
       route: 'business_user_profile',
-      icon: Icons.person,
+      icon: Icons.assignment_ind_outlined,
     ),
     if (SPLVariables.hasChat)
       MenuItem(

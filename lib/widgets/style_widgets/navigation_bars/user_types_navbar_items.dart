@@ -53,6 +53,24 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeMobile = {
       icon: Icons.menu,
     ),
   ],
+  // Admin NavBar Items
+  UserType.admin: [
+    NavbarItem(
+      label: BottomNavigationStrings.home,
+      route: 'business_dashboard',
+      icon: Icons.home_filled,
+    ),
+    NavbarItem(
+      label: BottomNavigationStrings.orders,
+      route: 'business_user_orders',
+      icon: Icons.inventory_2,
+    ),
+    NavbarItem(
+      label: BottomNavigationStrings.menu,
+      route: 'admin_user_menu',
+      icon: Icons.menu,
+    ),
+  ],
   // Delivery NavBar Items
   UserType.delivery: [
     NavbarItem(
@@ -109,6 +127,24 @@ const Map<UserType, List<NavbarItem>> navbarItemsByUserTypeWeb = {
       label: BottomNavigationStrings.profile,
       route: 'business_user_profile',
       icon: Icons.person_outline,
+    ),
+  ],
+  // Admin NavBar Items
+  UserType.admin: [
+    NavbarItem(
+      label: BottomNavigationStrings.home,
+      route: 'business_dashboard',
+      icon: Icons.home_filled,
+    ),
+    NavbarItem(
+      label: BottomNavigationStrings.orders,
+      route: 'business_user_orders',
+      icon: Icons.inventory_2,
+    ),
+    NavbarItem(
+      label: BottomNavigationStrings.profile,
+      route: 'admin_profile',
+      icon: Icons.assignment_ind_outlined,
     ),
   ],
 };

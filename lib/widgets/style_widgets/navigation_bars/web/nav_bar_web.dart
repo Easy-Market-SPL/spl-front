@@ -23,7 +23,8 @@ class AppBarWeb extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = navbarItemsByUserTypeWeb[userType]!;
+    final isAdmin = UIUserTypeHelper.isAdmin;
+    final items = navbarItemsByUserTypeWeb[isAdmin ? UserType.admin : userType]!;
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
     final userProvider = BlocProvider.of<UsersBloc>(context);
     final user = userProvider.state.sessionUser;

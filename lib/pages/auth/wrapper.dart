@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/routes/routes.dart';
+import 'package:spl_front/utils/ui/ui_user_type_helper.dart';
 import 'package:spl_front/widgets/helpers/custom_loading.dart';
 
 import '../../bloc/users_blocs/users/users_bloc.dart';
@@ -57,7 +58,10 @@ class _WrapperState extends State<Wrapper> {
 
             // Once the user has been loaded, redirect according to their role.
             final userRole = state.sessionUser!.rol;
-            if (userRole == 'admin' || userRole == 'business') {
+            if (userRole == 'admin') {
+              UIUserTypeHelper.isAdmin = true;
+              return appRoutes['business_dashboard']!(context);
+            } else if (userRole == 'business') {
               return appRoutes['business_dashboard']!(context);
             } else if (userRole == 'delivery') {
               return appRoutes['delivery_user_orders']!(context);
