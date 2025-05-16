@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -64,10 +65,19 @@ class SupabaseAuth {
     final webClientId = dotenv.env['WEB_CLIENT_ID'];
     final iosClientId = dotenv.env['IOS_CLIENT_ID'];
 
-    final GoogleSignIn googleSignIn = GoogleSignIn(
-      clientId: iosClientId,
-      serverClientId: webClientId,
-    );
+    late final GoogleSignIn googleSignIn;
+  
+    if (kIsWeb) {
+      googleSignIn = GoogleSignIn(
+        clientId: webClientId,
+      );
+    } else {
+      googleSignIn = GoogleSignIn(
+        clientId: iosClientId,
+        serverClientId: webClientId,
+      );
+    }
+
     final googleUser = await googleSignIn.signIn();
     final googleAuth = await googleUser!.authentication;
     final accessToken = googleAuth.accessToken;
@@ -84,6 +94,13 @@ class SupabaseAuth {
       provider: OAuthProvider.google,
       idToken: idToken,
       accessToken: accessToken,
+    );
+  }
+
+  static Future<dynamic> googleSignIn() async {
+    return _instance._supabaseClient.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: kIsWeb ? null : 'io.supabase.flutterquickstart://login-callback',
     );
   }
 }

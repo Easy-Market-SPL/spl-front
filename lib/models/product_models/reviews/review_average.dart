@@ -1,4 +1,6 @@
 // lib/models/data/review_average_dto.dart
+import 'dart:convert';
+
 class ReviewAverage {
   final String productId;
   final double average;
@@ -13,6 +15,13 @@ class ReviewAverage {
       productId: json['productId'] as String,
       average: (json['average'] as num).toDouble(),
     );
+  }
+
+  static List<ReviewAverage> fromJsonList(String jsonString) {
+    final List<dynamic> jsonList = json.decode(jsonString);
+    return jsonList
+        .map((json) => ReviewAverage.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   Map<String, dynamic> toJson() => {

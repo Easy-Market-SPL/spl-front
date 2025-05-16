@@ -66,6 +66,19 @@ class ReviewService {
     }
   }
 
+  /// GET /reviews/average
+  static Future<List<ReviewAverage>?> getAllReviewAverages() async {
+    final url = '$_baseUrl/reviews/average';
+    try {
+      final response = await fetchWithRetry(url);
+      final decoded = utf8.decode(response.bodyBytes);
+      return ReviewAverage.fromJsonList(decoded);
+    } catch (e) {
+      debugPrint('❌ Error fetching all review averages: $e');
+      return null;
+    }
+  }
+
   /// GET /reviews/average/{idProduct}
   static Future<ReviewAverage?> getReviewAverage(String productCode) async {
     final url = '$_baseUrl/reviews/average/$productCode';

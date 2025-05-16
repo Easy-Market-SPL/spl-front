@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/utils/strings/login_strings.dart';
 
@@ -34,7 +35,9 @@ class SocialAuthButtons extends StatelessWidget {
                   color: Colors.white,
                   image: AssetImage("assets/images/google_logo.png"),
                   onTap: () {
-                    SupabaseAuth.nativeGoogleSignIn();
+                    kIsWeb 
+                    ? SupabaseAuth.nativeGoogleSignIn()
+                    : SupabaseAuth.googleSignIn();
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                 ),

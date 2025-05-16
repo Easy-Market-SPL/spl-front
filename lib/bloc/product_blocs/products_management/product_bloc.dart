@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/product_blocs/products_management/product_event.dart';
 import 'package:spl_front/bloc/product_blocs/products_management/product_state.dart';
+import 'package:spl_front/models/product_models/reviews/review_average.dart';
+import 'package:spl_front/services/api_services/review_service/review_service.dart';
 import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 
@@ -26,10 +28,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
 
     if (SPLVariables.isRated) {
-      for (final product in products) {
-        await product.fetchReviewsProduct(product.code);
-        await product.fetchReviewAverage(product.code);
-      }
+      await getProductsWithRatings(products);
     }
 
     return products;
@@ -44,11 +43,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (products == null || products.isEmpty) {
         emit(ProductError(ProductStrings.productLoadingError));
       } else {
-        // Load reviews and average for each product
-        for (final product in products) {
-          await product.fetchReviewsProduct(product.code);
-          await product.fetchReviewAverage(product.code);
-        }
         emit(ProductLoaded(products));
       }
     } catch (e) {
@@ -95,11 +89,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (products == null || products.isEmpty) {
         emit(ProductError(ProductStrings.productLoadingError));
         return;
-      } else {
-        for (final product in products) {
-          await product.fetchReviewsProduct(product.code);
-          await product.fetchReviewAverage(product.code);
-        }
       }
 
       List<Product> filteredProducts = List.from(products);
@@ -184,6 +173,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         return p;
       }).toList();
       emit(ProductLoaded(updatedProducts, activeCategory: curr.activeCategory));
+    }
+  }
+
+  Future<void> getProductsWithRatings(List<Product> products) async {
+    await ReviewService.initializeReviewService();
+    List<ReviewAverage> reviewAverages = await ReviewService.getAllReviewAverages() ?? [];
+
+    for (var product in products) {
+      final reviewAverage = reviewAverages.firstWhere(
+        (review) => review.productId == product.code,
+        orElse: () => ReviewAverage(productId: product.code, average: 0),
+      );
+      product.rating = reviewAverage.average;
     }
   }
 }

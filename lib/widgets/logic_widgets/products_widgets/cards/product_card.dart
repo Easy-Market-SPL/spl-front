@@ -128,8 +128,7 @@ class ProductCard extends StatelessWidget {
 
                         // Product Rating
                         if (SPLVariables.isRated &&
-                            product.rating != null &&
-                            product.reviews != null)
+                            product.rating != null)
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -137,7 +136,7 @@ class ProductCard extends StatelessWidget {
                                   color: Colors.amber, size: 14),
                               const SizedBox(width: 2),
                               Text(
-                                product.reviews!.isEmpty
+                                product.rating == 0
                                     ? '--'
                                     : product.rating!.toStringAsFixed(1),
                                 style: const TextStyle(
