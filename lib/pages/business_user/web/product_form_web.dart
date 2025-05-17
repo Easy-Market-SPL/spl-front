@@ -80,6 +80,12 @@ class _ProductFormWebState extends State<ProductFormWeb> {
           
           ctx.read<ProductBloc>().add(RefreshProducts());
           Navigator.pop(ctx, true);
+        } else if (state is ProductFormLoaded && !_formInitialized){
+          nameController.text = state.name;
+          codeController.text = state.code;
+          descriptionController.text = state.description;
+          priceController.text = state.price.toString();
+          _formInitialized = true;
         }
       },
       builder: (ctx, state) {
@@ -92,13 +98,6 @@ class _ProductFormWebState extends State<ProductFormWeb> {
         } else if (state is ProductFormError) {
           body = Center(child: Text(state.error, style: const TextStyle(color: Colors.red)));
         } else if (state is ProductFormLoaded) {
-          if (!_formInitialized) {
-            nameController.text = state.name;
-            codeController.text = state.code;
-            descriptionController.text = state.description;
-            priceController.text = state.price.toString();
-            _formInitialized = true;
-          }
           body = Column(
             mainAxisSize: MainAxisSize.min,
             children: [

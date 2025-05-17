@@ -23,11 +23,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     await ProductService.initializeProductService();
     final products = await ProductService.getProducts();
 
-    if (products == null || products.isEmpty) {
-      return null;
-    }
-
-    if (SPLVariables.isRated) {
+    if (SPLVariables.isRated && products != null) {
       await getProductsWithRatings(products);
     }
 
@@ -40,7 +36,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final products = await _loadProducts();
 
-      if (products == null || products.isEmpty) {
+      if (products == null) {
         emit(ProductError(ProductStrings.productLoadingError));
       } else {
         emit(ProductLoaded(products));
