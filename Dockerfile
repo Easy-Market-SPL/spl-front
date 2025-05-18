@@ -49,8 +49,7 @@ RUN mkdir -p assets && printf '%s\n' \
 > assets/.env
 
 RUN flutter pub get \
- && flutter config --enable-web \
- && flutter build web --release
+ && flutter build web
 
 ###############################################################################
 # ── Etapa 2: RUNTIME ──                                                     #
