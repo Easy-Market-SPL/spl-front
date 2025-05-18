@@ -27,7 +27,7 @@ ARG CASH_ENABLED
 ARG CREDIT_CARD_ENABLED
 
 # ----- genera assets/.env para flutter_dotenv -----
-RUN mkdir -p assets && printf '%s\n' \
+RUN printf '%s\n' \
   "ANDROID_CLIENT_ID=$ANDROID_CLIENT_ID" \
   "API_HOST=$API_HOST" \
   "BASE_GOOGLE_PLACES_URL=$BASE_GOOGLE_PLACES_URL" \
@@ -46,10 +46,10 @@ RUN mkdir -p assets && printf '%s\n' \
   "REALTIME_TRACKING_ENABLED=$REALTIME_TRACKING_ENABLED" \
   "CASH_ENABLED=$CASH_ENABLED" \
   "CREDIT_CARD_ENABLED=$CREDIT_CARD_ENABLED" \
-> assets/.env
+> .env
 
-RUN flutter pub get \
- && flutter build web
+RUN flutter pub get
+RUN flutter build web
 
 ###############################################################################
 # ── Etapa 2: RUNTIME ──                                                     #
@@ -59,18 +59,9 @@ FROM python:3.12-slim
 WORKDIR /srv
 COPY --from=build /app/build/web ./
 
-# ---------- Doppler CLI (igual que en tus otros servicios) ----------
-RUN apt-get update && apt-get install -y apt-transport-https curl gnupg ca-certificates && \
-    curl -sLf --retry 3 --tlsv1.2 --proto "=https" \
-      'https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key' \
-      | gpg --dearmor -o /usr/share/keyrings/doppler-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/doppler-archive-keyring.gpg] https://packages.doppler.com/public/cli/deb/debian any-version main" \
-      > /etc/apt/sources.list.d/doppler-cli.list && \
-    apt-get update && apt-get -y install doppler && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # ---------- script de arranque condicional ----------
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8001
-ENTRYPOINT ["doppler", "run", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
