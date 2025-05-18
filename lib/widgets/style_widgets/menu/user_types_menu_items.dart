@@ -16,7 +16,7 @@ class MenuItem {
   });
 }
 
-const Map<UserType, List<MenuItem>> menuItemsByUserType = {
+Map<UserType, List<MenuItem>> menuItemsByUserType = {
   // Customer menu items
   UserType.customer: [
     MenuItem(

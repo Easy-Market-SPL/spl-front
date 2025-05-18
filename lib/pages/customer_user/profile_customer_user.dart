@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/logic_widgets/user_widgets/payment/methods/payment_list_section.dart';
 
@@ -101,30 +102,29 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
   BlocBuilder<ProfileTabBloc, ProfileTabState> buildSectionButtons() {
     return BlocBuilder<ProfileTabBloc, ProfileTabState>(
       builder: (context, state) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<ProfileTabBloc>().add(ChangeTab(0));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      state.showedTab == 0 ? Colors.blue : Colors.grey[200],
-                  foregroundColor:
-                      state.showedTab == 0 ? Colors.white : Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  ProfileStrings.information,
-                  style: TextStyle(fontSize: 12),
+        return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                context.read<ProfileTabBloc>().add(ChangeTab(0));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    state.showedTab == 0 ? Colors.blue : Colors.grey[200],
+                foregroundColor:
+                    state.showedTab == 0 ? Colors.white : Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              child: const Text(
+                ProfileStrings.information,
+                style: TextStyle(fontSize: 12),
+              ),
             ),
-            const SizedBox(width: 10),
+          ),
+          const SizedBox(width: 10),
+          if (SPLVariables.hasCreditCardPayment) ...[
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
@@ -146,28 +146,28 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
               ),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<ProfileTabBloc>().add(ChangeTab(2));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      state.showedTab == 2 ? Colors.blue : Colors.grey[200],
-                  foregroundColor:
-                      state.showedTab == 2 ? Colors.white : Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  ProfileStrings.addresses,
-                  style: TextStyle(fontSize: 12),
+          ],
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                context.read<ProfileTabBloc>().add(ChangeTab(2));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    state.showedTab == 2 ? Colors.blue : Colors.grey[200],
+                foregroundColor:
+                    state.showedTab == 2 ? Colors.white : Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              child: const Text(
+                ProfileStrings.addresses,
+                style: TextStyle(fontSize: 12),
+              ),
             ),
-          ],
-        );
+          ),
+        ]);
       },
     );
   }

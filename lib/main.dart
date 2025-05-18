@@ -19,6 +19,7 @@ import 'package:spl_front/services/external_services/google_maps/map_service.dar
 import 'package:spl_front/services/external_services/stripe/stripe_service.dart';
 import 'package:spl_front/services/supabase_services/real-time/real_time_chat_service.dart';
 import 'package:spl_front/services/supabase_services/supabase_config.dart';
+import 'package:spl_front/spl/load_env_spl.dart';
 import 'package:spl_front/theme/theme.dart';
 import 'package:spl_front/utils/map/helpers/google_maps_api_web_loader.dart';
 
@@ -42,6 +43,7 @@ import 'bloc/users_session_information_blocs/payment_bloc/payment_bloc.dart';
 Future main() async {
   // Load the environment variables from the .env file for begin the app
   await dotenv.load(fileName: '.env');
+  await LoadSPLClass.initializateSPLVariables();
   await SupabaseConfig.initializeSupabase();
   await ProductService.initializeProductService();
   await LabelService.initializeLabelService();
@@ -55,7 +57,7 @@ Future main() async {
       GoogleMapsApiWebLoader.loadGoogleMapsApi();
     }
   });
-  
+
   runApp(MyApp());
 }
 

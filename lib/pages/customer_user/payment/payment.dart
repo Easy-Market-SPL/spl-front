@@ -149,6 +149,10 @@ class PaymentPageState extends State<PaymentPage> {
         const SizedBox(height: 15),
         GestureDetector(
           onTap: () async {
+            if (!SPLVariables.hasCreditCardPayment) {
+              return;
+            }
+
             if (selectedAddress == null) {
               showSelectAddressDialog(context);
               return;
@@ -213,16 +217,18 @@ class PaymentPageState extends State<PaymentPage> {
                     ),
                   ],
                 ),
-                Text(
-                  'Cambiar',
-                  style: TextStyle(
-                    color: SPLVariables.hasRealTimeTracking
-                        ? Colors.green
-                        : Colors.blue,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                SPLVariables.hasCreditCardPayment
+                    ? Text(
+                        'Cambiar',
+                        style: TextStyle(
+                          color: SPLVariables.hasRealTimeTracking
+                              ? Colors.green
+                              : Colors.blue,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : SizedBox.shrink(),
               ],
             ),
           ),

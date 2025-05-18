@@ -25,71 +25,71 @@ class AddUserDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 450,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ProfileStrings.userTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        constraints: const BoxConstraints(
+          maxWidth: 450,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ProfileStrings.userTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              // Name
-              CustomInput(
-                hintText: ProfileStrings.nameHint,
-                textController: nameController,
-                labelText: ProfileStrings.nameLabel,
-                isPassword: false,
-                keyboardType: TextInputType.name,
-              ),
-              const SizedBox(height: 16),
-              // Username
-              CustomInput(
-                hintText: ProfileStrings.userNameHint,
-                textController: userNameController,
-                labelText: ProfileStrings.userNameLabel,
-                isPassword: false,
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 16),
-              // Email
-              CustomInput(
-                hintText: ProfileStrings.emailHint,
-                textController: emailController,
-                labelText: ProfileStrings.emailLabel,
-                isPassword: false,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              // Password
-              CustomInput(
-                hintText: ProfileStrings.passwordHint,
-                textController: passwordController,
-                labelText: ProfileStrings.passwordLabel,
-                isPassword: true,
-                keyboardType: TextInputType.visiblePassword,
-              ),
-              const SizedBox(height: 16),
-              // Select Role
-              buildRoleValueListenable(),
-              const SizedBox(height: 24),
-              // Create User Button: se le pasa el handler que valida y crea el usuario
-              CreateUserButton(
-                onPress: () => handleCreateUser(context),
-              ),
-            ],
+                const SizedBox(height: 16),
+                // Name
+                CustomInput(
+                  hintText: ProfileStrings.nameHint,
+                  textController: nameController,
+                  labelText: ProfileStrings.nameLabel,
+                  isPassword: false,
+                  keyboardType: TextInputType.name,
+                ),
+                const SizedBox(height: 16),
+                // Username
+                CustomInput(
+                  hintText: ProfileStrings.userNameHint,
+                  textController: userNameController,
+                  labelText: ProfileStrings.userNameLabel,
+                  isPassword: false,
+                  keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 16),
+                // Email
+                CustomInput(
+                  hintText: ProfileStrings.emailHint,
+                  textController: emailController,
+                  labelText: ProfileStrings.emailLabel,
+                  isPassword: false,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
+                // Password
+                CustomInput(
+                  hintText: ProfileStrings.passwordHint,
+                  textController: passwordController,
+                  labelText: ProfileStrings.passwordLabel,
+                  isPassword: true,
+                  keyboardType: TextInputType.visiblePassword,
+                ),
+                const SizedBox(height: 16),
+                // Select Role
+                buildRoleValueListenable(),
+                const SizedBox(height: 24),
+                // Create User Button: se le pasa el handler que valida y crea el usuario
+                CreateUserButton(
+                  onPress: () => handleCreateUser(context),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -107,7 +107,7 @@ class AddUserDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          items: const [
+          items: [
             DropdownMenuItem(
               value: 'admin',
               child: Text(ProfileStrings.adminProfile),

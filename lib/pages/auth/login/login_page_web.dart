@@ -18,7 +18,7 @@ class WebLoginPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: 600,
-              maxHeight: 600,
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
             ),
             child: Padding(
               padding:
@@ -42,12 +42,11 @@ class WebLoginPage extends StatelessWidget {
                         emailController: TextEditingController(),
                         passwordController: TextEditingController(),
                       ),
-
-                      if (SPLVariables.hasThirdAuth)...[
+                      const SizedBox(height: 20),
+                      if (SPLVariables.hasThirdAuth) ...[
                         SocialAuthButtons(),
                         const SizedBox(height: 20),
                       ],
-
                       const SizedBox(height: 15),
                       RegisterLink(),
                     ],

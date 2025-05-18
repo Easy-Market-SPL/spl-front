@@ -5,11 +5,12 @@ import 'package:spl_front/bloc/ui_blocs/profile_tab_bloc/profile_tab_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
 import 'package:spl_front/models/helpers/intern_logic/user_type.dart';
 import 'package:spl_front/models/users_models/user.dart';
-import 'package:spl_front/widgets/logic_widgets/user_widgets/addresses/web/address_section_web.dart';
+import 'package:spl_front/spl/spl_variables.dart';
 import 'package:spl_front/utils/strings/profile_strings.dart';
 import 'package:spl_front/widgets/logic_widgets/profile_management_widgets/profile_header.dart';
 import 'package:spl_front/widgets/logic_widgets/profile_management_widgets/profile_section.dart';
 import 'package:spl_front/widgets/logic_widgets/user_widgets/addresses/address_section.dart';
+import 'package:spl_front/widgets/logic_widgets/user_widgets/addresses/web/address_section_web.dart';
 import 'package:spl_front/widgets/logic_widgets/user_widgets/payment/methods/payment_list_section.dart';
 import 'package:spl_front/widgets/web/scaffold_web.dart';
 
@@ -28,7 +29,8 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
   @override
   void initState() {
     super.initState();
-    final UserModel? user = BlocProvider.of<UsersBloc>(context).state.sessionUser;
+    final UserModel? user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser;
     if (user != null) {
       userNameController.text = user.username;
       nameController.text = user.fullname;
@@ -44,7 +46,8 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    final UserModel? user = BlocProvider.of<UsersBloc>(context).state.sessionUser;
+    final UserModel? user =
+        BlocProvider.of<UsersBloc>(context).state.sessionUser;
     if (user == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -65,7 +68,8 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
                 ProfileHeader(
                   userName: user.fullname,
                   userRoleTitle: ProfileStrings.customerTitle,
-                  userRoleDescription: ProfileStrings.roleDescriptionCustomer(user.fullname),
+                  userRoleDescription:
+                      ProfileStrings.roleDescriptionCustomer(user.fullname),
                 ),
                 const SizedBox(height: 24),
 
@@ -94,11 +98,13 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
                                       // Two-column layout for wider screens
                                       if (constraints.maxWidth > 600) {
                                         return Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
                                               child: ProfileSection(
-                                                userNameController: userNameController,
+                                                userNameController:
+                                                    userNameController,
                                                 nameController: nameController,
                                                 userType: UserType.customer,
                                               ),
@@ -107,7 +113,8 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
                                         );
                                       } else {
                                         return ProfileSection(
-                                          userNameController: userNameController,
+                                          userNameController:
+                                              userNameController,
                                           nameController: nameController,
                                           userType: UserType.customer,
                                         );
@@ -125,9 +132,9 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
                           } else {
                             return Padding(
                               padding: const EdgeInsets.all(24),
-                              child: kIsWeb 
-                                ? AddressSectionWeb()
-                                : AddressSection(),
+                              child: kIsWeb
+                                  ? AddressSectionWeb()
+                                  : AddressSection(),
                             );
                           }
                         },
@@ -151,14 +158,16 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
           runSpacing: 12,
           children: [
             _buildTabButton(0, ProfileStrings.information, state.showedTab),
-            _buildTabButton(1, ProfileStrings.paymentMethods, state.showedTab),
+            if (SPLVariables.hasCreditCardPayment) ...[
+              _buildTabButton(1, ProfileStrings.paymentMethods, state.showedTab)
+            ],
             _buildTabButton(2, ProfileStrings.addresses, state.showedTab),
           ],
         );
       },
     );
   }
-  
+
   Widget _buildTabButton(int tabIndex, String label, int currentTab) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
@@ -167,10 +176,13 @@ class _CustomerProfileWebPageState extends State<CustomerProfileWebPage> {
       ),
       child: IntrinsicWidth(
         child: ElevatedButton(
-          onPressed: () => context.read<ProfileTabBloc>().add(ChangeTab(tabIndex)),
+          onPressed: () =>
+              context.read<ProfileTabBloc>().add(ChangeTab(tabIndex)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: currentTab == tabIndex ? Colors.blue : Colors.grey[200],
-            foregroundColor: currentTab == tabIndex ? Colors.white : Colors.black,
+            backgroundColor:
+                currentTab == tabIndex ? Colors.blue : Colors.grey[200],
+            foregroundColor:
+                currentTab == tabIndex ? Colors.white : Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
