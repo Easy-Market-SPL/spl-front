@@ -249,8 +249,13 @@ class _DashboardBusinessWebState extends State<DashboardBusinessWeb> {
         );
       }
 
-      return BusinessProductGrid(
-        productsList: state.products,
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: BusinessProductGrid(
+            productsList: state.products,
+          ),
+        ),
       );
     }
 

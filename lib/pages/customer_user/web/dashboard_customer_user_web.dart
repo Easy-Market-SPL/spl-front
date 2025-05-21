@@ -249,8 +249,13 @@ class _DashboardCustomerWebState extends State<DashboardCustomerWeb> {
         );
       }
 
-      return CustomerProductGrid(
-        productsList: state.products,
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CustomerProductGrid(
+          productsList: state.products,
+        ),
+          ),
       );
     }
 
