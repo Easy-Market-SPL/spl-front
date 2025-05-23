@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:spl_front/pages/product/product_details.dart';
+import 'package:spl_front/pages/product/web/product_details_web.dart';
 import 'package:spl_front/utils/ui/format_currency.dart';
 import 'package:spl_front/widgets/logic_widgets/products_widgets/cards/product_card.dart';
 
@@ -24,15 +26,23 @@ class CustomerProductCard extends StatelessWidget {
         height: 43,
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ViewProductDetailsPage(
-                  product: product,
-                  userType: UserType.customer,
+            if (!kIsWeb){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ViewProductDetailsPage(
+                    product: product,
+                    userType: UserType.customer,
+                  ),
                 ),
-              ),
-            );
+              );
+            } else{
+              showProductDetailsWeb(
+                context,
+                product: product,
+                userType: UserType.customer,
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,

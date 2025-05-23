@@ -159,7 +159,7 @@ class ProductService {
   }
 
   // Update products colors
-  static Future<ProductColor?> updateProductColors(
+  static Future<List<ProductColor>?> updateProductColors(
       String code, List<ProductColor> colors) async {
     var url = '$_url/products/$code/colors';
     try {
@@ -172,7 +172,7 @@ class ProductService {
       );
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
-        return ProductColor.fromJson(decodedBody);
+        return ProductColor.fromJsonList(decodedBody);
       } else {
         debugPrint(
             '❌ ${ProductStrings.productColorsSaveError}: ${response.body}');
@@ -185,7 +185,7 @@ class ProductService {
   }
 
   // Update products variants
-  static Future<Variant?> updateProductVariants(
+  static Future<List<Variant>?> updateProductVariants(
       String code, List<Variant> variants) async {
     var url = '$_url/products/$code/variants';
     try {
@@ -198,7 +198,7 @@ class ProductService {
       );
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
-        return Variant.fromJson(decodedBody);
+        return Variant.fromJsonList(decodedBody);
       } else {
         debugPrint(
             '❌ ${ProductStrings.productVariantsSaveError}: ${response.body}');

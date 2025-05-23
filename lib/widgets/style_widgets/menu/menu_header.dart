@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/users_blocs/users/users_bloc.dart';
-import 'package:spl_front/utils/strings/menu_strings.dart';
 
 import '../../../models/helpers/intern_logic/user_type.dart';
 
@@ -12,6 +11,21 @@ class MenuHeader extends StatelessWidget {
 
   String initialsName(String userName) {
     return userName.substring(0, 2).toUpperCase();
+  }
+
+  String getUserRole(String userType) {
+    switch (userType) {
+      case 'admin':
+        return 'Administrador';
+      case 'customer':
+        return 'Cliente';
+      case 'business':
+        return 'Gestor productos';
+      case 'delivery':
+        return 'Repartidor';
+      default:
+        return 'Usuario';
+    }
   }
 
   @override
@@ -61,8 +75,8 @@ class MenuHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Text(
-                  MenuStrings.myProfile,
+                Text(
+                  getUserRole(user.rol),
                   style: TextStyle(color: Colors.white70),
                 ),
               ],

@@ -181,6 +181,7 @@ class OrderService {
     final body = jsonEncode({
       "shippingCost": shippingCost,
       "paymentAmount": paymentAmount,
+      "confirmationDate": DateTime.now().toUtc().toIso8601String(),
     });
 
     try {

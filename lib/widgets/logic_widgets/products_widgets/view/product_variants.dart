@@ -57,21 +57,6 @@ class _VariantsEditorState extends State<VariantsEditor> {
       },
     );
     if (variantName != null && variantName.trim().isNotEmpty) {
-      //       // Instead of directly adding with setState, call a backend service.
-      // try {
-      //   // Example: await variantRepository.createVariant(variantName.trim())
-      //   // and then, with the returned variant (which includes its id), update the UI.
-      //   final newVariant = await VariantRepository.createVariant(variantName.trim());
-      //   setState(() {
-      //     widget.variants.add(newVariant);
-      //   });
-      //   widget.onVariantsChanged();
-      // } catch (error) {
-      //   // Display error message.
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text("Error creating variant: $error")),
-      //   );
-      // }
       setState(() {
         widget.variants.add(Variant(name: variantName.trim(), options: []));
       });

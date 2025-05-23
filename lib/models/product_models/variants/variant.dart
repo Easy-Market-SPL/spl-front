@@ -38,4 +38,14 @@ class Variant {
   static String toJsonList(List<Variant> variants) {
     return jsonEncode(variants.map((e) => e.toMap(e)).toList());
   }
+
+  static List<Variant> deepCopyList(List<Variant> variants) {
+    return variants.map((variant) => Variant(
+      name: variant.name,
+      options: variant.options.map((option) => VariantOption(
+        name: option.name,
+        // Copia otras propiedades de option aquí
+      )).toList(),
+    )).toList();
+  }
 }

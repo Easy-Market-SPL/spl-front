@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spl_front/bloc/product_blocs/product_form/product_form_event.dart';
 import 'package:spl_front/bloc/product_blocs/product_form/product_form_state.dart';
 import 'package:spl_front/models/product_models/variants/variant.dart';
+import 'package:spl_front/models/product_models/variants/variant_option.dart';
 import 'package:spl_front/utils/strings/products_strings.dart';
 
 import '../../../models/product_models/labels/label.dart';
@@ -42,7 +43,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
           // Save originals entities relations
           _originalLabels = List.from(product.labels ?? []);
           _originalColors = List.from(colors ?? []);
-          _originalVariants = List.from(variants ?? []);
+          _originalVariants = Variant.deepCopyList(variants ?? []);
           // Emit loaded state
           emit(ProductFormLoaded(
             productCode: product.code,
@@ -211,7 +212,51 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
 
   // Helper method for variant comparison
   bool _areVariantsEqual(List<Variant> original, List<Variant> current) {
-    return _areEntitiesListsEqual(original, current, (variant) => variant.name);
+    if (original.length != current.length) return false;
+  
+    // Sort variants by name to compare properly
+    final sortedOriginal = List<Variant>.from(original)
+      ..sort((a, b) => a.name.compareTo(b.name));
+    
+    final sortedCurrent = List<Variant>.from(current)
+      ..sort((a, b) => a.name.compareTo(b.name));
+  
+    // Compare each variant and its options
+    for (int i = 0; i < sortedOriginal.length; i++) {
+      final origVariant = sortedOriginal[i];
+      final currVariant = sortedCurrent[i];
+      
+      // If names don't match, they're different
+      if (origVariant.name != currVariant.name) return false;
+      
+      // Compare options within each variant
+      if (!_areVariantOptionsEqual(origVariant.options, currVariant.options)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  // Helper method to compare variant options
+  bool _areVariantOptionsEqual(List<VariantOption> original, List<VariantOption> current) {
+    if (original.length != current.length) return false;
+    
+    // Sort options by name for consistent comparison
+    final sortedOriginal = List<VariantOption>.from(original)
+      ..sort((a, b) => a.name.compareTo(b.name));
+    
+    final sortedCurrent = List<VariantOption>.from(current)
+      ..sort((a, b) => a.name.compareTo(b.name));
+    
+    // Compare each option by name
+    for (int i = 0; i < sortedOriginal.length; i++) {
+      if (sortedOriginal[i].name != sortedCurrent[i].name) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   bool _areEntitiesListsEqual<T, K extends Comparable>(
