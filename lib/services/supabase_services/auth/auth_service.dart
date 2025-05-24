@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -97,10 +98,14 @@ class SupabaseAuth {
     );
   }
 
-  static Future<dynamic> googleSignIn() async {
+  static Future<dynamic> googleSignIn(BuildContext context) async {
+    debugPrint("Web Google Sign In");
     return _instance._supabaseClient.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: kIsWeb ? null : 'io.supabase.flutterquickstart://login-callback',
+      redirectTo: kIsWeb ? null : 'https://wkfihonvssampevypomm.supabase.co/auth/v1/callback',
+      queryParams: kIsWeb ? {
+
+      } : null,
     );
   }
 }

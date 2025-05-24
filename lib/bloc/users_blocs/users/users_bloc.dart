@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spl_front/services/api_services/user_service/user_sync_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../models/users_models/user.dart';
 import '../../../services/api_services/user_service/user_service.dart';
@@ -16,6 +18,13 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     on<OnClearUserEvent>((event, emit) {
       emit(state.copyWith(sessionUser: null));
     });
+
+    on<OnCreateExternalUserEvent>((event, emit) async {
+      final userCreated = await UserService.createUser(event.user);
+      if (userCreated) {
+        emit(state.copyWith(sessionUser: event.user));
+      }
+    });
   }
 
   Future<void> getUser(String? id) async {
@@ -30,6 +39,19 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       add(OnUpdateSessionUserEvent(user));
     }
     return answer;
+  }
+
+  Future<bool> createExternalUser(User supabaseUser, {String defaultRole = 'customer'}) async {
+    try {
+      final newUser = await UserSyncService.syncExternalUser(supabaseUser);
+      if (newUser != null) {
+        add(OnUpdateSessionUserEvent(newUser));
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   }
 
   void clearUser() {
