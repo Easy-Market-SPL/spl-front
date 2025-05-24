@@ -12,4 +12,10 @@ class OnUpdateSessionUserEvent extends UsersEvent {
   const OnUpdateSessionUserEvent(this.user);
 }
 
+class OnCreateExternalUserEvent extends UsersEvent {
+  final UserModel user;
+  
+  const OnCreateExternalUserEvent(this.user);
+}
+
 class OnClearUserEvent extends UsersEvent {}

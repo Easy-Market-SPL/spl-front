@@ -34,11 +34,17 @@ class SocialAuthButtons extends StatelessWidget {
                   text: LoginStrings.googleText,
                   color: Colors.white,
                   image: AssetImage("assets/images/google_logo.png"),
-                  onTap: () {
-                    kIsWeb 
-                    ? SupabaseAuth.nativeGoogleSignIn()
-                    : SupabaseAuth.googleSignIn();
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  onTap: () async {
+                    try {
+                      if (!kIsWeb) {
+                        await SupabaseAuth.nativeGoogleSignIn();
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                      } else {
+                        await SupabaseAuth.googleSignIn(context);
+                      }
+                    } catch (e) {
+                      debugPrint("Error: $e");
+                    }
                   },
                 ),
               ),
