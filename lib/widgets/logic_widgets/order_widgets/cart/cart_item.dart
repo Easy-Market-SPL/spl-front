@@ -149,8 +149,11 @@ class CartItem extends StatelessWidget {
 
   void _updateProductQuantity(BuildContext context, int newQuantity) {
     final userId = context.read<UsersBloc>().state.sessionUser!.id;
-    // TODO: Correct the address
-    final address = context.read<AddressBloc>().state.addresses.first.address;
+    final addresses = context.read<AddressBloc>().state.addresses;
+
+    var address = addresses.isNotEmpty
+        ? addresses.first.address
+        : "Pending";
 
     context.read<OrdersBloc>().add(AddProductToOrderEvent(item,
         productCode: item.idProduct,
