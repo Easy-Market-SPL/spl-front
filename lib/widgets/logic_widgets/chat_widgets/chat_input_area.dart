@@ -68,24 +68,26 @@ class ChatInputField extends StatelessWidget {
                     }
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.videocam),
-                  title: const Text(ChatStrings.selectVideo),
-                  onTap: () async {
-                    fileType = MessageType.video;
-                    final XFile? video =
-                        await picker.pickVideo(source: ImageSource.gallery);
-                    if (context.mounted) {
-                      Navigator.pop(context, video);
-                    }
-                  },
-                ),
+                // TODO: Re-enable video selection when supported
+                // ListTile(
+                //   leading: const Icon(Icons.videocam),
+                //   title: const Text(ChatStrings.selectVideo),
+                //   onTap: () async {
+                //     fileType = MessageType.video;
+                //     final XFile? video =
+                //         await picker.pickVideo(source: ImageSource.gallery);
+                //     if (context.mounted) {
+                //       Navigator.pop(context, video);
+                //     }
+                //   },
+                // ),
               ],
             ),
           );
         },
       );
 
+      // File selection handling
       if (file != null) {
         String fileUrl = file.path;
 
@@ -97,6 +99,7 @@ class ChatInputField extends StatelessWidget {
                 senderType: userType,
                 messageType: messageType,
                 filePath: fileUrl,
+                webBytes: kIsWeb ? await file.readAsBytes() : null,
               ));
         }
         scrollToBottomWithDelay(scrollController);
@@ -207,22 +210,32 @@ class ChatInputField extends StatelessWidget {
           if (isUploading)
             Positioned.fill(
               child: Container(
-                color: Colors.black,
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                        strokeWidth: 2.5,
                       ),
-                      const SizedBox(height: 8),
-                      Text(ChatStrings.uploadingFile,
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.grey[800])),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "Subiendo archivo...",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
