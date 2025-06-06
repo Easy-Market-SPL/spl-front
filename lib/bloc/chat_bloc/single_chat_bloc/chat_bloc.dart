@@ -96,9 +96,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       String? fileUrl;
       if (event.messageType == MessageType.image) {
         fileUrl =
-            await StorageService().uploadChatImage(event.filePath, messageId);
+            await StorageService().uploadChatImage(event.filePath, messageId, event.webBytes);
       } else {
-        // Handle other file types in the future
+        // TODO: Handle other file types in the future
         debugPrint('Unsupported file type: ${event.messageType}');
         return;
       }
@@ -118,10 +118,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           fileUrl: fileUrl);
 
       debugPrint('File sent successfully');
-      // The stream will handle updating the chat
     } catch (e) {
       debugPrint('Error sending file: ${e.toString()}');
-      // Consider emitting an error state
       if (state is ChatFileUploading) {
         final currentMessages = (state as ChatFileUploading).messages;
         emit(ChatLoaded(currentMessages));
